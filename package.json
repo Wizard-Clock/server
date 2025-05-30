@@ -1,0 +1,18 @@
+{
+  "name": "server",
+  "version": "1.0.0",
+  "description": "server backend for wizarding clock project.",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://lovelace.feely.dev/Wizarding_Clock/server.git"
+  },
+  "author": "Andrew Feely",
+  "license": "AGPL-3.0-only",
+  "dependencies": {
+    "express": "^5.1.0"
+  }
+}
