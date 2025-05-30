@@ -1,2 +1,6 @@
 # Wizarding Clock Server
-- Created with Node.js.
+- Proposed Tech Stack
+    - DB: Sqllite3
+    - Runtime: Node.js
+    - Backend: Express.js
+    - Frontend: Angular.js
