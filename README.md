@@ -3,4 +3,4 @@
     - DB: Sqllite3
     - Runtime: Node.js
     - Backend: Express.js
-    - Frontend: Angular.js
+    - Frontend: Angular.js or React.js 
