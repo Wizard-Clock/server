@@ -1,19 +1,20 @@
 {
   "name": "server",
-  "version": "1.0.0",
-  "description": "server backend for wizarding clock project.",
-  "main": "app.js",
+  "version": "0.0.0",
+  "private": true,
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node ./bin/www"
   },
-  "repository": {
-    "type": "git",
-    "url": "https://lovelace.feely.dev/Wizarding_Clock/server.git"
-  },
-  "author": "Andrew Feely",
-  "license": "AGPL-3.0-only",
   "dependencies": {
-    "express": "^5.1.0",
+    "body-parser": "^2.2.0",
+    "cookie-parser": "~1.4.4",
+    "debug": "~2.6.9",
+    "express": "^4.21.2",
+    "http-errors": "~1.6.3",
+    "morgan": "~1.9.1",
+    "passport": "^0.7.0",
+    "passport-local": "^1.0.0",
+    "pug": "3.0.3",
     "sqlite3": "^5.1.7"
   }
 }
