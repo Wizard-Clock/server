@@ -14,13 +14,23 @@ html
                     x.type = "password";
                 }
             }
-    body
+            function checkLoginError() {
+                console.log(sessionStorage)
+                if (sessionStorage) {
+                    document.getElementById('errorDiv').style.display = 'block';
+                } else {
+                    document.getElementById('errorDiv').style.display = "none";
+                }
+            }
+    body( onload="checkLoginError()")
         div(class="container-sm vh-100 d-flex justify-content-center align-items-center")
             div(class="p-5 rounded border")
                 div(class="text-center")
                     h1(class="mb-3")
                         img(src="images/wizarding-clock-high-resolution-logo-transparent.svg" width="400px" height="70px" alt="Wizarding Clock")
-                form(id="loginForm" action="/login" method="post" class="justify-content-center align-items-center")
+                div(id="errorDiv")
+                    div(class="alert alert-danger") Invalid Email or Password
+                form(id="loginForm" action="/auth/login" method="post" class="justify-content-center align-items-center")
                     div(class="form-group p-3")
                         label(for="identityInput") Username / Email:
                         input(type="text" id="identityInput" name="identity" class="form-control" placeholder="Enter username/email" required autofocus)
