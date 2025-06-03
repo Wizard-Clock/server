@@ -9,6 +9,7 @@ const logger = require('morgan');
 const app = express();
 const port = process.env.PORT;
 
+// Parser
 const bodyParser = require('body-parser');
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json())

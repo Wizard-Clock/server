@@ -40,10 +40,6 @@ passport.use(new LocalStrategy(function verify(username, password, callback) {
  * by verifying the session.  The same user information that was serialized at
  * session establishment will be restored when the session is authenticated by
  * the `deserializeUser` function.
- *
- * Since every request to the app needs the user ID and username, in order to
- * fetch todo records and render the user element in the navigation bar, that
- * information is stored in the session.
  */
 passport.serializeUser(function(user, cb) {
     process.nextTick(function() {
