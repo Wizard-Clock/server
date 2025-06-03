@@ -22,7 +22,7 @@ html
                         img(src="images/wizarding-clock-high-resolution-logo-transparent.svg" width="400px" height="70px" alt="Wizarding Clock")
                 if errorMsg
                     div(id="errorDiv")
-                        div(class="alert alert-danger") Invalid Email or Password
+                        div(class="alert alert-danger") #{errorMsg}
                 form(action="/auth/login" method="post" class="justify-content-center align-items-center")
                     div(class="form-group p-3")
                         section()
