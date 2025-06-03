@@ -1,6 +1,6 @@
 # Wizarding Clock Server
 - Proposed Tech Stack
-    - DB: Sqllite3
+    - DB: sqllite 3
     - Runtime: Node.js
-    - Backend: Express.js
-    - Frontend: Angular.js or React.js 
+        - Auth Service: Passport.js
+    - Backend Routing: Express.js
