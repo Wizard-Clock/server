@@ -26,5 +26,7 @@ html
                 li()
                   a(class="dropdown-item" href="#") Account Settings
                 li()
-                  a(class="dropdown-item" href="#") Logout
+                  a(class="dropdown-item" href="#" onclick="document.forms[\"logoutForm\"].submit();") Logout
+                  form(name='logoutForm' action='/auth/logout' method='post')
+                    input(type="hidden")
     block content
