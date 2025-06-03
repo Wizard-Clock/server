@@ -8,8 +8,7 @@ const db = new sqlite.Database(process.env.DATABASE_NAME, (err) => {
     }  console.log('Connected to the SQLite database.');
 });
 
-//TEMPORARY
-let files = fs.readdirSync('C:\\Users\\andrew.feely\\Documents\\Personal\\gitea\\wizarding_clock\\server\\migrations');
+let files = fs.readdirSync(__dirname + '/migrations/');
 files.sort((a, b) => {
     a = parseInt(a.slice(1, a.indexOf("_")));
     b = parseInt(b.slice(1, b.indexOf("_")));
