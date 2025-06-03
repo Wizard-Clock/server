@@ -1,6 +1,6 @@
 const express = require('express');
 const passport = require('passport');
-const LocalStrategy = require('passport-local');
+const LocalStrategy = require('passport-local').Strategy;
 const crypto = require('crypto');
 const db = require('../db');
 
@@ -57,21 +57,26 @@ passport.deserializeUser(function(user, cb) {
     });
 });
 
-var router = express.Router();
-
+const router = express.Router();
 
 /* Login home page. */
 router.get('/', function(req, res) {
-    res.redirect("login");
-})
+    if (req.isAuthenticated()) {
+        res.redirect("/dashboard");
+    } else {
+        res.redirect("login");
+    }
+});
 
 router.get('/login', function(req, res, next) {
-    res.render('login', { title: 'Login' });
+    console.log(req.session.messages);
+    let errors = req.session.messages ? req.session.messages.pop() : undefined;
+    res.render('login', { title: 'Login' , errorMsg: errors});
 });
 
 router.post('/login', passport.authenticate('local', {
-    successReturnToOrRedirect: '/dashboard',
-    failureRedirect: '/auth/login',
+    successRedirect: '/dashboard',
+    failureRedirect: '/',
     failureMessage: true
 }));
 
