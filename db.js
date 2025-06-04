@@ -36,7 +36,15 @@ sqlite_inst.serialize(() => {
         crypto.pbkdf2Sync('admin', salt, 310000, 32, 'sha256'),
         salt
     ]);
+    salt = crypto.randomBytes(16);
+    sqlite_inst.run(`INSERT OR IGNORE INTO users (id,username, hashed_password, salt) VALUES (?, ?, ?, ?)`, [
+        2,
+        'user',
+        crypto.pbkdf2Sync('user', salt, 310000, 32, 'sha256'),
+        salt
+    ]);
     sqlite_inst.run(`INSERT OR IGNORE INTO user_roles (user_id, role_id) VALUES(1,1)`);
+    sqlite_inst.run(`INSERT OR IGNORE INTO user_roles (user_id, role_id) VALUES(2,2)`);
     sqlite_inst.run("COMMIT");
 });
 
