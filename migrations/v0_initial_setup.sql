@@ -10,7 +10,7 @@ CREATE TABLE IF NOT EXISTS "users" (
 **
 CREATE TABLE IF NOT EXISTS "roles" (
    "id" INTEGER PRIMARY KEY NOT NULL,
-   "role" integer NOT NULL UNIQUE,
+   "role" TEXT NOT NULL UNIQUE,
    "description" TEXT
 );
 **
@@ -73,3 +73,9 @@ CREATE TABLE IF NOT EXISTS "follower_link" (
        FOREIGN KEY ("follower_id") REFERENCES users("id"),
        FOREIGN KEY ("lead_id") REFERENCES users("id")
 );
+**
+INSERT OR IGNORE INTO roles (id,role, description) VALUES
+       (1,"admin", "Is the administrator of the instance."),
+       (2,"user", "Can have a child attached."),
+       (3,"child", "Only can be attached or set.")
+;

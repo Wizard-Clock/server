@@ -15,14 +15,15 @@ html
         div(class="collapse navbar-collapse" id="collapsibleNavbar")
           ul(class="navbar-nav")
             li(class="nav-item")
-              a(class="nav-link" href="#") Server Settings
-            li(class="nav-item")
               a(class="nav-link" href="#") Wizards
             li(class="nav-item")
               a(class="nav-link" href="#") Locations
             li(class="nav-item dropdown")
               a(class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown") #{username}
               ul(class="dropdown-menu")
+                if role === "admin"
+                  li()
+                    a(class="dropdown-item" href="#") Server Settings
                 li()
                   a(class="dropdown-item" href="#") Account Settings
                 li()

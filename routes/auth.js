@@ -16,7 +16,7 @@ const db = require('../db');
  * user is authenticated; otherwise, not.
  */
 passport.use(new LocalStrategy(function verify(username, password, callback) {
-    db.get('SELECT * FROM users WHERE username = ?', [ username ], function(err, user) {
+    db.sqlite_inst.get('SELECT * FROM users WHERE username = ?', [ username ], function(err, user) {
         if (err) { return callback(err); }
         if (!user) { return callback(null, false, { message: 'Incorrect username or password.' }); }
 
