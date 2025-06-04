@@ -18,19 +18,16 @@ files.sort((a, b) => {
 
 db.serialize(() => {
     db.run("BEGIN TRANSACTION");
-    // files.forEach((file) => {
-    //     const sqlArray = fs.readFileSync("/migrations/" + file)
-    //         .toString()
-    //         .split("**");
-    //     sqlArray.forEach((query) => {
-    //         db.run(query, (err) => {
-    //             if(err) throw err;
-    //         });
-    //     })
-    // });
-    // db.run("COMMIT");
-
-    db.run(`CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY, username TEXT UNIQUE, hashed_password BLOB, salt BLOB)`);
+    files.forEach((file) => {
+        const sqlArray = fs.readFileSync(__dirname + '/migrations/' + file)
+            .toString()
+            .split("**");
+        sqlArray.forEach((query) => {
+            db.run(query, (err) => {
+                if(err) throw err;
+            });
+        })
+    });
 
     let salt = crypto.randomBytes(16);
     db.run(`INSERT OR IGNORE INTO users (username, hashed_password, salt) VALUES (?, ?, ?)`, [

@@ -65,7 +65,6 @@ router.get('/', function(req, res) {
 });
 
 router.get('/login', function(req, res, next) {
-    console.log(req.session.messages);
     let errors = req.session.messages ? req.session.messages.pop() : undefined;
     res.render('login', { title: 'Login' , errorMsg: errors});
 });
