@@ -1,6 +1,8 @@
 const sqlite = require('sqlite3');
 const crypto = require('crypto');
 const fs = require('fs');
+const { dirname } = require('path');
+const migrationsDir = dirname(require.main.filename) + '/migrations/';
 
 const sqlite_inst = new sqlite.Database(process.env.DATABASE_NAME, (err) => {
     if (err) {
@@ -8,7 +10,7 @@ const sqlite_inst = new sqlite.Database(process.env.DATABASE_NAME, (err) => {
     }  console.log('Connected to the SQLite database.');
 });
 
-let files = fs.readdirSync(__dirname + '/migrations/');
+let files = fs.readdirSync(migrationsDir);
 files.sort((a, b) => {
     a = parseInt(a.slice(1, a.indexOf("_")));
     b = parseInt(b.slice(1, b.indexOf("_")));
@@ -19,7 +21,7 @@ files.sort((a, b) => {
 sqlite_inst.serialize(() => {
     sqlite_inst.run("BEGIN TRANSACTION");
     files.forEach((file) => {
-        const sqlArray = fs.readFileSync(__dirname + '/migrations/' + file)
+        const sqlArray = fs.readFileSync(migrationsDir + file)
             .toString()
             .split("**");
         sqlArray.forEach((query) => {

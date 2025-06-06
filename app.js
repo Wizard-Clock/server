@@ -5,6 +5,7 @@ const path = require('path');
 const cookieParser = require('cookie-parser');
 const createError = require('http-errors');
 const logger = require('morgan');
+require('./handlers/authHandler');
 
 const app = express();
 const wsServer = new ws.Server({ noServer: true });
