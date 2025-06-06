@@ -1,6 +1,12 @@
 body {
   padding: 50px;
-  font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
+  font: 14px "Lucida Grande", Helvetica, Arial;
+}
+
+.brand_font {
+  font-family: "Aboreto", system-ui;
+  font-weight: 400;
+  font-style: normal;
 }
 
 a {
