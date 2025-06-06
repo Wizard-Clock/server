@@ -1,14 +1,16 @@
 require('dotenv').config()
 const express = require('express');
-// const webSocket = require("ws");
+const ws = require("ws");
 const path = require('path');
 const cookieParser = require('cookie-parser');
 const createError = require('http-errors');
 const logger = require('morgan');
 
 const app = express();
-// const wss = new WebSocket({ noServer: true });
-const port = process.env.PORT;
+const wsServer = new ws.Server({ noServer: true });
+wsServer.on('connection', socket => {
+  socket.on('message', message => console.log(message));
+});
 
 // Parser
 const bodyParser = require('body-parser');
@@ -29,9 +31,10 @@ app.use(passport.authenticate('session'));
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'pug');
 
-app.use('/dashboard', require('./routes/index'));
 app.use('/', require('./routes/auth'));
 app.use('/auth', require('./routes/auth'));
+app.use('/api', require('./routes/api/api'));
+app.use('/dashboard', require('./routes/index'));
 
 app.use(logger('dev'));
 app.use(express.json());
@@ -60,6 +63,11 @@ app.use(function(err, req, res, next) {
 
 module.exports = app;
 
-app.listen(port, () => {
-  console.log(`Example app listening on port ${port}`)
+const httpServer = app.listen(process.env.PORT, () => {
+  console.log(`Example app listening on port ${process.env.PORT}`)
 });
+httpServer.on('upgrade', (req, socket, head) => {
+  wsServer.handleUpgrade(req, socket, head, (ws) => {
+    wsServer.emit('connection', ws, req)
+  })
+})
