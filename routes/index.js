@@ -1,16 +1,14 @@
 const express = require('express');
 const router = express.Router();
 const db = require("../handlers/dbHandler");
+const authenticateToken = require("../handlers/authHandler");
 
 
 /* GET home page. */
-router.get('/', async function (req, res, next) {
-  if (!req.isAuthenticated()) {
-    res.redirect('../');
-  } else {
-    const role = await db.getRoleNameFromUserID(req.user.id);
-    res.render('index', {title: 'Home', username: req.user.username, role: role[0].role});
-  }
+router.get('/', authenticateToken, async function (req, res, next) {
+    const userName = await db.getUserNameFromUserID(req.userID);
+    const userRole = await db.getRoleNameFromUserID(req.userID);
+    res.render('index', {title: 'Home', username: userName[0].username, role: userRole[0].role});
 });
 
 module.exports = router;

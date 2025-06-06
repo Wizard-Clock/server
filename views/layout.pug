@@ -31,6 +31,6 @@ html
                   a(class="dropdown-item brand_font" href="#") Account Settings
                 li()
                   a(class="dropdown-item brand_font" href="#" onclick="document.forms[\"logoutForm\"].submit();") Logout
-                  form(name='logoutForm' action='/auth/logout' method='post')
+                  form(name='logoutForm' action='/logout' method='post')
                     input(type="hidden")
     block content

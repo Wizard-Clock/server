@@ -2,7 +2,6 @@ require('dotenv').config()
 const express = require('express');
 const ws = require("ws");
 const path = require('path');
-const cookieParser = require('cookie-parser');
 const createError = require('http-errors');
 const logger = require('morgan');
 require('./handlers/authHandler');
@@ -14,33 +13,25 @@ wsServer.on('connection', socket => {
 });
 
 // Parser
+const cookieParser = require('cookie-parser');
+app.use(cookieParser());
 const bodyParser = require('body-parser');
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use(bodyParser.json())
+app.use(bodyParser.json());
 
-// Passport.js
-const passport = require('passport');
-const session = require('express-session');
-app.use(session({
-  secret: process.env.SESSION_SECRET_KEY,
-  resave: false,
-  saveUninitialized: false
-}));
-app.use(passport.authenticate('session'));
+
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'pug');
 
 app.use('/', require('./routes/auth'));
-app.use('/auth', require('./routes/auth'));
-app.use('/api', require('./routes/api/api'));
 app.use('/dashboard', require('./routes/index'));
+app.use('/api', require('./routes/api/index'));
 
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
-app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Set favicon

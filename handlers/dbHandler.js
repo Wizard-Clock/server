@@ -1,8 +1,7 @@
 const sqlite = require('sqlite3');
 const crypto = require('crypto');
 const fs = require('fs');
-const { dirname } = require('path');
-const migrationsDir = dirname(require.main.filename) + '/migrations/';
+const migrationsDir = require('path').dirname(require.main.filename) + '/migrations/';
 
 const sqlite_inst = new sqlite.Database(process.env.DATABASE_NAME, (err) => {
     if (err) {
@@ -61,7 +60,19 @@ async function getRoleNameFromUserID(user_id) {
     });
 }
 
+async function getUserNameFromUserID(user_id) {
+    return await new Promise((resolve, reject) => {
+        sqlite_inst.all('SELECT username FROM users where id=?', user_id, (err, rows) => {
+            if (err)
+                reject(err);
+            else
+                resolve(rows);
+        });
+    });
+}
+
 module.exports = {
     getRoleNameFromUserID,
+    getUserNameFromUserID,
     sqlite_inst
 };
