@@ -12,13 +12,13 @@ html
     div(class="navbar navbar-expand-sm bg-light navbar-light")
       div(class="container-fluid")
         a(class="navbar-brand" href="#")
-          img(src="images/wc-high-resolution-logo-transparent.svg" width="65px" height="65px" alt="small transparent logo")
+          img(src="/public/images/wc-high-resolution-logo-transparent.svg" width="65px" height="65px" alt="small transparent logo")
         button(class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#collapsibleNavbar")
           span(class="navbar-toggler-icon")
         div(class="collapse navbar-collapse" id="collapsibleNavbar")
           ul(class="navbar-nav")
             li(class="nav-item")
-              a(class="nav-link brand_font" href="#") Wizards
+              a(class="nav-link brand_font" href="/dashboard/wizards") Wizards
             li(class="nav-item")
               a(class="nav-link brand_font" href="#") Locations
             li(class="nav-item dropdown")
@@ -33,4 +33,5 @@ html
                   a(class="dropdown-item brand_font" href="#" onclick="document.forms[\"logoutForm\"].submit();") Logout
                   form(name='logoutForm' action='/logout' method='post')
                     input(type="hidden")
-    block content
+    div(class="d-flex justify-content-center")
+      block content

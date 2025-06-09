@@ -49,9 +49,25 @@ sqlite_inst.serialize(() => {
     sqlite_inst.run("COMMIT");
 });
 
-async function getRoleNameFromUserID(user_id) {
+async function getUserFromID(user_id) {
     return await new Promise((resolve, reject) => {
-        sqlite_inst.all('SELECT role FROM roles where id=(SELECT role_id FROM user_roles where user_id=?)', user_id, (err, rows) => {
+        sqlite_inst.all('SELECT * FROM users WHERE id=?', user_id, (err, rows) => {
+            if (err)
+                reject(err);
+            else
+                resolve(rows[0]);
+        });
+    });
+}
+
+async function addUser(username, password) {
+    let salt = crypto.randomBytes(16);
+    return await new Promise((resolve, reject) => {
+        sqlite_inst.run(`INSERT INTO users (username, hashed_password, salt) VALUES (?, ?, ?)`, [
+            username,
+            crypto.pbkdf2Sync(password, salt, 310000, 32, 'sha256'),
+            salt
+            ], (err, rows) => {
             if (err)
                 reject(err);
             else
@@ -60,19 +76,44 @@ async function getRoleNameFromUserID(user_id) {
     });
 }
 
-async function getUserNameFromUserID(user_id) {
+async function deleteUser(userID) {
     return await new Promise((resolve, reject) => {
-        sqlite_inst.all('SELECT username FROM users where id=?', user_id, (err, rows) => {
+        sqlite_inst.run(`DELETE FROM users WHERE id=?`, userID, (err, rows) => {
             if (err)
                 reject(err);
             else
                 resolve(rows);
+        });
+    });
+}
+
+async function getAllUsers() {
+    return await new Promise((resolve, reject) => {
+        sqlite_inst.all('SELECT * FROM users', (err, rows) => {
+            if (err)
+                reject(err);
+            else
+                resolve(rows);
+        });
+    });
+}
+
+async function getRoleFromUserID(user_id) {
+    return await new Promise((resolve, reject) => {
+        sqlite_inst.all('SELECT * FROM roles WHERE id=(SELECT role_id FROM user_roles WHERE user_id=?)', user_id, (err, rows) => {
+            if (err)
+                reject(err);
+            else
+                resolve(rows[0]);
         });
     });
 }
 
 module.exports = {
-    getRoleNameFromUserID,
-    getUserNameFromUserID,
+    getUserFromID,
+    addUser,
+    deleteUser,
+    getAllUsers,
+    getRoleFromUserID,
     sqlite_inst
 };

@@ -6,9 +6,13 @@ const authenticateToken = require("../handlers/authHandler");
 
 /* GET home page. */
 router.get('/', authenticateToken, async function (req, res, next) {
-    const userName = await db.getUserNameFromUserID(req.userID);
-    const userRole = await db.getRoleNameFromUserID(req.userID);
-    res.render('index', {title: 'Home', username: userName[0].username, role: userRole[0].role});
+    const user = await db.getUserFromID(req.userID);
+    const userRole = await db.getRoleFromUserID(req.userID);
+    res.render('index', {title: 'Home', username: user.username, role: userRole.role});
+});
+
+router.get("/wizards", authenticateToken, async function (req, res, next) {
+    res.render('wizards',{wizards: await db.getAllUsers()});
 });
 
 module.exports = router;
