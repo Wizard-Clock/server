@@ -60,20 +60,36 @@ async function getUserFromID(user_id) {
     });
 }
 
-async function addUser(username, password) {
-    let salt = crypto.randomBytes(16);
+async function getUserFromName(name) {
     return await new Promise((resolve, reject) => {
-        sqlite_inst.run(`INSERT INTO users (username, hashed_password, salt) VALUES (?, ?, ?)`, [
-            username,
-            crypto.pbkdf2Sync(password, salt, 310000, 32, 'sha256'),
-            salt
-            ], (err, rows) => {
+        sqlite_inst.all('SELECT * FROM users WHERE username=?', name, (err, rows) => {
+            if (err)
+                reject(err);
+            else
+                resolve(rows[0]);
+        });
+    });
+}
+
+async function addUser(username, password, role) {
+    let salt = crypto.randomBytes(16);
+    await sqlite_inst.run(`INSERT INTO users (username, hashed_password, salt) VALUES (?, ?, ?)`, [
+        username,
+        crypto.pbkdf2Sync(password, salt, 310000, 32, 'sha256'),
+        salt
+    ]);
+
+    let userID, roleID;
+    await getUserFromName(username).then(value => userID = value.id);
+    await getRoleFromRoleName(role).then(value => roleID = value.id);
+    return await new Promise((resolve, reject) => {
+        sqlite_inst.run(`INSERT OR IGNORE INTO user_roles (user_id, role_id) VALUES(?, ?)`, [userID, roleID], (err, rows) => {
             if (err)
                 reject(err);
             else
                 resolve(rows);
         });
-    });
+    })
 }
 
 async function deleteUser(userID) {
@@ -109,11 +125,34 @@ async function getRoleFromUserID(user_id) {
     });
 }
 
+async function getRoleFromRoleName(roleName) {
+    return await new Promise((resolve, reject) => {
+        sqlite_inst.all('SELECT * FROM roles WHERE role=?', roleName, (err, rows) => {
+            if (err)
+                reject(err);
+            else
+                resolve(rows[0]);
+        });
+    });
+}
+
+async function getAllRoles() {
+    return await new Promise((resolve, reject) => {
+        sqlite_inst.all('SELECT * FROM roles', (err, rows) => {
+            if (err)
+                reject(err);
+            else
+                resolve(rows);
+        });
+    });
+}
+
 module.exports = {
     getUserFromID,
     addUser,
     deleteUser,
     getAllUsers,
+    getAllRoles,
     getRoleFromUserID,
     sqlite_inst
 };

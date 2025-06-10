@@ -8,13 +8,13 @@ block content
                     tr()
                         th(scope="col") ID
                         th(scope="col") Username
-                        th(scope="col") Is Follower
                         th(scope="col") Role
                 tbody()
                     each wizard in wizards
                         tr()
                             th(scope="row" id="wizardID")= wizard.id
                             td()= wizard.username
+                            td()= wizard.role
         div()
         h1() User Management
         div(class="accordion" id="userManagement")
@@ -22,7 +22,51 @@ block content
                 h2(class="accordion-header")
                     button(class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="false" aria-controls="collapseOne") Add User
                 div(id="collapseOne" class="accordion-collapse collapse" data-bs-parent="#userManagement")
-                    div(class="accordion-body") This is the first item’s accordion body. It is shown by default, until the collapse plugin adds the appropriate classes that we use to style each element.
+                    div(class="accordion-body")
+                        form(class="row g-3" id="addUserForm")
+                            div(class="col-md-6")
+                                section()
+                                    label(for="usernameAddInput" class="form-label") Username
+                                    input(type="text" class="form-control" name="username" id="usernameAddInput" required)
+                            div(class="col-md-6")
+                                section()
+                                    label(for="roleAddInput" class="form-label") Role
+                                    select(id="roleAddInput" class="form-select" name="role" required)
+                                        option(selected disabled value="") Choose...
+                                        for role in roles
+                                            option()=role.role
+                            div(class="col-md-6")
+                                section()
+                                    label(for="passwordAddPlain" class="form-label") Password
+                                    input(type="text" class="form-control" name="password" id="passwordAddPlain" required)
+                            div(class="col-md-6")
+                                section()
+                                    label(for="passwordAddFinal" class="form-label") Confirm Password
+                                    input(type="password" class="form-control" id="passwordAddFinal" required)
+                            div(class="col-12")
+                                button(type="submit" class="btn btn-primary") Add User
+                        script.
+                            const addUserForm = document.getElementById('addUserForm');
+                            addUserForm.onsubmit = async (e) => {
+                                e.preventDefault();
+                                let firstPass = document.getElementById('passwordAddPlain').value;
+                                let secPass = document.getElementById('passwordAddFinal').value;
+                                if (firstPass === secPass) {
+                                    let response = await fetch('/dashboard/wizards/addUser', {
+                                        method: 'POST',
+                                        body: new FormData(addUserForm)
+                                    });
+                                    let result = await response.json();
+                                    if (result.success) {
+                                        addUserForm.reset();
+                                        window.location.reload();
+                                    } else {
+                                        alert("Submission Error");
+                                    }
+                                } else {
+                                    alert("Passwords much match!");
+                                }
+                            }
             div(class="accordion-item")
                 h2(class="accordion-header")
                     button(class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo") Delete User
