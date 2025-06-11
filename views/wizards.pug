@@ -50,26 +50,30 @@ block content
                         h1(class="modal-title fs-5" id="editModalLabel") Edit User
                         button(type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close")
                     div(class="modal-body")
-                        form(class="row g-3" id="addUserForm")
+                        form(class="row g-3" id="editUserForm")
+                            div(class="col-md-2")
+                                section()
+                                    label(for="userId" class="form-label") ID
+                                    input(type="text" class="form-control user-id" name="userid" id='userid' disabled)
                             div(class="col-md-6")
                                 section()
                                     label(for="usernameEdit" class="form-label") Username
-                                    input(type="text" class="form-control username" name="username" id="usernameEdit" required)
-                            div(class="col-md-6")
+                                    input(type="text" class="form-control username" name="username" id="usernameEdit")
+                            div(class="col-md-4")
                                 section()
                                     label(for="roleEdit" class="form-label") Role
-                                    select(id="roleEdit" class="form-select role-select" name="role" required)
+                                    select(id="roleEdit" class="form-select role-select" name="role")
                                         option(selected disabled value="") Choose...
                                         for role in roles
                                             option(value= role.role)=role.role
                             div(class="col-md-6")
                                 section()
                                     label(for="passwordEdit" class="form-label") Password
-                                    input(type="text" class="form-control" name="password" id="passwordEdit" required)
+                                    input(type="text" class="form-control" name="password" id="passwordEdit")
                             div(class="col-md-6")
                                 section()
                                     label(for="passwordEditConfirm" class="form-label") Confirm Password
-                                    input(type="password" class="form-control" id="passwordEditConfirm" required)
+                                    input(type="password" class="form-control" id="passwordEditConfirm")
                     div(class="modal-footer")
                         button(type="button" class="btn btn-secondary" data-bs-dismiss="modal") Cancel
                         button(type="button" class="btn btn-primary" onclick="editUserAction()") Apply Changes
@@ -120,6 +124,7 @@ block content
                     const wiz = JSON.parse(button.getAttribute('data-bs-wizard'));
                     console.log(wiz)
 
+                    editModal.querySelector('.user-id').value = wiz.id;
                     editModal.querySelector('.username').value = wiz.username;
                     editModal.querySelector('.role-select').value = wiz.role;
                 });
@@ -128,13 +133,26 @@ block content
             async function editUserAction() {
                 let editModal = document.getElementById('editModal');
                 if (editModal) {
-
-                    let response = await fetch('/dashboard/wizards/editUser', {
+                    let pass = document.getElementById('passwordEdit').value;
+                    if (pass !== "") {
+                        let passConf = document.getElementById('passwordEditConfirm').value;
+                        if (pass !== passConf) {
+                            alert("Passwords must match.");
+                            return;
+                        }
+                    }
+                    let response = await fetch('/dashboard/wizards/updateUser', {
                         method: 'POST',
                         headers: {
                             "Content-Type": "application/json",
                         },
-                        body: JSON.stringify()
+                        body: JSON.stringify({
+                            id: document.getElementById('userid').value,
+                            username: document.getElementById('usernameEdit').value,
+                            role: document.getElementById('roleEdit').value,
+                            password: pass
+
+                        })
                     });
                     let result = await response.json();
                     if (result.success) {
@@ -195,6 +213,6 @@ block content
                                         alert("Submission Error");
                                     }
                                 } else {
-                                    alert("Passwords much match!");
+                                    alert("Passwords much match.");
                                 }
                             }

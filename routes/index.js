@@ -34,4 +34,10 @@ router.post('/wizards/deleteUser', authenticateToken, async function (req, res, 
     res.send({success: true});
 })
 
+router.post('/wizards/updateUser', authenticateToken, async function (req, res, next) {
+    console.log(req.body);
+    // await db.updateUser(req.body);
+    res.send({success: true});
+})
+
 module.exports = router;
