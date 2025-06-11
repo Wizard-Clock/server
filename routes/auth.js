@@ -7,7 +7,7 @@ const router = express.Router();
 
 /* Login home page. */
 router.get('/', authenticateToken, function(req, res) {
-    res.redirect("/dashboard");
+    res.redirect("/clock");
 });
 
 router.get('/login', function(req, res, next) {
@@ -25,7 +25,7 @@ router.post('/login', function (req, res, next) {
             }
             const token = jwt.sign(user.id, process.env.JWT_SECRET);
             res.cookie('nargle', token, { httpOnly: true, secure: true, maxAge: 3600000 });
-            return res.redirect('/dashboard');
+            return res.redirect('/clock');
         })
     })
     (req, res);

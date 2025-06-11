@@ -124,7 +124,14 @@ async function updateUser(user) {
     if (updateRole) {
         let roleID;
         await getRoleFromRoleName(user.role).then(value => roleID = value.id);
-        sqlite_inst.run(`UPDATE user_roles SET role_id=? WHERE user_id=?`, [roleID, user.id], (err, rows) => {})
+        return await new Promise((resolve, reject) => {
+            sqlite_inst.run(`UPDATE user_roles SET role_id=? WHERE user_id=?`, [roleID, user.id], (err, rows) => {
+                if (err)
+                    reject(err);
+                else
+                    resolve(rows);
+            });
+        });
     }
 
 }

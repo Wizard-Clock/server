@@ -1,216 +1,229 @@
 extends layout
 
 block content
-    div(class="d-flex flex-column justify-content-center")
-        div(class="w-50")
-            table(class="table table-striped table-hover")
-                thead()
-                    tr()
-                        th(scope="col") ID
-                        th(scope="col") Username
-                        th(scope="col") Role
-                        th(scope="col") Edit
-                        th(scope="col") Delete
-                tbody()
-                    each wizard in wizards
+    div(class="row justify-content-center")
+        div(class="col-auto w-75")
+            div()
+                h1(class="pb-2 mb-4 border-bottom") Wizard Management
+                table(class="table table-striped table-hover")
+                    thead()
                         tr()
-                            th(scope="row" id="wizardID")= wizard.id
-                            td()= wizard.username
-                            td()= wizard.role
-                            td()
-                                button(type="button" class="btn btn-light" data-bs-toggle="modal" data-bs-target="#editModal" data-bs-wizard= wizard)
-                                    svg(xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil-square" viewBox="0 0 16 16")
-                                        path(d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z")
-                                        path(fill-rule="evenodd" d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5z")
-                            if wizard.id === 1
-                                td() Cannot Delete
-                            else
+                            th(scope="col") ID
+                            th(scope="col") Username
+                            th(scope="col") Role
+                            th(scope="col") Edit
+                            th(scope="col") Delete
+                    tbody()
+                        each wizard in wizards
+                            tr()
+                                th(scope="row" id="wizardID")= wizard.id
+                                td()= wizard.username
+                                td()= wizard.role
                                 td()
-                                    button(type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal" data-bs-wizard-id= wizard.id data-bs-wizard-name= wizard.username)
-                                        svg(xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash3" viewBox="0 0 16 16")
-                                            path(d="M6.5 1h3a.5.5 0 0 1 .5.5v1H6v-1a.5.5 0 0 1 .5-.5M11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3A1.5 1.5 0 0 0 5 1.5v1H1.5a.5.5 0 0 0 0 1h.538l.853 10.66A2 2 0 0 0 4.885 16h6.23a2 2 0 0 0 1.994-1.84l.853-10.66h.538a.5.5 0 0 0 0-1zm1.958 1-.846 10.58a1 1 0 0 1-.997.92h-6.23a1 1 0 0 1-.997-.92L3.042 3.5zm-7.487 1a.5.5 0 0 1 .528.47l.5 8.5a.5.5 0 0 1-.998.06L5 5.03a.5.5 0 0 1 .47-.53Zm5.058 0a.5.5 0 0 1 .47.53l-.5 8.5a.5.5 0 1 1-.998-.06l.5-8.5a.5.5 0 0 1 .528-.47M8 4.5a.5.5 0 0 1 .5.5v8.5a.5.5 0 0 1-1 0V5a.5.5 0 0 1 .5-.5")
-        div(class="modal fade" id="deleteModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true")
-            div(class="modal-dialog modal-dialog-centered")
-                div(class="modal-content")
-                    div(class="modal-header")
-                        h1(class="modal-title fs-5" id="deleteModalLabel") Confirm Delete User
-                        button(type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close")
-                    div(class="modal-body")
-                        p() Are you sure you want to delete this user?
-                        p(class="wizard_username")
-                        p(class="wizard_id")
-                    div(class="modal-footer")
-                        button(type="button" class="btn btn-secondary" data-bs-dismiss="modal") Cancel
-                        button(type="button" class="btn btn-primary" onclick="deleteUserAction()") Delete User
+                                    button(type="button" class="btn btn-light" data-bs-toggle="modal" data-bs-target="#editModal" data-bs-wizard= wizard)
+                                        svg(xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil-square" viewBox="0 0 16 16")
+                                            path(d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z")
+                                            path(fill-rule="evenodd" d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5z")
+                                if wizard.id === 1
+                                    td() Cannot Delete
+                                else
+                                    td()
+                                        button(type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal" data-bs-wizard-id= wizard.id data-bs-wizard-name= wizard.username)
+                                            svg(xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash3" viewBox="0 0 16 16")
+                                                path(d="M6.5 1h3a.5.5 0 0 1 .5.5v1H6v-1a.5.5 0 0 1 .5-.5M11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3A1.5 1.5 0 0 0 5 1.5v1H1.5a.5.5 0 0 0 0 1h.538l.853 10.66A2 2 0 0 0 4.885 16h6.23a2 2 0 0 0 1.994-1.84l.853-10.66h.538a.5.5 0 0 0 0-1zm1.958 1-.846 10.58a1 1 0 0 1-.997.92h-6.23a1 1 0 0 1-.997-.92L3.042 3.5zm-7.487 1a.5.5 0 0 1 .528.47l.5 8.5a.5.5 0 0 1-.998.06L5 5.03a.5.5 0 0 1 .47-.53Zm5.058 0a.5.5 0 0 1 .47.53l-.5 8.5a.5.5 0 1 1-.998-.06l.5-8.5a.5.5 0 0 1 .528-.47M8 4.5a.5.5 0 0 1 .5.5v8.5a.5.5 0 0 1-1 0V5a.5.5 0 0 1 .5-.5")
+                button(type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addUserModal") Add User
+                    svg(xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-person-plus-fill" viewBox="0 0 16 16")
+                        path(d="M1 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1zm5-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6")
+                        path(fill-rule="evenodd" d="M13.5 5a.5.5 0 0 1 .5.5V7h1.5a.5.5 0 0 1 0 1H14v1.5a.5.5 0 0 1-1 0V8h-1.5a.5.5 0 0 1 0-1H13V5.5a.5.5 0 0 1 .5-.5")
 
-        div(class="modal fade" id="editModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true")
-            div(class="modal-dialog modal-dialog-centered")
-                div(class="modal-content")
-                    div(class="modal-header")
-                        h1(class="modal-title fs-5" id="editModalLabel") Edit User
-                        button(type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close")
-                    div(class="modal-body")
-                        form(class="row g-3" id="editUserForm")
-                            div(class="col-md-2")
-                                section()
-                                    label(for="userId" class="form-label") ID
-                                    input(type="text" class="form-control user-id" name="userid" id='userid' disabled)
-                            div(class="col-md-6")
-                                section()
-                                    label(for="usernameEdit" class="form-label") Username
-                                    input(type="text" class="form-control username" name="username" id="usernameEdit")
-                            div(class="col-md-4")
-                                section()
-                                    label(for="roleEdit" class="form-label") Role
-                                    select(id="roleEdit" class="form-select role-select" name="role")
-                                        option(selected disabled value="") Choose...
-                                        for role in roles
-                                            option(value= role.role)=role.role
-                            div(class="col-md-6")
-                                section()
-                                    label(for="passwordEdit" class="form-label") Password
-                                    input(type="text" class="form-control" name="password" id="passwordEdit")
-                            div(class="col-md-6")
-                                section()
-                                    label(for="passwordEditConfirm" class="form-label") Confirm Password
-                                    input(type="password" class="form-control" id="passwordEditConfirm")
-                    div(class="modal-footer")
-                        button(type="button" class="btn btn-secondary" data-bs-dismiss="modal") Cancel
-                        button(type="button" class="btn btn-primary" onclick="editUserAction()") Apply Changes
-        script.
-            let deleteModal = document.getElementById('deleteModal');
-            if (deleteModal) {
-                deleteModal.addEventListener('show.bs.modal', event => {
-                    const button = event.relatedTarget;
+            div(class="modal fade" id="deleteModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true")
+                div(class="modal-dialog modal-dialog-centered")
+                    div(class="modal-content")
+                        div(class="modal-header")
+                            h1(class="modal-title fs-5" id="deleteModalLabel") Confirm Delete User
+                            button(type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close")
+                        div(class="modal-body")
+                            p() Are you sure you want to delete this user?
+                            p(class="wizard_username")
+                            p(class="wizard_id")
+                        div(class="modal-footer")
+                            button(type="button" class="btn btn-secondary" data-bs-dismiss="modal") Cancel
+                            button(type="button" class="btn btn-primary" onclick="deleteUserAction()") Delete User
 
-                    const wizName = button.getAttribute('data-bs-wizard-name');
-                    const modalBodyUsername = deleteModal.querySelector('.wizard_username');
-                    modalBodyUsername.textContent = `Username: ${wizName}`;
+            div(class="modal fade" id="editModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true")
+                div(class="modal-dialog modal-dialog-centered")
+                    div(class="modal-content")
+                        div(class="modal-header")
+                            h1(class="modal-title fs-5" id="editModalLabel") Edit User
+                            button(type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close")
+                        div(class="modal-body")
+                            form(class="row g-3" id="editUserForm")
+                                div(class="col-md-2")
+                                    section()
+                                        label(for="userId" class="form-label") ID
+                                        input(type="text" class="form-control user-id" name="userid" id='userid' disabled)
+                                div(class="col-md-6")
+                                    section()
+                                        label(for="usernameEdit" class="form-label") Username
+                                        input(type="text" class="form-control username" name="username" id="usernameEdit")
+                                div(class="col-md-4")
+                                    section()
+                                        label(for="roleEdit" class="form-label") Role
+                                        select(id="roleEdit" class="form-select role-select" name="role")
+                                            option(selected disabled value="") Choose...
+                                            for role in roles
+                                                option(value= role.role)=role.role
+                                div(class="col-md-6")
+                                    section()
+                                        label(for="passwordEdit" class="form-label") Password
+                                        input(type="text" class="form-control" name="password" id="passwordEdit")
+                                div(class="col-md-6")
+                                    section()
+                                        label(for="passwordEditConfirm" class="form-label") Confirm Password
+                                        input(type="password" class="form-control" id="passwordEditConfirm")
+                        div(class="modal-footer")
+                            button(type="button" class="btn btn-secondary" data-bs-dismiss="modal") Cancel
+                            button(type="button" class="btn btn-primary" onclick="editUserAction()") Apply Changes
 
-                    const wizID = button.getAttribute('data-bs-wizard-id');
-                    const modalBodyID = deleteModal.querySelector('.wizard_id');
-                    modalBodyID.textContent = `ID: ${wizID}`;
-                });
-            }
+            div(class="modal fade" id="addUserModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="addUserModalLabel" aria-hidden="true")
+                div(class="modal-dialog modal-dialog-centered")
+                    div(class="modal-content")
+                        div(class="modal-header")
+                            h1(class="modal-title fs-5" id="addUserModalLabel") Add User
+                            button(type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close")
+                        div(class="modal-body")
+                            form(class="row g-3" id="addUserForm")
+                                div(class="col-md-6")
+                                    section()
+                                        label(for="usernameAddInput" class="form-label") Username
+                                        input(type="text" class="form-control" name="username" id="usernameAddInput" required)
+                                div(class="col-md-6")
+                                    section()
+                                        label(for="roleAddInput" class="form-label") Role
+                                        select(id="roleAddInput" class="form-select" name="role" required)
+                                            option(selected disabled value="") Choose...
+                                            for role in roles
+                                                option()=role.role
+                                div(class="col-md-6")
+                                    section()
+                                        label(for="passwordAddPlain" class="form-label") Password
+                                        input(type="text" class="form-control" name="password" id="passwordAddPlain" required)
+                                div(class="col-md-6")
+                                    section()
+                                        label(for="passwordAddFinal" class="form-label") Confirm Password
+                                        input(type="password" class="form-control" id="passwordAddFinal" required)
+                                div(class="col-12")
+                                    button(type="submit" class="btn btn-primary") Add User
+                        div(class="modal-footer")
+                            button(type="button" class="btn btn-secondary" data-bs-dismiss="modal") Cancel
 
-            async function deleteUserAction() {
+            script.
                 let deleteModal = document.getElementById('deleteModal');
                 if (deleteModal) {
-                    let idString = document.getElementById('deleteModal').querySelector('.wizard_id').textContent;
-                    idString = idString.slice(3).trim();
-                    let response = await fetch('/dashboard/wizards/deleteUser', {
-                        method: 'POST',
-                        headers: {
-                            "Content-Type": "application/json",
-                        },
-                        body: JSON.stringify({id: idString})
+                    deleteModal.addEventListener('show.bs.modal', event => {
+                        const button = event.relatedTarget;
+
+                        const wizName = button.getAttribute('data-bs-wizard-name');
+                        const modalBodyUsername = deleteModal.querySelector('.wizard_username');
+                        modalBodyUsername.textContent = `Username: ${wizName}`;
+
+                        const wizID = button.getAttribute('data-bs-wizard-id');
+                        const modalBodyID = deleteModal.querySelector('.wizard_id');
+                        modalBodyID.textContent = `ID: ${wizID}`;
                     });
-                    let result = await response.json();
-                    if (result.success) {
-                        $('#deleteModal').modal('hide');
-                        window.location.reload();
-                    } else {
-                        alert("Deletion Error");
-                    }
                 }
-            }
 
-            let editModal = document.getElementById('editModal');
-            if (editModal) {
-                editModal.addEventListener('show.bs.modal', event => {
-                    const button = event.relatedTarget;
-
-                    const wiz = JSON.parse(button.getAttribute('data-bs-wizard'));
-
-                    editModal.querySelector('.user-id').value = wiz.id;
-                    editModal.querySelector('.username').value = wiz.username;
-                    editModal.querySelector('.role-select').value = wiz.role;
-                });
-            }
-
-            async function editUserAction() {
-                let editModal = document.getElementById('editModal');
-                if (editModal) {
-                    let pass = document.getElementById('passwordEdit').value;
-                    if (pass !== "") {
-                        let passConf = document.getElementById('passwordEditConfirm').value;
-                        if (pass !== passConf) {
-                            alert("Passwords must match.");
-                            return;
+                async function deleteUserAction() {
+                    let deleteModal = document.getElementById('deleteModal');
+                    if (deleteModal) {
+                        let idString = document.getElementById('deleteModal').querySelector('.wizard_id').textContent;
+                        idString = idString.slice(3).trim();
+                        let response = await fetch('/wizards/deleteUser', {
+                            method: 'POST',
+                            headers: {
+                                "Content-Type": "application/json",
+                            },
+                            body: JSON.stringify({id: idString})
+                        });
+                        let result = await response.json();
+                        if (result.success) {
+                            $('#deleteModal').modal('hide');
+                            window.location.reload();
+                        } else {
+                            alert("Deletion Error");
                         }
                     }
-                    let response = await fetch('/dashboard/wizards/updateUser', {
-                        method: 'POST',
-                        headers: {
-                            "Content-Type": "application/json",
-                        },
-                        body: JSON.stringify({
-                            id: document.getElementById('userid').value,
-                            username: document.getElementById('usernameEdit').value,
-                            role: document.getElementById('roleEdit').value,
-                            password: pass
+                }
 
-                        })
+                let editModal = document.getElementById('editModal');
+                if (editModal) {
+                    editModal.addEventListener('show.bs.modal', event => {
+                        const button = event.relatedTarget;
+
+                        const wiz = JSON.parse(button.getAttribute('data-bs-wizard'));
+
+                        editModal.querySelector('.user-id').value = wiz.id;
+                        editModal.querySelector('.username').value = wiz.username;
+                        editModal.querySelector('.role-select').value = wiz.role;
                     });
-                    let result = await response.json();
-                    if (result.success) {
-                        $('#editModal').modal('hide');
-                        window.location.reload();
-                    } else {
-                        alert("Edit Error");
+                }
+
+                async function editUserAction() {
+                    let editModal = document.getElementById('editModal');
+                    if (editModal) {
+                        let pass = document.getElementById('passwordEdit').value;
+                        if (pass !== "") {
+                            let passConf = document.getElementById('passwordEditConfirm').value;
+                            if (pass !== passConf) {
+                                alert("Passwords must match.");
+                                return;
+                            }
+                        }
+                        let response = await fetch('/wizards/updateUser', {
+                            method: 'POST',
+                            headers: {
+                                "Content-Type": "application/json",
+                            },
+                            body: JSON.stringify({
+                                id: document.getElementById('userid').value,
+                                username: document.getElementById('usernameEdit').value,
+                                role: document.getElementById('roleEdit').value,
+                                password: pass
+
+                            })
+                        });
+                        let result = await response.json();
+                        if (result.success) {
+                            $('#editModal').modal('hide');
+                            window.location.reload();
+                        } else {
+                            alert("Edit Error");
+                        }
                     }
                 }
-            }
 
-        div()
-        h1() User Management
-        div(class="accordion" id="userManagement")
-            div(class="accordion-item")
-                h2(class="accordion-header")
-                    button(class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="false" aria-controls="collapseOne") Add User
-                div(id="collapseOne" class="accordion-collapse collapse" data-bs-parent="#userManagement")
-                    div(class="accordion-body")
-                        form(class="row g-3" id="addUserForm")
-                            div(class="col-md-6")
-                                section()
-                                    label(for="usernameAddInput" class="form-label") Username
-                                    input(type="text" class="form-control" name="username" id="usernameAddInput" required)
-                            div(class="col-md-6")
-                                section()
-                                    label(for="roleAddInput" class="form-label") Role
-                                    select(id="roleAddInput" class="form-select" name="role" required)
-                                        option(selected disabled value="") Choose...
-                                        for role in roles
-                                            option()=role.role
-                            div(class="col-md-6")
-                                section()
-                                    label(for="passwordAddPlain" class="form-label") Password
-                                    input(type="text" class="form-control" name="password" id="passwordAddPlain" required)
-                            div(class="col-md-6")
-                                section()
-                                    label(for="passwordAddFinal" class="form-label") Confirm Password
-                                    input(type="password" class="form-control" id="passwordAddFinal" required)
-                            div(class="col-12")
-                                button(type="submit" class="btn btn-primary") Add User
-                        script.
-                            const addUserForm = document.getElementById('addUserForm');
-                            addUserForm.onsubmit = async (e) => {
-                                e.preventDefault();
-                                let firstPass = document.getElementById('passwordAddPlain').value;
-                                let secPass = document.getElementById('passwordAddFinal').value;
-                                if (firstPass === secPass) {
-                                    let response = await fetch('/dashboard/wizards/addUser', {
-                                        method: 'POST',
-                                        body: new FormData(addUserForm)
-                                    });
-                                    let result = await response.json();
-                                    if (result.success) {
-                                        addUserForm.reset();
-                                        window.location.reload();
-                                    } else {
-                                        alert("Submission Error");
-                                    }
-                                } else {
-                                    alert("Passwords much match.");
-                                }
-                            }
+                let addUserForm = document.getElementById('addUserForm');
+                addUserForm.onsubmit = async (e) => {
+                    console.log("Pong");
+                    e.preventDefault();
+                    let firstPass = document.getElementById('passwordAddPlain').value;
+                    let secPass = document.getElementById('passwordAddFinal').value;
+                    if (firstPass === secPass) {
+                        let response = await fetch('/wizards/addUser', {
+                            method: 'POST',
+                            body: new FormData(addUserForm)
+                        });
+                        let result = await response.json();
+                        if (result.success) {
+                            addUserForm.reset();
+                            window.location.reload();
+                        } else {
+                            alert("Submission Error");
+                        }
+                    } else {
+                        alert("Passwords much match.");
+                    }
+                }
+
+            div()
+                h1(class="py-2 my-4 border-bottom") Role Management
