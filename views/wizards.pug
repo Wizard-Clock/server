@@ -18,6 +18,10 @@ block content
                             td()= wizard.username
                             td()= wizard.role
                             td()
+                                button(type="button" class="btn btn-light" data-bs-toggle="modal" data-bs-target="#editModal" data-bs-wizard= wizard)
+                                    svg(xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil-square" viewBox="0 0 16 16")
+                                        path(d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z")
+                                        path(fill-rule="evenodd" d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5z")
                             if wizard.id === 1
                                 td() Cannot Delete
                             else
@@ -36,8 +40,39 @@ block content
                         p(class="wizard_username")
                         p(class="wizard_id")
                     div(class="modal-footer")
-                        button(type="button" class="btn btn-secondary" data-bs-dismiss="modal") Close
-                        button(type="button" class="btn btn-primary" onclick="deleteUserAction()") Understood
+                        button(type="button" class="btn btn-secondary" data-bs-dismiss="modal") Cancel
+                        button(type="button" class="btn btn-primary" onclick="deleteUserAction()") Delete User
+
+        div(class="modal fade" id="editModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true")
+            div(class="modal-dialog modal-dialog-centered")
+                div(class="modal-content")
+                    div(class="modal-header")
+                        h1(class="modal-title fs-5" id="editModalLabel") Edit User
+                        button(type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close")
+                    div(class="modal-body")
+                        form(class="row g-3" id="addUserForm")
+                            div(class="col-md-6")
+                                section()
+                                    label(for="usernameEdit" class="form-label") Username
+                                    input(type="text" class="form-control username" name="username" id="usernameEdit" required)
+                            div(class="col-md-6")
+                                section()
+                                    label(for="roleEdit" class="form-label") Role
+                                    select(id="roleEdit" class="form-select role-select" name="role" required)
+                                        option(selected disabled value="") Choose...
+                                        for role in roles
+                                            option(value= role.role)=role.role
+                            div(class="col-md-6")
+                                section()
+                                    label(for="passwordEdit" class="form-label") Password
+                                    input(type="text" class="form-control" name="password" id="passwordEdit" required)
+                            div(class="col-md-6")
+                                section()
+                                    label(for="passwordEditConfirm" class="form-label") Confirm Password
+                                    input(type="password" class="form-control" id="passwordEditConfirm" required)
+                    div(class="modal-footer")
+                        button(type="button" class="btn btn-secondary" data-bs-dismiss="modal") Cancel
+                        button(type="button" class="btn btn-primary" onclick="editUserAction()") Apply Changes
         script.
             let deleteModal = document.getElementById('deleteModal');
             if (deleteModal) {
@@ -73,6 +108,40 @@ block content
                         window.location.reload();
                     } else {
                         alert("Deletion Error");
+                    }
+                }
+            }
+
+            let editModal = document.getElementById('editModal');
+            if (editModal) {
+                editModal.addEventListener('show.bs.modal', event => {
+                    const button = event.relatedTarget;
+
+                    const wiz = JSON.parse(button.getAttribute('data-bs-wizard'));
+                    console.log(wiz)
+
+                    editModal.querySelector('.username').value = wiz.username;
+                    editModal.querySelector('.role-select').value = wiz.role;
+                });
+            }
+
+            async function editUserAction() {
+                let editModal = document.getElementById('editModal');
+                if (editModal) {
+
+                    let response = await fetch('/dashboard/wizards/editUser', {
+                        method: 'POST',
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify()
+                    });
+                    let result = await response.json();
+                    if (result.success) {
+                        $('#editModal').modal('hide');
+                        window.location.reload();
+                    } else {
+                        alert("Edit Error");
                     }
                 }
             }
