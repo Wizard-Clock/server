@@ -98,7 +98,6 @@ block content
                 if (deleteModal) {
                     let idString = document.getElementById('deleteModal').querySelector('.wizard_id').textContent;
                     idString = idString.slice(3).trim();
-                    console.log(idString);
                     let response = await fetch('/dashboard/wizards/deleteUser', {
                         method: 'POST',
                         headers: {
@@ -122,7 +121,6 @@ block content
                     const button = event.relatedTarget;
 
                     const wiz = JSON.parse(button.getAttribute('data-bs-wizard'));
-                    console.log(wiz)
 
                     editModal.querySelector('.user-id').value = wiz.id;
                     editModal.querySelector('.username').value = wiz.username;

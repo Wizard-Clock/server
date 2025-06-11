@@ -103,6 +103,32 @@ async function deleteUser(userID) {
     });
 }
 
+async function updateUser(user) {
+    const oldUser = await getUserFromID(user.id);
+
+    if (oldUser.username !== user.username) {
+        sqlite_inst.run(`UPDATE users SET username=? WHERE id=?`, [user.username, user.id], (err, rows) => {})
+    }
+
+    if (user.password !== "") {
+        let salt = crypto.randomBytes(16);
+        sqlite_inst.run(`UPDATE users SET hashed_password=?, salt=? WHERE id=?`, [
+            crypto.pbkdf2Sync(user.password, salt, 310000, 32, 'sha256'),
+            salt,
+            user.id
+        ], (err, rows) => {})
+    }
+
+    let updateRole = false;
+    await getRoleFromUserID(user.id).then(value => updateRole = value.role !== user.role);
+    if (updateRole) {
+        let roleID;
+        await getRoleFromRoleName(user.role).then(value => roleID = value.id);
+        sqlite_inst.run(`UPDATE user_roles SET role_id=? WHERE user_id=?`, [roleID, user.id], (err, rows) => {})
+    }
+
+}
+
 async function getAllUsers() {
     return await new Promise((resolve, reject) => {
         sqlite_inst.all('SELECT * FROM users', (err, rows) => {
@@ -151,6 +177,7 @@ module.exports = {
     getUserFromID,
     addUser,
     deleteUser,
+    updateUser,
     getAllUsers,
     getAllRoles,
     getRoleFromUserID,

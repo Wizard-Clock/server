@@ -24,7 +24,6 @@ router.post('/wizards/addUser', authenticateToken, async function (req, res, nex
     const form = formidable({ multiples: true });
     await form.parse(req, async (err, user) => {
         await db.addUser(user.username[0], user.password[0], user.role[0]);
-        console.log('fields: ', user);
         res.send({success: true});
     });
 })
@@ -35,8 +34,7 @@ router.post('/wizards/deleteUser', authenticateToken, async function (req, res, 
 })
 
 router.post('/wizards/updateUser', authenticateToken, async function (req, res, next) {
-    console.log(req.body);
-    // await db.updateUser(req.body);
+    await db.updateUser(req.body);
     res.send({success: true});
 })
 
