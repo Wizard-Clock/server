@@ -180,13 +180,62 @@ async function getAllRoles() {
     });
 }
 
+async function getLocationFromID(locationID) {
+    return await new Promise((resolve, reject) => {
+        sqlite_inst.all('SELECT * FROM locations WHERE id=?', locationID, (err, rows) => {
+            if (err)
+                reject(err);
+            else
+                resolve(rows[0]);
+        });
+    });
+}
+
+async function getAllLocations() {
+    return await new Promise((resolve, reject) => {
+        sqlite_inst.all('SELECT * FROM locations', (err, rows) => {
+            if (err)
+                reject(err);
+            else
+                resolve(rows);
+        });
+    });
+}
+
+async function getClockPositionFromLocationID(locationID) {
+    return await new Promise((resolve, reject) => {
+        sqlite_inst.all('SELECT * FROM clock_face WHERE location_id=?', locationID, (err, rows) => {
+            if (err)
+                reject(err);
+            else
+                resolve(rows[0]);
+        });
+    });
+}
+
+async function getAllClockPositions() {
+    return await new Promise((resolve, reject) => {
+        sqlite_inst.all('SELECT * FROM clock_face', (err, rows) => {
+            if (err)
+                reject(err);
+            else
+                resolve(rows);
+        });
+    });
+}
+
+
 module.exports = {
     getUserFromID,
     addUser,
     deleteUser,
     updateUser,
     getAllUsers,
-    getAllRoles,
     getRoleFromUserID,
+    getAllRoles,
+    getLocationFromID,
+    getAllLocations,
+    getClockPositionFromLocationID,
+    getAllClockPositions,
     sqlite_inst
 };

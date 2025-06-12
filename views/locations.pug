@@ -9,6 +9,7 @@ block content
                     thead()
                         tr()
                             th(scope="col") ID
+                            th(scope="col") Clock Position
                             th(scope="col") Name
                             th(scope="col") Longitude
                             th(scope="col") Latitude
@@ -21,35 +22,80 @@ block content
                          each location in locations
                              tr()
                                  th(scope="row" id="location-id")= location.id
+                                 if location.clockPosition
+                                    td()= location.clockPosition
+                                 else
+                                    td() NA
                                  td()= location.name
                                  td()= location.longitude
                                  td()= location.latitude
                                  td()= location.radius
                                  td()= location.description
                                  td()
-                                     button(type="button" class="btn btn-light" data-bs-toggle="modal" data-bs-target="#editModal" data-bs-location= location)
-                                         svg(xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil-square" viewBox="0 0 16 16")
-                                             path(d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z")
-                                             path(fill-rule="evenodd" d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5z")
+                                     button(type="button" class="btn btn-light" data-bs-toggle="modal" data-bs-target="#editLocationModal" data-bs-location= location)
+                                         i(class="bi bi-pencil-square")
                                  td()
-                                     button(type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal" data-bs-location= location)
-                                         svg(xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash3" viewBox="0 0 16 16")
-                                             path(d="M6.5 1h3a.5.5 0 0 1 .5.5v1H6v-1a.5.5 0 0 1 .5-.5M11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3A1.5 1.5 0 0 0 5 1.5v1H1.5a.5.5 0 0 0 0 1h.538l.853 10.66A2 2 0 0 0 4.885 16h6.23a2 2 0 0 0 1.994-1.84l.853-10.66h.538a.5.5 0 0 0 0-1zm1.958 1-.846 10.58a1 1 0 0 1-.997.92h-6.23a1 1 0 0 1-.997-.92L3.042 3.5zm-7.487 1a.5.5 0 0 1 .528.47l.5 8.5a.5.5 0 0 1-.998.06L5 5.03a.5.5 0 0 1 .47-.53Zm5.058 0a.5.5 0 0 1 .47.53l-.5 8.5a.5.5 0 1 1-.998-.06l.5-8.5a.5.5 0 0 1 .528-.47M8 4.5a.5.5 0 0 1 .5.5v8.5a.5.5 0 0 1-1 0V5a.5.5 0 0 1 .5-.5")
-                                td()
-                                    button(type="button" class="btn btn-primary"  onclick="previewLocation()" data-bs-location= location)
-                                        svg(xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-eye-fill" viewBox="0 0 16 16")
-                                            path(d="M10.5 8a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0")
-                                            path(d="M0 8s3-5.5 8-5.5S16 8 16 8s-3 5.5-8 5.5S0 8 0 8m8 3.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7")
-                button(type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addUserModal") Add Location
-                     svg(xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-geo-alt" viewBox="0 0 16 16")
-                         path(d="M12.166 8.94c-.524 1.062-1.234 2.12-1.96 3.07A32 32 0 0 1 8 14.58a32 32 0 0 1-2.206-2.57c-.726-.95-1.436-2.008-1.96-3.07C3.304 7.867 3 6.862 3 6a5 5 0 0 1 10 0c0 .862-.305 1.867-.834 2.94M8 16s6-5.686 6-10A6 6 0 0 0 2 6c0 4.314 6 10 6 10")
-                         path(d="M8 8a2 2 0 1 1 0-4 2 2 0 0 1 0 4m0 1a3 3 0 1 0 0-6 3 3 0 0 0 0 6")
+                                     button(type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteLocatioModal" data-bs-location= location)
+                                         i(class="bi bi-trash3-fill")
+                                 td()
+                                     button(type="button" class="btn btn-primary"  onclick="previewLocation()" data-bs-location= location)
+                                         i(class="bi bi-eye-fill")
+                button(type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addLocationModal") Add Location&nbsp;
+                    i(class="bi bi-geo-alt")
             div()
                 h1(class="pb-2 mb-4 border-bottom") Location Preview
                 div(id="map")
-                script.
-                    var map = L.map('map').setView([41.737023,-99.587382], 5);
-                    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                        maxZoom: 19,
-                        attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-                    }).addTo(map);
+
+            div(class="modal fade" id="addLocationModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="addLocationModalLabel" aria-hidden="true")
+                div(class="modal-dialog modal-dialog-centered")
+                    div(class="modal-content")
+                        div(class="modal-header")
+                            h1(class="modal-title fs-5" id="addLocationModalLabel") Add User
+                            button(type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close")
+                        div(class="modal-body")
+                            form(class="row g-3" id="addLocationForm")
+                                div(class="col-md-8")
+                                    section()
+                                        label(for="locationNameAddInput" class="form-label") Name
+                                        input(type="text" class="form-control" name="name" id="locationNameInput" required)
+                                div(class="col-md-4")
+                                    section()
+                                        label(for="clockPosSelectInput" class="form-label") Clock Position
+                                        select(id="clockPosSelectInput" class="form-select" name="clockPos")
+                                            option(selected disabled value="") Choose...
+                                            for position in positions
+                                                if position.location_id
+                                                else
+                                                    option()=position.position
+                                div(class="col-md-4")
+                                    section()
+                                        label(for="latitudeAdd" class="form-label") Latitude&nbsp;
+                                            i(class="bi bi-question-circle-fill" data-bs-toggle="tooltip" data-bs-title="Must be a valid number between -90 and 90, and 0.0 formatting should followed.")
+                                        input(type="text" class="form-control" name="latitude" id="latitudeAdd" pattern="^(\\+|-)?(?:90(?:(?:\\.0{1,6})?)|(?:[0-9]|[1-8][0-9])(?:(?:\\.[0-9]{1,6})?))$" required)
+                                div(class="col-md-4")
+                                    section()
+                                        label(for="longitudeAdd" class="form-label") Longitude&nbsp;
+                                            i(class="bi bi-question-circle-fill" data-bs-toggle="tooltip" data-bs-title="Must be a valid number between -180 and 180, and 0.0 formatting should followed.")
+                                        input(type="text" class="form-control" name="longitude" id="longitudeAdd" pattern="^(\\+|-)?(?:180(?:(?:\\.0{1,6})?)|(?:[0-9]|[1-9][0-9]|1[0-7][0-9])(?:(?:\\.[0-9]{1,6})?))$" required)
+                                div(class="col-md-4")
+                                    section()
+                                        label(for="radiusAdd" class="form-label") Radius (ft)
+                                        input(type="number" min=0 class="form-control" name="radius" id="radiusAdd" required)
+                                div(class="col-md-12")
+                                    section()
+                                        label(for="descriptionAdd" class="form-label") Description
+                                        textarea(class="form-control" name="description" id="descriptionAdd")
+                                div(class="col-12")
+                                    button(type="submit" class="btn btn-primary") Add Location
+                        div(class="modal-footer")
+                            button(type="button" class="btn btn-secondary" data-bs-dismiss="modal") Cancel
+            script.
+                document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(tooltip => {
+                    new bootstrap.Tooltip(tooltip);
+                })
+
+                var map = L.map('map').setView([41.737023, -99.587382], 5);
+                L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    maxZoom: 19,
+                    attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+                }).addTo(map);
