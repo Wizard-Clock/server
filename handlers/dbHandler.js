@@ -251,9 +251,9 @@ async function getAllClockPositions() {
     });
 }
 
-async function updateClockPositionWithLocation(postion, locationID) {
+async function updateClockPositionWithLocation(position, locationID) {
     return await new Promise((resolve, reject) => {
-        sqlite_inst.all(`UPDATE clock_face SET location_id=? WHERE postion=?`,[locationID, postion], (err, rows) => {
+        sqlite_inst.all(`UPDATE clock_face SET location_id=? WHERE position=?`,[locationID, position], (err, rows) => {
             if (err)
                 reject(err);
             else

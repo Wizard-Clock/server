@@ -64,7 +64,7 @@ block content
                                     section()
                                         label(for="clockPosSelectInput" class="form-label") Clock Position
                                         select(id="clockPosSelectInput" class="form-select" name="clockPosition")
-                                            option(selected disabled value="") Choose...
+                                            option(selected value="") None
                                             for position in positions
                                                 if position.location_id
                                                 else
@@ -104,13 +104,13 @@ block content
 
                 let locations = JSON.parse('!{JSON.stringify(locations)}');
                 for (let location of locations) {
-                    L.circle([location.longitude, location.latitude], {
+                    L.circle([location.latitude, location.longitude], {
                         color: 'red',
                         fillColor: '#f03',
                         fillOpacity: 0.4,
                         radius: location.radius
                     }).addTo(map);
-                    var marker = L.marker([location.longitude, location.latitude]).addTo(map);
+                    var marker = L.marker([location.latitude, location.longitude]).addTo(map);
                     marker.bindPopup(location.name).openPopup();
 
                 }
