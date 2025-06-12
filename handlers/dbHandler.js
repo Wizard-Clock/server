@@ -230,6 +230,22 @@ async function addLocation(location) {
     }
 }
 
+async function deleteLocation(locationID) {
+
+    let position = await getClockPositionFromLocationID(locationID);
+    if (position) {
+        await sqlite_inst.run(`UPDATE FROM clock_face SET location_id=NUll WHERE position=?`,  position.id, (err, rows) => {});
+    }
+    return await new Promise((resolve, reject) => {
+        sqlite_inst.run(`DELETE FROM locations WHERE id=?`, locationID, (err, rows) => {
+            if (err)
+                reject(err);
+            else
+                resolve(rows);
+        });
+    });
+}
+
 async function getClockPositionFromLocationID(locationID) {
     return await new Promise((resolve, reject) => {
         sqlite_inst.all('SELECT * FROM clock_face WHERE location_id=?', locationID, (err, rows) => {
@@ -276,6 +292,7 @@ module.exports = {
     getLocationFromID,
     getAllLocations,
     addLocation,
+    deleteLocation,
     getClockPositionFromLocationID,
     getAllClockPositions,
     sqlite_inst

@@ -39,10 +39,14 @@ router.post('/addLocation', authenticateToken, async function (req, res, next) {
             radius: location.radius[0],
             description: location.description ? location.description[0] : "",
         }
-        console.log(locationObj);
         await db.addLocation(locationObj);
         res.send({success: true});
     });
+})
+
+router.post('/deleteLocation', authenticateToken, async function (req, res, next) {
+    await db.deleteLocation(req.body.id);
+    res.send({success: true});
 })
 
 module.exports = router;
