@@ -44,6 +44,23 @@ router.post('/addLocation', authenticateToken, async function (req, res, next) {
     });
 })
 
+router.post('/editLocation', authenticateToken, async function (req, res, next) {
+    const form = formidable({ multiples: true });
+    await form.parse(req, async (err, location) => {
+        const locationObj = {
+            id: location.id[0],
+            name: location.name[0],
+            clockPosition: location.clockPosition ?  location.clockPosition[0] : "",
+            latitude: location.latitude[0],
+            longitude: location.longitude[0],
+            radius: location.radius[0],
+            description: location.description ? location.description[0] : "",
+        }
+        await db.updateLocation(locationObj);
+        res.send({success: true});
+    });
+})
+
 router.post('/deleteLocation', authenticateToken, async function (req, res, next) {
     await db.deleteLocation(req.body.id);
     res.send({success: true});

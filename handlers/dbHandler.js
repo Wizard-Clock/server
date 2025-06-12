@@ -230,11 +230,31 @@ async function addLocation(location) {
     }
 }
 
+async function updateLocation(location) {
+    await sqlite_inst.run(`UPDATE locations SET name=?, latitude=?, longitude=?, radius=?, description=? WHERE id=?`, [
+        location.name,
+        location.latitude,
+        location.longitude,
+        location.radius,
+        location.description,
+        location.id
+    ]);
+
+    if (location.clockPosition) {
+        return updateClockPositionWithLocation(location.clockPosition, location.id);
+    } else {
+        let position = await getClockPositionFromLocationID(location.id);
+        if (position) {
+            return await deleteLocationFromClockPosition(position.id);
+        }
+    }
+}
+
 async function deleteLocation(locationID) {
 
     let position = await getClockPositionFromLocationID(locationID);
     if (position) {
-        await sqlite_inst.run(`UPDATE clock_face SET location_id=NUll WHERE position=?`,  position.id, (err, rows) => {});
+        await deleteLocationFromClockPosition(position.id);
     }
     return await new Promise((resolve, reject) => {
         sqlite_inst.run(`DELETE FROM locations WHERE id=?`, locationID, (err, rows) => {
@@ -244,6 +264,17 @@ async function deleteLocation(locationID) {
                 resolve(rows);
         });
     });
+}
+
+async function deleteLocationFromClockPosition(positionID) {
+    return await new Promise((resolve, reject) => {
+        sqlite_inst.run(`UPDATE clock_face SET location_id=NULL WHERE position=?`,  positionID, (err, rows) => {
+            if (err)
+                reject(err);
+            else
+                resolve(rows);
+        });
+    })
 }
 
 async function getClockPositionFromLocationID(locationID) {
@@ -292,6 +323,7 @@ module.exports = {
     getLocationFromID,
     getAllLocations,
     addLocation,
+    updateLocation,
     deleteLocation,
     getClockPositionFromLocationID,
     getAllClockPositions,
