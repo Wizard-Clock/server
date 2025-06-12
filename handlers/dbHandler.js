@@ -93,6 +93,7 @@ async function addUser(username, password, role) {
 }
 
 async function deleteUser(userID) {
+    await sqlite_inst.run(`DELETE FROM user_roles WHERE user_id=?`, userID, (err, rows) => {});
     return await new Promise((resolve, reject) => {
         sqlite_inst.run(`DELETE FROM users WHERE id=?`, userID, (err, rows) => {
             if (err)
