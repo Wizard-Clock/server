@@ -234,7 +234,7 @@ async function deleteLocation(locationID) {
 
     let position = await getClockPositionFromLocationID(locationID);
     if (position) {
-        await sqlite_inst.run(`UPDATE FROM clock_face SET location_id=NUll WHERE position=?`,  position.id, (err, rows) => {});
+        await sqlite_inst.run(`UPDATE clock_face SET location_id=NUll WHERE position=?`,  position.id, (err, rows) => {});
     }
     return await new Promise((resolve, reject) => {
         sqlite_inst.run(`DELETE FROM locations WHERE id=?`, locationID, (err, rows) => {
