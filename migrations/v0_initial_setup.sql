@@ -77,5 +77,19 @@ CREATE TABLE IF NOT EXISTS "follower_link" (
 INSERT OR IGNORE INTO roles (id,role, description) VALUES
        (1,"admin", "Is the administrator of the instance."),
        (2,"user", "Can have a child attached."),
-       (3,"child", "Only can be attached or set.")
-;
+       (3,"child", "Only can be attached or set.");
+**
+INSERT OR IGNORE INTO clock_face (id,position) VALUES
+       (1,1),
+       (2,2),
+       (3,3),
+       (4,4),
+       (5,5),
+       (6,6),
+       (7,7),
+       (8,8),
+       (9,9),
+       (10,10),
+       (11,11),
+       (12,12),
+       (13,13);
