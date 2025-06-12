@@ -39,9 +39,9 @@ CREATE TABLE IF NOT EXISTS "role_permissions" (
 CREATE TABLE IF NOT EXISTS "locations" (
        "id" INTEGER PRIMARY KEY NOT NULL,
        "name" TEXT NOT NULL UNIQUE,
-       "longitude" integer,
-       "latitude" integer,
-       "radius" integer,
+       "longitude" TEXT NOT NULL,
+       "latitude" TEXT NOT NULL,
+       "radius" integer NOT NULL,
        "description" TEXT
 );
 **

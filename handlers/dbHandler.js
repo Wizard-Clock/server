@@ -191,6 +191,17 @@ async function getLocationFromID(locationID) {
     });
 }
 
+async function getLocationFromName(locationName) {
+    return await new Promise((resolve, reject) => {
+        sqlite_inst.all('SELECT * FROM locations WHERE name=?', locationName, (err, rows) => {
+            if (err)
+                reject(err);
+            else
+                resolve(rows[0]);
+        });
+    });
+}
+
 async function getAllLocations() {
     return await new Promise((resolve, reject) => {
         sqlite_inst.all('SELECT * FROM locations', (err, rows) => {
@@ -200,6 +211,22 @@ async function getAllLocations() {
                 resolve(rows);
         });
     });
+}
+
+async function addLocation(location) {
+    await sqlite_inst.run(`INSERT INTO locations (name, latitude, longitude, radius, description) VALUES (?, ?, ?, ?, ?)`, [
+        location.name,
+        location.latitude,
+        location.longitude,
+        location.radius,
+        location.description,
+    ]);
+
+    if (location.clockPosition) {
+        let locationID;
+        await getLocationFromName(location.name).then(value => locationID = value.id);
+        return updateClockPositionWithLocation(location.clockPosition, locationID);
+    }
 }
 
 async function getClockPositionFromLocationID(locationID) {
@@ -224,6 +251,18 @@ async function getAllClockPositions() {
     });
 }
 
+async function updateClockPositionWithLocation(postion, locationID) {
+    return await new Promise((resolve, reject) => {
+        sqlite_inst.all(`UPDATE clock_face SET location_id=? WHERE postion=?`,[locationID, postion], (err, rows) => {
+            if (err)
+                reject(err);
+            else
+                resolve(rows);
+        });
+    });
+}
+
+
 
 module.exports = {
     getUserFromID,
@@ -235,6 +274,7 @@ module.exports = {
     getAllRoles,
     getLocationFromID,
     getAllLocations,
+    addLocation,
     getClockPositionFromLocationID,
     getAllClockPositions,
     sqlite_inst
