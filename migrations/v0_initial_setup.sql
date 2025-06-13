@@ -46,11 +46,11 @@ CREATE TABLE IF NOT EXISTS "locations" (
 );
 **
 CREATE TABLE IF NOT EXISTS "user_location" (
-       "location_id" INTEGER NOT NULL,
        "user_id" INTEGER NOT NULL,
-       PRIMARY KEY ("location_id", "user_id"),
-       FOREIGN KEY ("location_id") REFERENCES locations("id"),
-       FOREIGN KEY ("user_id") REFERENCES users("id")
+       "location_id" INTEGER NOT NULL,
+       PRIMARY KEY ("user_id", "location_id"),
+       FOREIGN KEY ("user_id") REFERENCES users("id"),
+       FOREIGN KEY ("location_id") REFERENCES locations("id")
 );
 **
 CREATE TABLE IF NOT EXISTS "clock_face" (

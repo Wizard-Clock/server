@@ -301,13 +301,29 @@ async function getAllClockPositions() {
 
 async function updateClockPositionWithLocation(position, locationID) {
     return await new Promise((resolve, reject) => {
-        sqlite_inst.all(`UPDATE clock_face SET location_id=? WHERE position=?`,[locationID, position], (err, rows) => {
+        sqlite_inst.all(`UPDATE clock_face SET location_id=? WHERE position=?`,[
+            locationID,
+            position
+        ], (err, rows) => {
             if (err)
                 reject(err);
             else
                 resolve(rows);
         });
     });
+}
+
+async function updateUserLocation(userID, locationID) {
+    return await new Promise((resolve, reject) => {
+        sqlite_inst.all(`INSERT INTO user_location (user_id, location_id) VALUES (?, ?) ON CONFLICT(user_id) DO UPDATE SET location_id=?`, [
+            userID,
+            locationID,
+            locationID
+        ], (err) => {
+            if (err)
+                reject(err);
+        });
+    })
 }
 
 
@@ -327,5 +343,6 @@ module.exports = {
     deleteLocation,
     getClockPositionFromLocationID,
     getAllClockPositions,
+    updateUserLocation,
     sqlite_inst
 };

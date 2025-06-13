@@ -21,4 +21,40 @@ router.post('/login', async function (req, res, next) {
     (req, res);
 });
 
+router.post('/updateUserLocation', authenticateToken, async function (req, res, next) {
+    const userID = req.body.userID;
+    const userLoc = req.body.location;
+    const locations = await db.getAllLocations();
+
+    for (let loc in locations) {
+        if (isUserWithinLocation(userLoc.latitude, userLoc.longitude, loc.latitude, loc.longitude, userLoc.radius)) {
+            await db.updateUserLocation(userID, loc.id);
+        }
+    }
+});
+
+function isUserWithinLocation(userLat, userLong, locationLat, locationLong, radius) {
+    return getDistanceFromLatLonInM(userLat, userLong, locationLat, locationLong) <= radius;
+}
+
+// From https://stackoverflow.com/a/27943
+function getDistanceFromLatLonInM(userLat, userLong, locationLat, locationLong) {
+    var R = 6371; // Radius of the earth in km
+    var dLat = deg2rad(locationLat-userLat);  // deg2rad below
+    var dLon = deg2rad(locationLong-userLong);
+    var a =
+        Math.sin(dLat/2) * Math.sin(dLat/2) +
+        Math.cos(deg2rad(userLat)) * Math.cos(deg2rad(locationLat)) *
+        Math.sin(dLon/2) * Math.sin(dLon/2)
+    ;
+    var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    var d = R * c; // Distance in km
+    return d * 1000; // Convert to m
+}
+
+function deg2rad(deg) {
+    return deg * (Math.PI/180)
+}
+
+
 module.exports = router;
