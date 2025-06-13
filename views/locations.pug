@@ -40,7 +40,7 @@ block content
                                      button(type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteLocationModal" data-bs-location-id= location.id data-bs-location-name= location.name)
                                          i(class="bi bi-trash3-fill")
                                  td()
-                                     button(type="button" class="btn btn-primary"  onclick="previewLocation()" data-bs-location= location)
+                                     button(type="button" class="btn btn-primary"  onclick='previewLocation(' + location.latitude + ',' + location.longitude +')')
                                          i(class="bi bi-eye-fill")
                 button(type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addLocationModal") Add Location&nbsp;
                     i(class="bi bi-geo-alt")
@@ -154,7 +154,7 @@ block content
                     new bootstrap.Tooltip(tooltip);
                 })
 
-                var map = L.map('map').setView([41.737023, -99.587382], 5);
+                let map = L.map('map').setView([41.737023, -99.587382], 5);
                 L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
                     maxZoom: 19,
                     attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
@@ -170,7 +170,6 @@ block content
                     }).addTo(map);
                     var marker = L.marker([location.latitude, location.longitude]).addTo(map);
                     marker.bindPopup(location.name).openPopup();
-
                 }
 
                 let deleteLocationModal = document.getElementById('deleteLocationModal');
@@ -252,9 +251,7 @@ block content
 
                     let formData = new FormData(editLocationForm)
                     let locationID = editLocationModal.getAttribute("data-bs-location-id");
-                    console.log(locationID);
                     formData.append("id",locationID);
-                    console.log(formData);
 
                     let response = await fetch('/locations/editLocation', {
                         method: 'POST',
@@ -293,4 +290,8 @@ block content
                     } else {
                         alert("Submission Error");
                     }
+                }
+
+                function previewLocation(lat, long) {
+                    map.setView([lat, long], 15);
                 }
