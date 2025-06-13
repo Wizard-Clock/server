@@ -51,9 +51,9 @@ router.post('/editLocation', authenticateToken, async function (req, res, next) 
             id: location.id[0],
             name: location.name[0],
             clockPosition: location.clockPosition ?  location.clockPosition[0] : "",
-            latitude: location.latitude[0],
-            longitude: location.longitude[0],
-            radius: location.radius[0],
+            latitude: location.latitude ? location.latitude[0] : "0",
+            longitude: location.longitude ? location.longitude[0] : "0",
+            radius: location.radius ? location.radius[0] : 0,
             description: location.description ? location.description[0] : "",
         }
         await db.updateLocation(locationObj);

@@ -5,7 +5,7 @@ CREATE TABLE IF NOT EXISTS "users" (
     "username" TEXT NOT NULL UNIQUE,
     "hashed_password" BLOB NOT NULL,
     "salt" BLOB NOT NULL,
-    "is_follower" INTEGER DEFAULT 0 NOT NULL
+    "follower" INTEGER DEFAULT 0 NOT NULL
 );
 **
 CREATE TABLE IF NOT EXISTS "roles" (
@@ -42,7 +42,8 @@ CREATE TABLE IF NOT EXISTS "locations" (
        "longitude" TEXT NOT NULL,
        "latitude" TEXT NOT NULL,
        "radius" integer NOT NULL,
-       "description" TEXT
+       "description" TEXT,
+       "isDefault" INTEGER DEFAULT 0 NOT NULL
 );
 **
 CREATE TABLE IF NOT EXISTS "user_location" (
@@ -91,5 +92,10 @@ INSERT OR IGNORE INTO clock_face (id,position) VALUES
        (9,9),
        (10,10),
        (11,11),
-       (12,12),
-       (13,13);
+       (12,12);
+**
+INSERT OR IGNORE INTO locations (id, name, latitude, longitude, radius, description, isDefault) VALUES
+    (1,"Out and About", "0", "0", 0, "Default location", 1);
+**
+INSERT OR IGNORE INTO clock_face (id,position, location_id) VALUES
+    (13, 13, 1);

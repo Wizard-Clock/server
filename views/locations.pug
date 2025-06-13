@@ -21,27 +21,39 @@ block content
                             th(scope="col") Delete
                             th(scope="col") Navigate To
                     tbody()
-                         each location in locations
-                             tr()
-                                 th(scope="row" id="location-id")= location.id
-                                 if location.clockPosition
+                        each location in locations
+                            tr()
+                                th(scope="row" id="location-id")= location.id
+                                if location.clockPosition
                                     td()= location.clockPosition
-                                 else
+                                else
                                     td() NA
-                                 td()= location.name
-                                 td()= location.latitude
-                                 td()= location.longitude
-                                 td()= location.radius
-                                 td()= location.description
-                                 td()
-                                     button(type="button" class="btn btn-light" data-bs-toggle="modal" data-bs-target="#editLocationModal" data-bs-location= location)
-                                         i(class="bi bi-pencil-square")
-                                 td()
-                                     button(type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteLocationModal" data-bs-location-id= location.id data-bs-location-name= location.name)
-                                         i(class="bi bi-trash3-fill")
-                                 td()
-                                     button(type="button" class="btn btn-primary"  onclick='previewLocation(' + location.latitude + ',' + location.longitude +')')
-                                         i(class="bi bi-eye-fill")
+                                td()= location.name
+                                if !location.isDefault
+                                    td()= location.latitude
+                                    td()= location.longitude
+                                    td()= location.radius
+                                    td()= location.description
+                                    td()
+                                        button(type="button" class="btn btn-light" data-bs-toggle="modal" data-bs-target="#editLocationModal" data-bs-location= location)
+                                            i(class="bi bi-pencil-square")
+                                    td()
+                                        button(type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteLocationModal" data-bs-location-id= location.id data-bs-location-name= location.name)
+                                            i(class="bi bi-trash3-fill")
+                                    td()
+                                        button(type="button" class="btn btn-primary"  onclick='previewLocation(' + location.latitude + ',' + location.longitude + ')')
+                                            i(class="bi bi-eye-fill")
+                                else
+                                    td()
+                                    td()
+                                    td()
+                                    td()= location.description
+                                    td()
+                                        button(type="button" class="btn btn-light" data-bs-toggle="modal" data-bs-target="#editLocationModal" data-bs-location= location)
+                                            i(class="bi bi-pencil-square")
+                                    td()
+                                    td()
+
                 button(type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addLocationModal") Add Location&nbsp;
                     i(class="bi bi-geo-alt")
             div()
@@ -82,7 +94,7 @@ block content
                                                 for position in positions
                                                     if position.location_id
                                                     else
-                                                        option()=position.position
+                                                        option(value= position.position)=position.position
                                 div(class="col-md-4")
                                     section()
                                         label(for="latitudeEdit" class="form-label") Latitude&nbsp;
@@ -162,14 +174,16 @@ block content
 
                 let locations = JSON.parse('!{JSON.stringify(locations)}');
                 for (let location of locations) {
-                    L.circle([location.latitude, location.longitude], {
-                        color: 'red',
-                        fillColor: '#f03',
-                        fillOpacity: 0.4,
-                        radius: location.radius
-                    }).addTo(map);
-                    var marker = L.marker([location.latitude, location.longitude]).addTo(map);
-                    marker.bindPopup(location.name).openPopup();
+                    if (!location.isDefault) {
+                        L.circle([location.latitude, location.longitude], {
+                            color: 'red',
+                            fillColor: '#f03',
+                            fillOpacity: 0.4,
+                            radius: location.radius
+                        }).addTo(map);
+                        var marker = L.marker([location.latitude, location.longitude]).addTo(map);
+                        marker.bindPopup(location.name).openPopup();
+                    }
                 }
 
                 let deleteLocationModal = document.getElementById('deleteLocationModal');
@@ -215,7 +229,15 @@ block content
                         document.getElementById('editLocationForm').reset();
                         const button = event.relatedTarget;
                         const location = JSON.parse(button.getAttribute('data-bs-location'));
+
                         editLocationModal.setAttribute("data-bs-location-id", location.id);
+
+                        // Set Enabled based on if Default
+                        editLocationModal.querySelector('.clock-pos').disabled = location.isDefault;
+                        editLocationModal.querySelector('.loc-lat').disabled = location.isDefault;
+                        editLocationModal.querySelector('.loc-long').disabled = location.isDefault;
+                        editLocationModal.querySelector('.loc-rad').disabled = location.isDefault;
+
                         editLocationModal.querySelector('.loc-name').value = location.name;
                         editLocationModal.querySelector('.loc-lat').value = location.latitude;
                         editLocationModal.querySelector('.loc-long').value = location.longitude;
@@ -223,6 +245,7 @@ block content
                         editLocationModal.querySelector('.loc-desc').value = location.description;
 
                         let clock_pos_select = editLocationModal.querySelector('.clock-pos');
+                        $("#clockPosSelectEditInput option[value='13']").remove();
                         if (location.clockPosition) {
                             const options = Object.values(clock_pos_select.options).map(option => option.value);
                             if (!options.includes(location.clockPosition.toString())) {
