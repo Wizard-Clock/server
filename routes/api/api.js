@@ -5,6 +5,10 @@ const db = require("../../handlers/dbHandler");
 const authenticateToken = require("../../handlers/authHandler");
 const passport = require("passport");
 
+router.all('/health', authenticateToken, async function (req, res, next) {
+    return res.status(200).json({ message: 'API up and running.' });
+});
+
 router.post('/login', async function (req, res, next) {
     passport.authenticate('local', (err, user) => {
         if (err || !user) {
@@ -22,15 +26,24 @@ router.post('/login', async function (req, res, next) {
 });
 
 router.post('/updateUserLocation', authenticateToken, async function (req, res, next) {
-    const userID = req.body.userID;
-    const userLoc = req.body.location;
+    const userID = req.userID;
+    const userLoc = JSON.parse(req.body.location);
     const locations = await db.getAllLocations();
 
     for (let loc in locations) {
         if (isUserWithinLocation(userLoc.latitude, userLoc.longitude, loc.latitude, loc.longitude, userLoc.radius)) {
-            await db.updateUserLocation(userID, loc.id);
+            await db.updateUserLocation(userID, loc.id).catch(() =>{
+                return res.status(500);
+            });
+            return res.status(202).json({ message: 'User location updated.' });
         }
     }
+
+    const defaultLocation = await db.getDefaultLocation();
+    await db.updateUserLocation(userID, defaultLocation.id).catch(() =>{
+        return res.status(500);
+    });
+    return res.status(202).json({ message: 'User location updated.' });
 });
 
 function isUserWithinLocation(userLat, userLong, locationLat, locationLong, radius) {

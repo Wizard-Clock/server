@@ -78,20 +78,37 @@ passport.use(new JWTStrategy({
 
 // Middleware to verify JWT
 function authenticateToken(req, res, next) {
-    const authCookie = req.cookies['nargle'];
+    if (req.baseUrl === "/api") {
+        const token = req.headers['authorization'].slice(6).trim();
+        // If there is no token, return an error
+        if(token == null) {
+            return res.status(401).json({ message: 'User not authenticated.' });
+        }
 
-    // If there is no cookie, return an error
-    if(authCookie == null)  return res.redirect("/login");
+        jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
+            // If there is an error, return an error
+            if(err) return res.status(401).json({ message: 'User not authenticated.' });
 
-    // If there is a cookie, verify it
-    jwt.verify(authCookie, process.env.JWT_SECRET, (err, user) => {
-        // If there is an error, return an error
-        if(err) return res.redirect("/login")
+            // If there is no error, continue the execution
+            req.userID = user;
+            next();
+        })
+    } else {
+        const authCookie = req.cookies['nargle'];
+        // If there is no cookie, return an error
+        if(authCookie == null) {
+            return res.redirect("/login");
+        }
 
-        // If there is no error, continue the execution
-        req.userID = user;
-        next();
-    })
+        jwt.verify(authCookie, process.env.JWT_SECRET, (err, user) => {
+            // If there is an error, return an error
+            if(err) return res.redirect("/login");
+
+            // If there is no error, continue the execution
+            req.userID = user;
+            next();
+        })
+    }
 }
 
 module.exports = authenticateToken;

@@ -29,7 +29,7 @@ app.use('/', require('./routes/auth'));
 app.use('/wizards', require('./routes/smt/wizards'));
 app.use('/locations', require('./routes/smt/locations'));
 app.use('/clock', require('./routes/smt/clock'));
-app.use('/api', require('./routes/api/index'));
+app.use('/api', require('./routes/api/api'));
 
 app.use(logger('dev'));
 app.use(express.json());

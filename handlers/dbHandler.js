@@ -37,6 +37,7 @@ sqlite_inst.serialize(() => {
         crypto.pbkdf2Sync('admin', salt, 310000, 32, 'sha256'),
         salt
     ]);
+    sqlite_inst.run(`INSERT INTO user_location (user_id, location_id) VALUES (1, 1)`);
     salt = crypto.randomBytes(16);
     sqlite_inst.run(`INSERT OR IGNORE INTO users (id,username, hashed_password, salt) VALUES (?, ?, ?, ?)`, [
         2,
@@ -44,6 +45,7 @@ sqlite_inst.serialize(() => {
         crypto.pbkdf2Sync('user', salt, 310000, 32, 'sha256'),
         salt
     ]);
+    sqlite_inst.run(`INSERT INTO user_location (user_id, location_id) VALUES (2, 1)`);
     sqlite_inst.run(`INSERT OR IGNORE INTO user_roles (user_id, role_id) VALUES(1,1)`);
     sqlite_inst.run(`INSERT OR IGNORE INTO user_roles (user_id, role_id) VALUES(2,2)`);
     sqlite_inst.run("COMMIT");
@@ -82,14 +84,13 @@ async function addUser(username, password, role) {
     let userID, roleID;
     await getUserFromName(username).then(value => userID = value.id);
     await getRoleFromRoleName(role).then(value => roleID = value.id);
-    return await new Promise((resolve, reject) => {
-        sqlite_inst.run(`INSERT OR IGNORE INTO user_roles (user_id, role_id) VALUES(?, ?)`, [userID, roleID], (err, rows) => {
-            if (err)
-                reject(err);
-            else
-                resolve(rows);
-        });
-    })
+    await sqlite_inst.run(`INSERT OR IGNORE INTO user_roles (user_id, role_id) VALUES(?, ?)`, [
+        userID,
+        roleID
+    ]);
+
+    const defaultLocation = await getDefaultLocation();
+    await updateUserLocation(userID, defaultLocation.id);
 }
 
 async function deleteUser(userID) {
@@ -195,6 +196,17 @@ async function getLocationFromID(locationID) {
 async function getLocationFromName(locationName) {
     return await new Promise((resolve, reject) => {
         sqlite_inst.all('SELECT * FROM locations WHERE name=?', locationName, (err, rows) => {
+            if (err)
+                reject(err);
+            else
+                resolve(rows[0]);
+        });
+    });
+}
+
+async function getDefaultLocation() {
+    return await new Promise((resolve, reject) => {
+        sqlite_inst.all('SELECT * FROM locations WHERE isDefault=1', (err, rows) => {
             if (err)
                 reject(err);
             else
@@ -337,6 +349,7 @@ module.exports = {
     getRoleFromUserID,
     getAllRoles,
     getLocationFromID,
+    getDefaultLocation,
     getAllLocations,
     addLocation,
     updateLocation,
