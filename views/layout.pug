@@ -16,7 +16,7 @@ html
   body()
     div(class="navbar navbar-expand-sm bg-light navbar-light")
       div(class="container-fluid")
-        a(class="navbar-brand" href="#")
+        a(class="navbar-brand" href="/clock")
           img(src="/public/images/wc-high-resolution-logo-transparent.svg" width="65px" height="65px" alt="small transparent logo")
         button(class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#collapsibleNavbar")
           span(class="navbar-toggler-icon")
@@ -24,18 +24,17 @@ html
           ul(class="navbar-nav")
             li(class="nav-item")
               a(class="nav-link brand_font" href="/clock") Clock
-            li(class="nav-item")
-              a(class="nav-link brand_font" href="/wizards") Wizards
-            li(class="nav-item")
-              a(class="nav-link brand_font" href="/locations") Locations
+            if role === "admin"
+              li(class="nav-item")
+                a(class="nav-link brand_font" href="/wizards") Wizards
+              li(class="nav-item")
+                a(class="nav-link brand_font" href="/locations") Locations
             li(class="nav-item dropdown")
               a(class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown") #{username}
               ul(class="dropdown-menu")
                 if role === "admin"
                   li()
                     a(class="dropdown-item brand_font" href="#") Server Settings
-                li()
-                  a(class="dropdown-item brand_font" href="#") Account Settings
                 li()
                   a(class="dropdown-item brand_font" href="#" onclick="document.forms[\"logoutForm\"].submit();") Logout
                   form(name='logoutForm' action='/logout' method='post')

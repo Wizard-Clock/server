@@ -11,8 +11,11 @@ const LONGITUDE_REGEX = "^(\\+|-)?(?:180(?:(?:\\.0{1,6})?)|(?:[0-9]|[1-9][0-9]|1
 * */
 
 router.get('/', authenticateToken, async function (req, res, next) {
-    const user = await db.getUserFromID(req.userID);
     const userRole = await db.getRoleFromUserID(req.userID);
+    if (userRole.role !== "admin") {
+        return res.redirect("/clock");
+    }
+    const user = await db.getUserFromID(req.userID);
     let locations = await db.getAllLocations();
     for (let location of locations) {
         const clockPosition = await db.getClockPositionFromLocationID(location.id);
