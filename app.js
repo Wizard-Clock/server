@@ -64,7 +64,7 @@ app.use(function(err, req, res, next) {
 module.exports = app;
 
 const httpServer = app.listen(process.env.PORT, () => {
-  console.log(`Example app listening on port ${process.env.PORT}`)
+  console.log(`Server listening on port ${process.env.PORT}`)
 });
 httpServer.on('upgrade', (req, socket, head) => {
   wsServer.handleUpgrade(req, socket, head, (ws) => {

@@ -1,6 +1,9 @@
 {
-  "name": "server",
+  "name": "wizarding-clock-server",
   "version": "0.0.0",
+  "author": "Andrew Feely <feelydevelopment@gmail.com>",
+  "license": "AGPL-3.0",
+  "main": "app.js",
   "private": true,
   "scripts": {
     "start": "node ./bin/www"

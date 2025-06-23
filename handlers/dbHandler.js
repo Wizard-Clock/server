@@ -48,6 +48,13 @@ sqlite_inst.serialize(() => {
     sqlite_inst.run(`INSERT INTO user_location (user_id, location_id) VALUES (2, 1)`);
     sqlite_inst.run(`INSERT OR IGNORE INTO user_roles (user_id, role_id) VALUES(1,1)`);
     sqlite_inst.run(`INSERT OR IGNORE INTO user_roles (user_id, role_id) VALUES(2,2)`);
+    sqlite_inst.run(`INSERT OR IGNORE INTO locations (name, latitude, longitude, radius, description) VALUES (?, ?, ?, ?, ?)`, [
+        "The Burrow",
+        "41.221007",
+        "-96.627713",
+        100,
+        "The home of the creator.",
+    ]);
     sqlite_inst.run("COMMIT");
 });
 

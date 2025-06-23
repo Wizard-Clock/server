@@ -1,0 +1,11 @@
+# Nodejs
+node_modules
+npm-debug.log
+
+# Docker
+Dockerfile
+.dockerignore
+
+# Git
+.gitignore
+.git
