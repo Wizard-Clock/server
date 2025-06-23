@@ -92,9 +92,8 @@ block content
                                         select(id="clockPosSelectEditInput" class="form-select clock-pos" name="clockPosition")
                                             option(selected value="") None
                                                 for position in positions
-                                                    if position.location_id
-                                                    else
-                                                        option(value= position.position)=position.position
+                                                    if position.face_position !== 13
+                                                        option(value= position.face_position)=position.face_position
                                 div(class="col-md-4")
                                     section()
                                         label(for="latitudeEdit" class="form-label") Latitude&nbsp;
@@ -136,9 +135,8 @@ block content
                                         select(id="clockPosSelectInput" class="form-select" name="clockPosition")
                                             option(selected value="") None
                                             for position in positions
-                                                if position.location_id
-                                                else
-                                                    option(value= position.position)=position.position
+                                                if position.face_position !== 13
+                                                    option(value= position.face_position)=position.face_position
                                 div(class="col-md-4")
                                     section()
                                         label(for="latitudeAdd" class="form-label") Latitude&nbsp;
@@ -244,17 +242,8 @@ block content
                         editLocationModal.querySelector('.loc-rad').value = location.radius;
                         editLocationModal.querySelector('.loc-desc').value = location.description;
 
-                        let clock_pos_select = editLocationModal.querySelector('.clock-pos');
-                        $("#clockPosSelectEditInput option[value='13']").remove();
                         if (location.clockPosition) {
-                            const options = Object.values(clock_pos_select.options).map(option => option.value);
-                            if (!options.includes(location.clockPosition.toString())) {
-                                clock_pos_select.add(new Option(location.clockPosition, location.clockPosition));
-                                $("#clockPosSelectEditInput").html($('#clockPosSelectEditInput option').sort(function (x, y) {
-                                    return parseInt($(x).text()) < parseInt($(y).text()) ? -1 : 1;
-                                }));
-                            }
-                            clock_pos_select.value = location.clockPosition;
+                            editLocationModal.querySelector('.clock-pos').value = location.clockPosition;
                         }
                     });
                 }

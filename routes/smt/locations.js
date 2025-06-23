@@ -17,7 +17,7 @@ router.get('/', authenticateToken, async function (req, res, next) {
     for (let location of locations) {
         const clockPosition = await db.getClockPositionFromLocationID(location.id);
         if (clockPosition) {
-            location.clockPosition = clockPosition.position;
+            location.clockPosition = clockPosition.position_id;
         }
     }
     res.render('locations', {

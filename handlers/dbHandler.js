@@ -51,28 +51,7 @@ sqlite_inst.serialize(() => {
     sqlite_inst.run("COMMIT");
 });
 
-async function getUserFromID(user_id) {
-    return await new Promise((resolve, reject) => {
-        sqlite_inst.all('SELECT * FROM users WHERE id=?', user_id, (err, rows) => {
-            if (err)
-                reject(err);
-            else
-                resolve(rows[0]);
-        });
-    });
-}
-
-async function getUserFromName(name) {
-    return await new Promise((resolve, reject) => {
-        sqlite_inst.all('SELECT * FROM users WHERE username=?', name, (err, rows) => {
-            if (err)
-                reject(err);
-            else
-                resolve(rows[0]);
-        });
-    });
-}
-
+// User Management
 async function addUser(username, password, role) {
     let salt = crypto.randomBytes(16);
     await sqlite_inst.run(`INSERT INTO users (username, hashed_password, salt) VALUES (?, ?, ?)`, [
@@ -93,28 +72,16 @@ async function addUser(username, password, role) {
     await updateUserLocation(userID, defaultLocation.id);
 }
 
-async function deleteUser(userID) {
-    await sqlite_inst.run(`DELETE FROM user_roles WHERE user_id=?`, userID, (err, rows) => {});
-    return await new Promise((resolve, reject) => {
-        sqlite_inst.run(`DELETE FROM users WHERE id=?`, userID, (err, rows) => {
-            if (err)
-                reject(err);
-            else
-                resolve(rows);
-        });
-    });
-}
-
 async function updateUser(user) {
     const oldUser = await getUserFromID(user.id);
 
     if (oldUser.username !== user.username) {
-        sqlite_inst.run(`UPDATE users SET username=? WHERE id=?`, [user.username, user.id], (err, rows) => {})
+        await sqlite_inst.run(`UPDATE users SET username=? WHERE id=?`, [user.username, user.id], (err, rows) => {})
     }
 
     if (user.password !== "") {
         let salt = crypto.randomBytes(16);
-        sqlite_inst.run(`UPDATE users SET hashed_password=?, salt=? WHERE id=?`, [
+        await sqlite_inst.run(`UPDATE users SET hashed_password=?, salt=? WHERE id=?`, [
             crypto.pbkdf2Sync(user.password, salt, 310000, 32, 'sha256'),
             salt,
             user.id
@@ -138,9 +105,55 @@ async function updateUser(user) {
 
 }
 
+async function deleteUser(userID) {
+    await sqlite_inst.run(`DELETE FROM user_roles WHERE user_id=?`, userID, (err, rows) => {});
+    return await new Promise((resolve, reject) => {
+        sqlite_inst.run(`DELETE FROM users WHERE id=?`, userID, (err, rows) => {
+            if (err)
+                reject(err);
+            else
+                resolve(rows);
+        });
+    });
+}
+
 async function getAllUsers() {
     return await new Promise((resolve, reject) => {
         sqlite_inst.all('SELECT * FROM users', (err, rows) => {
+            if (err)
+                reject(err);
+            else
+                resolve(rows);
+        });
+    });
+}
+
+async function getUserFromID(user_id) {
+    return await new Promise((resolve, reject) => {
+        sqlite_inst.all('SELECT * FROM users WHERE id=?', user_id, (err, rows) => {
+            if (err)
+                reject(err);
+            else
+                resolve(rows[0]);
+        });
+    });
+}
+
+async function getUserFromName(name) {
+    return await new Promise((resolve, reject) => {
+        sqlite_inst.all('SELECT * FROM users WHERE username=?', name, (err, rows) => {
+            if (err)
+                reject(err);
+            else
+                resolve(rows[0]);
+        });
+    });
+}
+
+// Role Management
+async function getAllRoles() {
+    return await new Promise((resolve, reject) => {
+        sqlite_inst.all('SELECT * FROM roles', (err, rows) => {
             if (err)
                 reject(err);
             else
@@ -171,9 +184,56 @@ async function getRoleFromRoleName(roleName) {
     });
 }
 
-async function getAllRoles() {
+// Location Management
+async function addLocation(location) {
+    await sqlite_inst.run(`INSERT INTO locations (name, latitude, longitude, radius, description) VALUES (?, ?, ?, ?, ?)`, [
+        location.name,
+        location.latitude,
+        location.longitude,
+        location.radius,
+        location.description,
+    ]);
+
+    if (location.clockPosition) {
+        let locationID;
+        await getLocationFromName(location.name).then(value => locationID = value.id);
+        return updatePositionLocations(location.clockPosition, locationID);
+    }
+}
+
+async function updateLocation(location) {
+    await sqlite_inst.run(`UPDATE locations SET name=?, latitude=?, longitude=?, radius=?, description=? WHERE id=?`, [
+        location.name,
+        location.latitude,
+        location.longitude,
+        location.radius,
+        location.description,
+        location.id
+    ]);
+
+    if (location.clockPosition) {
+        return updatePositionLocations(location.clockPosition, location.id);
+    } else {
+        return await removeLocationFromPosition(location.id);
+    }
+}
+
+async function deleteLocation(locationID) {
+    await removeLocationFromPosition(locationID);
+
     return await new Promise((resolve, reject) => {
-        sqlite_inst.all('SELECT * FROM roles', (err, rows) => {
+        sqlite_inst.run(`DELETE FROM locations WHERE id=?`, locationID, (err, rows) => {
+            if (err)
+                reject(err);
+            else
+                resolve(rows);
+        });
+    });
+}
+
+async function getAllLocations() {
+    return await new Promise((resolve, reject) => {
+        sqlite_inst.all('SELECT * FROM locations', (err, rows) => {
             if (err)
                 reject(err);
             else
@@ -215,87 +275,18 @@ async function getDefaultLocation() {
     });
 }
 
-async function getAllLocations() {
+// Clock Face Management
+async function updatePositionLocations(position, locationID) {
     return await new Promise((resolve, reject) => {
-        sqlite_inst.all('SELECT * FROM locations', (err, rows) => {
+        sqlite_inst.all(`INSERT INTO position_locations (location_id, position_id) VALUES (?, ?) ON CONFLICT(location_id) DO UPDATE SET position_id=?`,[
+            locationID,
+            position,
+            position
+        ], (err, rows) => {
             if (err)
                 reject(err);
             else
                 resolve(rows);
-        });
-    });
-}
-
-async function addLocation(location) {
-    await sqlite_inst.run(`INSERT INTO locations (name, latitude, longitude, radius, description) VALUES (?, ?, ?, ?, ?)`, [
-        location.name,
-        location.latitude,
-        location.longitude,
-        location.radius,
-        location.description,
-    ]);
-
-    if (location.clockPosition) {
-        let locationID;
-        await getLocationFromName(location.name).then(value => locationID = value.id);
-        return updateClockPositionWithLocation(location.clockPosition, locationID);
-    }
-}
-
-async function updateLocation(location) {
-    await sqlite_inst.run(`UPDATE locations SET name=?, latitude=?, longitude=?, radius=?, description=? WHERE id=?`, [
-        location.name,
-        location.latitude,
-        location.longitude,
-        location.radius,
-        location.description,
-        location.id
-    ]);
-
-    if (location.clockPosition) {
-        return updateClockPositionWithLocation(location.clockPosition, location.id);
-    } else {
-        let position = await getClockPositionFromLocationID(location.id);
-        if (position) {
-            return await deleteLocationFromClockPosition(position.id);
-        }
-    }
-}
-
-async function deleteLocation(locationID) {
-
-    let position = await getClockPositionFromLocationID(locationID);
-    if (position) {
-        await deleteLocationFromClockPosition(position.id);
-    }
-    return await new Promise((resolve, reject) => {
-        sqlite_inst.run(`DELETE FROM locations WHERE id=?`, locationID, (err, rows) => {
-            if (err)
-                reject(err);
-            else
-                resolve(rows);
-        });
-    });
-}
-
-async function deleteLocationFromClockPosition(positionID) {
-    return await new Promise((resolve, reject) => {
-        sqlite_inst.run(`UPDATE clock_face SET location_id=NULL WHERE position=?`,  positionID, (err, rows) => {
-            if (err)
-                reject(err);
-            else
-                resolve(rows);
-        });
-    })
-}
-
-async function getClockPositionFromLocationID(locationID) {
-    return await new Promise((resolve, reject) => {
-        sqlite_inst.all('SELECT * FROM clock_face WHERE location_id=?', locationID, (err, rows) => {
-            if (err)
-                reject(err);
-            else
-                resolve(rows[0]);
         });
     });
 }
@@ -311,12 +302,21 @@ async function getAllClockPositions() {
     });
 }
 
-async function updateClockPositionWithLocation(position, locationID) {
+async function getClockPositionFromLocationID(locationID) {
     return await new Promise((resolve, reject) => {
-        sqlite_inst.all(`UPDATE clock_face SET location_id=? WHERE position=?`,[
-            locationID,
-            position
-        ], (err, rows) => {
+        sqlite_inst.all('SELECT position_id FROM position_locations WHERE location_id=?', locationID, (err, rows) => {
+            if (err)
+                reject(err);
+            else
+                resolve(rows[0]);
+        });
+    });
+}
+
+// Misc Functions
+async function removeLocationFromPosition(locationID) {
+    return await new Promise((resolve, reject) => {
+        sqlite_inst.run(`DELETE FROM position_locations WHERE location_id=?`, locationID, (err, rows) => {
             if (err)
                 reject(err);
             else
@@ -341,14 +341,13 @@ async function updateUserLocation(userID, locationID) {
 
 
 module.exports = {
-    getUserFromID,
     addUser,
-    deleteUser,
     updateUser,
+    deleteUser,
     getAllUsers,
+    getUserFromID,
     getRoleFromUserID,
     getAllRoles,
-    getLocationFromID,
     getDefaultLocation,
     getAllLocations,
     addLocation,
