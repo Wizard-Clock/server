@@ -7,7 +7,7 @@ const authenticateToken = require("../../handlers/authHandler");
 router.get('/', authenticateToken, async function (req, res, next) {
     const user = await db.getUserFromID(req.userID);
     const userRole = await db.getRoleFromUserID(req.userID);
-    res.render('index', {title: 'Clock', username: user.username, role: userRole.role});
+    res.render('clock', {title: 'Clock', username: user.username, role: userRole.role});
 });
 
 module.exports = router;
