@@ -27,11 +27,11 @@ router.post('/login', async function (req, res, next) {
 
 router.post('/updateUserLocation', authenticateToken, async function (req, res, next) {
     const userID = req.userID;
-    const userLoc = JSON.parse(req.body.location);
+    const userLoc = req.body.location;
     const locations = await db.getAllLocations();
 
-    for (let loc in locations) {
-        if (isUserWithinLocation(userLoc.latitude, userLoc.longitude, loc.latitude, loc.longitude, userLoc.radius)) {
+    for (let location of locations) {
+        if (isUserWithinLocation(userLoc.latitude, userLoc.longitude, location.latitude, location.longitude, location.radius)) {
             await db.updateUserLocation(userID, loc.id).catch(() =>{
                 return res.status(500);
             });
