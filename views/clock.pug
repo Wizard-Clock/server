@@ -3,4 +3,101 @@ extends layout
 block content
     div(class="row justify-content-center")
         div(class="d-flex justify-content-center align-items-center")
-            img(src="/public/images/wizarding-clock-face.jpg" class="img-fluid" alt="Wizarding Clock Face")
+            canvas(id="wizardingClockFace" class="img-fluid" width="871" height="846")
+
+    script.
+        const canvas = document.getElementById('wizardingClockFace');
+        const ctx = canvas.getContext('2d');
+        let positionNameList = JSON.parse('!{JSON.stringify(positionNames)}');
+
+        // Add image to Canvas
+        const img = new Image();
+        img.crossOrigin = 'anonymous';
+        img.src = '/public/images/wizarding-clock-face.jpg';
+        img.alt = "Wizarding Clock Face";
+        img.onload = function () {
+            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+            ctx.translate(canvas.width/2, canvas.height/2);
+            drawNumbers(ctx, (canvas.height-93)/2, positionNameList)
+        };
+
+
+        // Much help from https://github.com/malcolmrigg/wizard-clock-card/tree/master
+        async function drawNumbers(ctx, radius, positions) {
+            let ang;
+            let num;
+            this.selectedFont = 'Aboreto';
+            this.fontScale = 0.3;
+
+            ctx.font = radius*0.15*this.fontScale + "px " + this.selectedFont;
+            ctx.textBaseline = "middle";
+            ctx.textAlign = "center";
+            // ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--primary-text-color');
+            ctx.fillStyle = 'black';
+
+            for (num = 0; num < positions.length; num++) {
+                ang = (num +1) * Math.PI / positions.length * 2;
+                // rotate to center of drawing position
+                ctx.rotate(ang);
+
+                let startAngle = 0;
+                let inwardFacing = true;
+                let kerning = 0; // can adjust kerning using this - maybe automatically adjust it based on text length?
+                let text = positions[num].split("").reverse().join("");
+
+                // This lets bottom position names face right way up if wanted
+                // if (ang > Math.PI / 2 && ang < ((Math.PI * 2) - (Math.PI / 2))) {
+                //     startAngle = Math.PI;
+                //     inwardFacing = false;
+                //     text = positions[num];
+                // }
+
+                text = this.isRtlLanguage(text) ? text.split("").reverse().join("") : text;
+
+                // calculate height of the font. Many ways to do this - you can replace with your own!
+                const div = document.createElement("div");
+                div.innerHTML = text;
+                div.style.position = 'absolute';
+                div.style.top = '-10000px';
+                div.style.left = '-10000px';
+                div.style.fontFamily = this.selectedFont;
+                div.style.fontSize = radius * 0.15 * this.fontScale + "px";
+                document.body.appendChild(div);
+                const textHeight = div.offsetHeight;
+                document.body.removeChild(div);
+
+                // rotate 50% of total angle for center alignment
+                for (let j = 0; j < text.length; j++) {
+                    let charWid = ctx.measureText(text[j]).width;
+                    startAngle += ((charWid + (j == text.length - 1 ? 0 : kerning)) / (radius - textHeight)) / 2;
+                }
+
+                // Phew... now rotate into final start position
+                ctx.rotate(startAngle);
+
+                // Now for the fun bit: draw, rotate, and repeat
+                for (let j = 0; j < text.length; j++) {
+                    let charWid = ctx.measureText(text[j]).width; // half letter
+                    // rotate half letter
+                    ctx.rotate((charWid / 2) / (radius - textHeight) * -1);
+                    // draw the character at "top" or "bottom"
+                    // depending on inward or outward facing
+                    ctx.fillText(text[j], 0, (inwardFacing ? 1 : -1) * (0 - radius + textHeight));
+
+                    ctx.rotate((charWid / 2 + kerning) / (radius - textHeight) * -1); // rotate half letter
+                }
+                // rotate back round from the end position to the central position of the text
+                ctx.rotate(startAngle);
+
+                // rotate to the next location
+                ctx.rotate(-ang);
+            }
+        }
+
+        function isRtlLanguage(text) {
+            const rtlChar = /[\u0590-\u05FF\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]/;
+            return rtlChar.test(text);
+        }
+
+
+
