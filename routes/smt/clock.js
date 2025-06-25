@@ -7,18 +7,19 @@ const authenticateToken = require("../../handlers/authHandler");
 router.get('/', authenticateToken, async function (req, res, next) {
     const user = await db.getUserFromID(req.userID);
     const userRole = await db.getRoleFromUserID(req.userID);
+
+    // Get all Clock Face Postions + Name;
     const clockPositions = await db.getAllClockPositions();
 
-    const positionNames = [];
-    for (let position of clockPositions) {
-        positionNames.push(position.name);
-    }
+    // Get all User Locations on Clock
+    const usersClockPosition= await db.getAllUsersClockFacePositions();
 
     res.render('clock', {
         title: 'Clock',
         username: user.username,
         role: userRole.role,
-        positionNames: positionNames});
+        clockPositions: clockPositions,
+        usersClockPosition:usersClockPosition});
 });
 
 module.exports = router;

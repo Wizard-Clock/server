@@ -88,7 +88,7 @@ INSERT OR IGNORE INTO roles (id,role, description) VALUES
        (3,'child', 'Only can be attached or set.');
 **
 INSERT OR IGNORE INTO clock_face (id,face_position, name) VALUES
-       (1,1, 'Position 1'),
+       (1,1, 'Lost'),
        (2,2, 'Position 2'),
        (3,3, 'Position 3'),
        (4,4, 'Position 4'),

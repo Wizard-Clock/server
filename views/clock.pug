@@ -8,7 +8,12 @@ block content
     script.
         const canvas = document.getElementById('wizardingClockFace');
         const ctx = canvas.getContext('2d');
-        let positionNameList = JSON.parse('!{JSON.stringify(positionNames)}');
+        let clockPositions = JSON.parse('!{JSON.stringify(clockPositions)}');
+        console.log(clockPositions);
+        let usersClockPosition = JSON.parse('!{JSON.stringify(usersClockPosition)}');
+        const currentState = [];
+        const selectedFont = 'Aboreto';
+        const fontScale = 0.3;
 
         // Add image to Canvas
         const img = new Image();
@@ -18,7 +23,8 @@ block content
         img.onload = function () {
             ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
             ctx.translate(canvas.width/2, canvas.height/2);
-            drawNumbers(ctx, (canvas.height-93)/2, positionNameList)
+            drawNumbers(ctx, (canvas.height-93)/2, clockPositions);
+            drawTime(ctx, (canvas.height-93)/2, clockPositions, usersClockPosition);
         };
 
 
@@ -26,10 +32,8 @@ block content
         async function drawNumbers(ctx, radius, positions) {
             let ang;
             let num;
-            this.selectedFont = 'Aboreto';
-            this.fontScale = 0.3;
 
-            ctx.font = radius*0.15*this.fontScale + "px " + this.selectedFont;
+            ctx.font = radius*0.15*fontScale + "px " + selectedFont;
             ctx.textBaseline = "middle";
             ctx.textAlign = "center";
             // ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--primary-text-color');
@@ -43,7 +47,7 @@ block content
                 let startAngle = 0;
                 let inwardFacing = true;
                 let kerning = 0; // can adjust kerning using this - maybe automatically adjust it based on text length?
-                let text = positions[num].split("").reverse().join("");
+                let text = positions[num].name.split("").reverse().join("");
 
                 // This lets bottom position names face right way up if wanted
                 // if (ang > Math.PI / 2 && ang < ((Math.PI * 2) - (Math.PI / 2))) {
@@ -60,8 +64,8 @@ block content
                 div.style.position = 'absolute';
                 div.style.top = '-10000px';
                 div.style.left = '-10000px';
-                div.style.fontFamily = this.selectedFont;
-                div.style.fontSize = radius * 0.15 * this.fontScale + "px";
+                div.style.fontFamily = selectedFont;
+                div.style.fontSize = radius * 0.15 * fontScale + "px";
                 document.body.appendChild(div);
                 const textHeight = div.offsetHeight;
                 document.body.removeChild(div);
@@ -97,6 +101,82 @@ block content
         function isRtlLanguage(text) {
             const rtlChar = /[\u0590-\u05FF\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]/;
             return rtlChar.test(text);
+        }
+
+        async function drawTime(ctx, radius, locations, wizardClockPositions){
+            const targetState = [];
+            for (let num = 0; num < wizardClockPositions.length; num++) {
+                const wizardClockPosition = wizardClockPositions[num];
+                const wizardOffset = ((num - ((wizardClockPositions.length - 1) / 2)) / wizardClockPositions.length * 0.6);
+                let location = wizardOffset;
+                for (let loc of locations) {
+                    if (loc.name === wizardClockPosition.position.name) {
+                        location = wizardOffset + loc.face_position;
+                    }
+                }
+                location = location * Math.PI / locations.length * 2;
+
+                // set targetstate
+                targetState.push({
+                    pos: location,
+                    length: radius * 0.7,
+                    width: radius * 0.05,
+                    wizard: wizardClockPositions[num].name,
+                });
+            }
+
+            // update currentstate from targetstate
+            if (!currentState) {
+                currentState.length = 0;
+            }
+            for (let num = 0; num < wizardClockPositions.length; num++) {
+                if (currentState[num]) {
+                    currentState[num].pos = currentState[num].pos + ((targetState[num].pos - currentState[num].pos) / 60);
+                } else {
+                    currentState.push({
+                        pos: targetState[num].pos,
+                        length: targetState[num].length,
+                        width: targetState[num].width,
+                        wizard: targetState[num].wizard
+                    });
+                }
+            }
+            // draw currentState
+            for (let num = 0; num < wizardClockPositions.length; num++) {
+                this.drawHand(ctx, currentState[num].pos, currentState[num].length, currentState[num].width, currentState[num].wizard);
+            }
+        }
+
+        function drawHand(ctx, pos, length, width, wizard) {
+            ctx.beginPath();
+            ctx.lineWidth = width;
+            ctx.fillStyle = "black";
+            ctx.shadowColor = "#0008";
+            ctx.shadowBlur = 10;
+            ctx.shadowOffsetX = 5;
+            ctx.shadowOffsetY = 5;
+            ctx.moveTo(0, 0);
+            ctx.rotate(pos);
+            ctx.quadraticCurveTo(width, -length * 0.5, width, -length * 0.75);
+            ctx.quadraticCurveTo(width * 0.2, -length * 0.8, 0, -length);
+            ctx.quadraticCurveTo(-width * 0.2, -length * 0.8, -width, -length * 0.75);
+            ctx.quadraticCurveTo(-width, -length * 0.5, 0, 0);
+
+            ctx.fill();
+
+            ctx.font = width * 3 * fontScale + "px " + selectedFont;
+            ctx.fillStyle = "white";
+            ctx.translate(0, -length / 2);
+            ctx.rotate(Math.PI / 2)
+            if (pos < Math.PI && pos >= 0)
+                ctx.rotate(Math.PI);
+            ctx.fillText(wizard, 0, 0);
+            if (pos < Math.PI && pos >= 0)
+                ctx.rotate(-Math.PI);
+            ctx.rotate(-Math.PI / 2);
+            ctx.translate(0, length / 2);
+
+            ctx.rotate(-pos);
         }
 
 
