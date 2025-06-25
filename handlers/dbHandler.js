@@ -356,12 +356,10 @@ async function getClockPositionFromUserID(user_id) {
 }
 
 async function getClockPositionFromLocationID(locationID) {
-    let positionID;
-    sqlite_inst.all('SELECT position_id FROM position_locations WHERE location_id=?', locationID, (err, rows) => {
-        positionID = rows[0];
-    });
+    let position = await getPositionLocationFromLocationID(locationID);
+
     return await new Promise((resolve, reject) => {
-        sqlite_inst.all('SELECT face_position FROM clock_face WHERE id=?', positionID, (err, rows) => {
+        sqlite_inst.all('SELECT * FROM clock_face WHERE id=?', position.position_id, (err, rows) => {
             if (err)
                 reject(err);
             else
