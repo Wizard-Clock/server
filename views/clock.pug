@@ -12,7 +12,6 @@ block content
         let usersClockPosition = JSON.parse('!{JSON.stringify(usersClockPosition)}');
         const currentState = [];
         const selectedFont = 'Aboreto';
-        const fontScale = 0.3;
 
         // Add image to Canvas
         const img = new Image();
@@ -28,32 +27,18 @@ block content
 
         // Much help from https://github.com/malcolmrigg/wizard-clock-card/tree/master
         async function drawNumbers(ctx, radius, positions) {
-            let ang;
-            let num;
-
+            let fontScale = 0.3;
             ctx.font = "bold " + radius*0.15*fontScale + "px " + selectedFont;
             ctx.textBaseline = "middle";
             ctx.textAlign = "center";
             ctx.fillStyle = 'black';
 
-            for (num = 0; num < positions.length; num++) {
-                ang = (num +1) * Math.PI / positions.length * 2;
+            for (let num = 0; num < positions.length; num++) {
+                let ang = (num +1) * Math.PI / positions.length * 2;
                 // rotate to center of drawing position
                 ctx.rotate(ang);
 
-                let startAngle = 0;
-                let inwardFacing = true;
-                let kerning = 0; // can adjust kerning using this - maybe automatically adjust it based on text length?
                 let text = positions[num].name.split("").reverse().join("");
-
-                // This lets bottom position names face right way up if wanted
-                // if (ang > Math.PI / 2 && ang < ((Math.PI * 2) - (Math.PI / 2))) {
-                //     startAngle = Math.PI;
-                //     inwardFacing = false;
-                //     text = positions[num];
-                // }
-
-                text = this.isRtlLanguage(text) ? text.split("").reverse().join("") : text;
 
                 // calculate height of the font. Many ways to do this - you can replace with your own!
                 const div = document.createElement("div");
@@ -67,10 +52,12 @@ block content
                 const textHeight = div.offsetHeight;
                 document.body.removeChild(div);
 
+
                 // rotate 50% of total angle for center alignment
+                let startAngle = 0;
                 for (let j = 0; j < text.length; j++) {
                     let charWid = ctx.measureText(text[j]).width;
-                    startAngle += ((charWid + (j == text.length - 1 ? 0 : kerning)) / (radius - textHeight)) / 2;
+                    startAngle += ((charWid) / (radius - textHeight)) / 2;
                 }
 
                 // Phew... now rotate into final start position
@@ -83,9 +70,9 @@ block content
                     ctx.rotate((charWid / 2) / (radius - textHeight) * -1);
                     // draw the character at "top" or "bottom"
                     // depending on inward or outward facing
-                    ctx.fillText(text[j], 0, (inwardFacing ? 1 : -1) * (0 - radius + textHeight));
+                    ctx.fillText(text[j], 0, (0 - radius + textHeight));
 
-                    ctx.rotate((charWid / 2 + kerning) / (radius - textHeight) * -1); // rotate half letter
+                    ctx.rotate((charWid / 2) / (radius - textHeight) * -1); // rotate half letter
                 }
                 // rotate back round from the end position to the central position of the text
                 ctx.rotate(startAngle);
@@ -93,11 +80,6 @@ block content
                 // rotate to the next location
                 ctx.rotate(-ang);
             }
-        }
-
-        function isRtlLanguage(text) {
-            const rtlChar = /[\u0590-\u05FF\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]/;
-            return rtlChar.test(text);
         }
 
         async function drawTime(ctx, radius, locations, wizardClockPositions){
@@ -145,6 +127,7 @@ block content
         }
 
         function drawHand(ctx, pos, length, width, wizard) {
+            let fontScale = 0.3;
             const scissorObj = new Image();
             scissorObj.src = '/public/images/half-scissor-outline.png';
             scissorObj.alt = "Clock Hand";
