@@ -2,14 +2,13 @@ extends layout
 
 block content
     div(class="row justify-content-center")
-        div(class="d-flex justify-content-center align-items-center")
+        div(class="d-flex justify-content-center align-items-center" id="clockDiv")
             canvas(id="wizardingClockFace" class="img-fluid" width="871" height="846")
 
     script.
         const canvas = document.getElementById('wizardingClockFace');
         const ctx = canvas.getContext('2d');
         let clockPositions = JSON.parse('!{JSON.stringify(clockPositions)}');
-        console.log(clockPositions);
         let usersClockPosition = JSON.parse('!{JSON.stringify(usersClockPosition)}');
         const currentState = [];
         const selectedFont = 'Aboreto';
@@ -27,16 +26,14 @@ block content
             drawTime(ctx, (canvas.height-93)/2, clockPositions, usersClockPosition);
         };
 
-
         // Much help from https://github.com/malcolmrigg/wizard-clock-card/tree/master
         async function drawNumbers(ctx, radius, positions) {
             let ang;
             let num;
 
-            ctx.font = radius*0.15*fontScale + "px " + selectedFont;
+            ctx.font = "bold " + radius*0.15*fontScale + "px " + selectedFont;
             ctx.textBaseline = "middle";
             ctx.textAlign = "center";
-            // ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--primary-text-color');
             ctx.fillStyle = 'black';
 
             for (num = 0; num < positions.length; num++) {
@@ -148,35 +145,28 @@ block content
         }
 
         function drawHand(ctx, pos, length, width, wizard) {
-            ctx.beginPath();
-            ctx.lineWidth = width;
-            ctx.fillStyle = "black";
-            ctx.shadowColor = "#0008";
-            ctx.shadowBlur = 10;
-            ctx.shadowOffsetX = 5;
-            ctx.shadowOffsetY = 5;
-            ctx.moveTo(0, 0);
-            ctx.rotate(pos);
-            ctx.quadraticCurveTo(width, -length * 0.5, width, -length * 0.75);
-            ctx.quadraticCurveTo(width * 0.2, -length * 0.8, 0, -length);
-            ctx.quadraticCurveTo(-width * 0.2, -length * 0.8, -width, -length * 0.75);
-            ctx.quadraticCurveTo(-width, -length * 0.5, 0, 0);
+            const scissorObj = new Image();
+            scissorObj.src = '/public/images/half-scissor-outline.png';
+            scissorObj.alt = "Clock Hand";
+            scissorObj.id = wizard + "-clock-hand";
+            scissorObj.onload = function () {
+                ctx.rotate(pos);
+                ctx.drawImage(scissorObj, -20, -300, 75, 450);
 
-            ctx.fill();
+                ctx.font = "bold " + width * 3 * fontScale + "px " + selectedFont;
+                ctx.fillStyle = "white";
+                ctx.translate(0, -length / 2);
+                ctx.rotate(Math.PI / 2)
+                if (pos < Math.PI && pos >= 0)
+                    ctx.rotate(Math.PI);
+                ctx.fillText(wizard, 0, 0);
+                if (pos < Math.PI && pos >= 0)
+                    ctx.rotate(-Math.PI);
+                ctx.rotate(-Math.PI / 2);
+                ctx.translate(0, length / 2);
 
-            ctx.font = width * 3 * fontScale + "px " + selectedFont;
-            ctx.fillStyle = "white";
-            ctx.translate(0, -length / 2);
-            ctx.rotate(Math.PI / 2)
-            if (pos < Math.PI && pos >= 0)
-                ctx.rotate(Math.PI);
-            ctx.fillText(wizard, 0, 0);
-            if (pos < Math.PI && pos >= 0)
-                ctx.rotate(-Math.PI);
-            ctx.rotate(-Math.PI / 2);
-            ctx.translate(0, length / 2);
-
-            ctx.rotate(-pos);
+                ctx.rotate(-pos);
+            };
         }
 
 
