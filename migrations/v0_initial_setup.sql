@@ -88,19 +88,19 @@ INSERT OR IGNORE INTO roles (id,role, description) VALUES
        (3,'child', 'Only can be attached or set.');
 **
 INSERT OR IGNORE INTO clock_face (id,face_position, name) VALUES
-       (1,1, 'Lost'),
-       (2,2, 'Position2'),
-       (3,3, 'Position3'),
-       (4,4, 'Position4'),
-       (5,5, 'Position5'),
-       (6,6, 'FriendsHouse'),
-       (7,7, 'Position7'),
-       (8,8, 'Position8'),
-       (9,9, 'GrandparentsHO'),
-       (10,10, 'Position10'),
-       (11,11, 'Position11'),
-       (12,12, 'Position12'),
-       (13, 13, 'OutAndAbout');
+       (1,1,   'MORTALPERIL'),
+       (2,2,   'RELATIVES'),
+       (3,3,   'SCHOOL'),
+       (4,4,   'WORK'),
+       (5,5,   'HOME'),
+       (6,6,   'PRISON'),
+       (7,7,   'FRIENDS'),
+       (8,8,   'LIBRARY'),
+       (9,9,   'CHURCH'),
+       (10,10, 'TRAVELING'),
+       (11,11, 'QUIDDITCH'),
+       (12,12, 'HOLIDAYS'),
+       (13, 13,'SOMEWHERE');
 **
 INSERT OR IGNORE INTO locations (id, name, latitude, longitude, radius, description, isDefault) VALUES
     (1,'Default', '0', '0', 0, 'Default location', 1);
