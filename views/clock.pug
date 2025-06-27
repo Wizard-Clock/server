@@ -11,7 +11,6 @@ block content
         let clockPositions = JSON.parse('!{JSON.stringify(clockPositions)}');
         let usersClockPosition = JSON.parse('!{JSON.stringify(usersClockPosition)}');
         const currentState = [];
-        const selectedFont = 'Aboreto';
 
         // Add image to Canvas
         const img = new Image();
@@ -21,68 +20,55 @@ block content
         img.onload = function () {
             ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
             ctx.translate(canvas.width/2, canvas.height/2);
-            drawNumbers(ctx, (canvas.height-93)/2, clockPositions);
-            drawTime(ctx, (canvas.height-93)/2, clockPositions, usersClockPosition);
+            drawNumbers(ctx, (canvas.height)/2, clockPositions);
+            drawTime(ctx, (canvas.height)/2, clockPositions, usersClockPosition);
         };
 
         // Much help from https://github.com/malcolmrigg/wizard-clock-card/tree/master
         async function drawNumbers(ctx, radius, positions) {
-            let fontScale = 0.3;
-            ctx.font = "bold " + radius*0.15*fontScale + "px " + selectedFont;
+            let selectedFont = 'Xanh Mono';
             ctx.textBaseline = "middle";
             ctx.textAlign = "center";
             ctx.fillStyle = 'black';
 
+            // Have to compensate for the clock not being a true circle
+            const startingAdjustArray = [0.81, 0.82, 0.76, 0.74, 0.74, 0.74, 0.73, 0.73, 0.75, 0.74, 0.72, 0.71, .79];
+            const ovalCompensateArray = [0, 5, 10, 10, 10, 5, 0, 3, 7, 10, 7, -2, -5];
+
+
             for (let num = 0; num < positions.length; num++) {
-                let ang = (num +1) * Math.PI / positions.length * 2;
-                // rotate to center of drawing position
+                const positionTranslateArray = [-99, -75, -68, -72, -83,  -98, -115];
+                const positionRotateArray =    [-55, -30,  -5, 20,   35,   40,   38];
+                const fontScaleArray =         [0.9, 0.8, 0.7, 0.6, 0.6,  0.55, 0.5];
+                const charWidthArray =              [3.8,   4, 3.5, 3.2,   2.8, 2.5];
+
+                ctx.resetTransform();
+                ctx.translate(canvas.width/2, canvas.height/2);
+                let ang = (2 * Math.PI / positions.length) * (num + startingAdjustArray[num]);
                 ctx.rotate(ang);
 
-                let text = positions[num].name.split("").reverse().join("");
-
-                // calculate height of the font. Many ways to do this - you can replace with your own!
-                const div = document.createElement("div");
-                div.innerHTML = text;
-                div.style.position = 'absolute';
-                div.style.top = '-10000px';
-                div.style.left = '-10000px';
-                div.style.fontFamily = selectedFont;
-                div.style.fontSize = radius * 0.15 * fontScale + "px";
-                document.body.appendChild(div);
-                const textHeight = div.offsetHeight;
-                document.body.removeChild(div);
-
-
-                // rotate 50% of total angle for center alignment
-                let startAngle = 0;
-                for (let j = 0; j < text.length; j++) {
-                    let charWid = ctx.measureText(text[j]).width;
-                    startAngle += ((charWid) / (radius - textHeight)) / 2;
-                }
-
-                // Phew... now rotate into final start position
-                ctx.rotate(startAngle);
-
                 // Now for the fun bit: draw, rotate, and repeat
-                for (let j = 0; j < text.length; j++) {
-                    let charWid = ctx.measureText(text[j]).width; // half letter
-                    // rotate half letter
-                    ctx.rotate((charWid / 2) / (radius - textHeight) * -1);
-                    // draw the character at "top" or "bottom"
-                    // depending on inward or outward facing
-                    ctx.fillText(text[j], 0, (0 - radius + textHeight));
+                let text = positions[num].name.toUpperCase();
+                for (let j = 0; j < 7; j++) {
+                    ctx.font = "bold " + radius*0.15*fontScaleArray[j] + "px " + selectedFont;
 
-                    ctx.rotate((charWid / 2) / (radius - textHeight) * -1); // rotate half letter
+                    ctx.translate(0, (0 - (radius + ovalCompensateArray[num] + positionTranslateArray[j])));
+                    ctx.rotate(positionRotateArray[j] * Math.PI /180);
+
+                    ctx.fillText(text[j], 0, 0);
+
+                    ctx.rotate(-positionRotateArray[j] * Math.PI /180);
+                    ctx.translate(0, -(0 - (radius + ovalCompensateArray[num] + positionTranslateArray[j])));
+
+                    ctx.rotate((charWidthArray[j]) * Math.PI /180);
                 }
-                // rotate back round from the end position to the central position of the text
-                ctx.rotate(startAngle);
 
-                // rotate to the next location
-                ctx.rotate(-ang);
             }
         }
 
         async function drawTime(ctx, radius, locations, wizardClockPositions){
+            ctx.resetTransform();
+            ctx.translate(canvas.width / 2, canvas.height / 2);
             const targetState = [];
             for (let num = 0; num < wizardClockPositions.length; num++) {
                 const wizardClockPosition = wizardClockPositions[num];
@@ -93,7 +79,7 @@ block content
                         location = wizardOffset + loc.face_position;
                     }
                 }
-                location = location * Math.PI / locations.length * 2;
+                location = (2 * Math.PI / locations.length) * (location+ .2);
 
                 // set targetstate
                 targetState.push({
@@ -128,6 +114,7 @@ block content
 
         function drawHand(ctx, pos, length, width, wizard) {
             let fontScale = 0.3;
+            let selectedFont = 'Aboreto';
             const scissorObj = new Image();
             scissorObj.src = '/public/images/half-scissor-outline.png';
             scissorObj.alt = "Clock Hand";
@@ -136,13 +123,13 @@ block content
                 ctx.rotate(pos);
                 ctx.drawImage(scissorObj, -20, -300, 75, 450);
 
-                ctx.font = "bold " + width * 3 * fontScale + "px " + selectedFont;
+                ctx.font = "bolder " + width * 3 * fontScale + "px " + selectedFont;
                 ctx.fillStyle = "white";
                 ctx.translate(0, -length / 2);
                 ctx.rotate(Math.PI / 2)
                 if (pos < Math.PI && pos >= 0)
                     ctx.rotate(Math.PI);
-                ctx.fillText(wizard, 0, 0);
+                ctx.fillText(wizard.toUpperCase(), 0, 0);
                 if (pos < Math.PI && pos >= 0)
                     ctx.rotate(-Math.PI);
                 ctx.rotate(-Math.PI / 2);
