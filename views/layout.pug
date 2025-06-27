@@ -14,7 +14,7 @@ html
     script(src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js")
     script(src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js")
   body()
-    div(class="navbar navbar-expand-sm bg-light navbar-light")
+    div(class="navbar fixed-top navbar-expand-sm bg-light navbar-light")
       div(class="container-fluid")
         a(class="navbar-brand" href="/clock")
           img(src="/public/images/wc-high-resolution-logo-transparent.svg" width="65px" height="65px" alt="small transparent logo")
@@ -39,5 +39,5 @@ html
                   a(class="dropdown-item brand_font" href="#" onclick="document.forms[\"logoutForm\"].submit();") Logout
                   form(name='logoutForm' action='/logout' method='post')
                     input(type="hidden")
-    div()
+    div(class="mt-5")
       block content
