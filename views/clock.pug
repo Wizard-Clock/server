@@ -9,20 +9,85 @@ block content
         const canvas = document.getElementById('wizardingClockFace');
         const ctx = canvas.getContext('2d');
         let clockPositions = JSON.parse('!{JSON.stringify(clockPositions)}');
-        let usersClockPosition = JSON.parse('!{JSON.stringify(usersClockPosition)}');
-        const currentState = [];
+        let wizardWithPositionArray = JSON.parse('!{JSON.stringify(usersClockPosition)}');
+        const currentWizardState = [];
+        const targetWizardState = [];
+        let firstUpdate = true;
 
-        // Add image to Canvas
-        const img = new Image();
-        img.crossOrigin = 'anonymous';
-        img.src = '/public/images/wizarding-clock-face.jpg';
-        img.alt = "Wizarding Clock Face";
-        img.onload = function () {
-            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-            ctx.translate(canvas.width/2, canvas.height/2);
-            drawNumbers(ctx, (canvas.height)/2, clockPositions);
-            drawTime(ctx, (canvas.height)/2, clockPositions, usersClockPosition);
+        const clockFace = new Image();
+        clockFace.crossOrigin = 'anonymous';
+        clockFace.src = '/public/images/wizarding-clock-face.jpg';
+        clockFace.alt = "Wizarding Clock Face";
+
+        const scissorObj = new Image();
+        scissorObj.src = '/public/images/half-scissor-outline.png';
+        scissorObj.alt = "Clock Hand";
+
+        const compareArrays = (a, b) => {
+            return JSON.stringify(a) === JSON.stringify(b);
         };
+
+        window.requestAnimationFrame(drawClock);
+
+        async function drawClock() {
+            // Add image to Canvas
+            await refreshWizardData();
+            ctx.resetTransform();
+            ctx.clearRect(0, 0, 871, 846);
+            ctx.drawImage(clockFace, 0, 0, canvas.width, canvas.height);
+            ctx.translate(canvas.width / 2, canvas.height / 2);
+            await drawNumbers(ctx, (canvas.height) / 2, clockPositions);
+            await drawTime(ctx, (canvas.height) / 2, clockPositions, wizardWithPositionArray);
+            window.requestAnimationFrame(drawClock);
+        }
+
+
+        async function refreshWizardData() {
+            let updateOccurred = false;
+            // Get the current data
+            let response = await fetch('/clock/updateToClock', {
+                method: 'GET'
+            });
+            let updatedData = await response.json();
+
+            // Check against the current data
+            if (!compareArrays(updatedData.clockPositions, clockPositions)) {
+                console.log("diff: clockPositions")
+                clockPositions = updatedData.clockPositions;
+                console.log("update: " + clockPositions);
+                updateOccurred = true;
+            }
+            if (!compareArrays(updatedData.usersClockPositions, wizardWithPositionArray)) {
+                console.log("diff: wizardWithPositionArray")
+                wizardWithPositionArray = updatedData.usersClockPositions;
+                console.log(updatedData.usersClockPositions);
+                updateOccurred = true;
+            }
+
+            if (updateOccurred || firstUpdate) {
+                firstUpdate = false;
+                // Update Wizard Info
+                for (let num = 0; num < wizardWithPositionArray.length; num++) {
+                    const wizardClockPosition = wizardWithPositionArray[num];
+                    const wizardOffset = ((num - ((wizardWithPositionArray.length - 1) / 2)) / wizardWithPositionArray.length * 0.6);
+                    let location = wizardOffset;
+                    for (let loc of clockPositions) {
+                        if (loc.name === wizardClockPosition.position.name) {
+                            location = wizardOffset + loc.face_position;
+                        }
+                    }
+                    location = (2 * Math.PI / clockPositions.length) * (location + .2);
+
+                    // set targetstate
+                    targetWizardState.push({
+                        wizard: wizardWithPositionArray[num].name,
+                        pos: location,
+                        length: (canvas.height / 2) * 0.7,
+                        width: (canvas.height / 2) * 0.05,
+                    });
+                }
+            }
+        }
 
         // Much help from https://github.com/malcolmrigg/wizard-clock-card/tree/master
         async function drawNumbers(ctx, radius, positions) {
@@ -34,7 +99,6 @@ block content
             // Have to compensate for the clock not being a true circle
             const startingAdjustArray = [0.81, 0.82, 0.76, 0.76, 0.74, 0.74, 0.73, 0.73, 0.75, 0.73, 0.71, 0.71, .79];
             const ovalCompensateArray = [0, 5, 10, 10, 7, 3, 0, 3, 7, 6, 4, -2, -3];
-
 
             for (let num = 0; num < positions.length; num++) {
                 // Unfun Required Math
@@ -53,12 +117,16 @@ block content
                 for (let j = 0; j < text.length; j++) {
                     ctx.font = "bold " + radius*0.15*fontScaleArray[j] + "px " + selectedFont;
 
+                    // From Center to Edge
                     ctx.translate(0, (0 - (radius + ovalCompensateArray[num] + positionTranslateArray[j])));
+                    // Rotate to letter position
                     ctx.rotate(positionRotateArray[j] * Math.PI /180);
 
                     ctx.fillText(text[j], 0, 0);
 
+                    // Rotate back to straight
                     ctx.rotate(-positionRotateArray[j] * Math.PI /180);
+                    // From Edge to Center
                     ctx.translate(0, -(0 - (radius + ovalCompensateArray[num] + positionTranslateArray[j])));
 
                     ctx.rotate((charWidthArray[j]) * Math.PI /180);
@@ -67,79 +135,79 @@ block content
             }
         }
 
-        async function drawTime(ctx, radius, locations, wizardClockPositions){
+        async function drawTime(ctx, radius){
             ctx.resetTransform();
             ctx.translate(canvas.width / 2, canvas.height / 2);
-            const targetState = [];
-            for (let num = 0; num < wizardClockPositions.length; num++) {
-                const wizardClockPosition = wizardClockPositions[num];
-                const wizardOffset = ((num - ((wizardClockPositions.length - 1) / 2)) / wizardClockPositions.length * 0.6);
-                let location = wizardOffset;
-                for (let loc of locations) {
-                    if (loc.name === wizardClockPosition.position.name) {
-                        location = wizardOffset + loc.face_position;
+
+            if (currentWizardState.length === 0) {
+                // Math for current wizard state creation
+                for (let num = 0; num < wizardWithPositionArray.length; num++) {
+                    const wizardOffset = ((num - ((wizardWithPositionArray.length - 1) / 2)) / wizardWithPositionArray.length * 0.6);
+                    let location = (2 * Math.PI / clockPositions.length) * (wizardOffset + .2);
+
+                    currentWizardState.push({
+                        wizard: wizardWithPositionArray[num].name,
+                        radToTravel: 0,
+                        pos: location,
+                        length: radius * 0.7,
+                        width: radius * 0.05,
+                    });
+
+                }
+            } else {
+                // Math for incrementing wizard state
+                for (let wizardCurrState of currentWizardState) {
+                    for (let wizardTarget of targetWizardState) {
+                        if (wizardCurrState.wizard === wizardTarget.wizard) {
+                            if (wizardCurrState.pos !== wizardTarget.pos) {
+                                if (wizardCurrState.radToTravel === 0) {
+                                    wizardCurrState.radToTravel = (wizardTarget.pos - wizardCurrState.pos) / 500;
+                                    wizardCurrState.loopNum = 0;
+                                }
+                                if (wizardCurrState.loopNum < 500) {
+                                    wizardCurrState.pos += wizardCurrState.radToTravel;
+                                    wizardCurrState.loopNum++;
+                                } else {
+                                    wizardCurrState.pos = wizardTarget.pos;
+                                }
+                            } else {
+                                wizardCurrState.radToTravel = 0;
+                                wizardCurrState.loopNum = 0;
+                            }
+
+                        }
                     }
                 }
-                location = (2 * Math.PI / locations.length) * (location+ .2);
-
-                // set targetstate
-                targetState.push({
-                    pos: location,
-                    length: radius * 0.7,
-                    width: radius * 0.05,
-                    wizard: wizardClockPositions[num].name,
-                });
             }
 
-            // update currentstate from targetstate
-            if (!currentState) {
-                currentState.length = 0;
-            }
-            for (let num = 0; num < wizardClockPositions.length; num++) {
-                if (currentState[num]) {
-                    currentState[num].pos = currentState[num].pos + ((targetState[num].pos - currentState[num].pos) / 60);
-                } else {
-                    currentState.push({
-                        pos: targetState[num].pos,
-                        length: targetState[num].length,
-                        width: targetState[num].width,
-                        wizard: targetState[num].wizard
-                    });
-                }
-            }
             // draw currentState
-            for (let num = 0; num < wizardClockPositions.length; num++) {
-                this.drawHand(ctx, currentState[num].pos, currentState[num].length, currentState[num].width, currentState[num].wizard);
+            for (let wizardState of currentWizardState) {
+                this.drawHand(ctx, wizardState.pos, wizardState.length, wizardState.width, wizardState.wizard);
             }
         }
 
         function drawHand(ctx, pos, length, width, wizard) {
             let fontScale = 0.3;
             let selectedFont = 'Aboreto';
-            const scissorObj = new Image();
-            scissorObj.src = '/public/images/half-scissor-outline.png';
-            scissorObj.alt = "Clock Hand";
             scissorObj.id = wizard + "-clock-hand";
-            scissorObj.onload = function () {
-                ctx.rotate(pos);
-                ctx.drawImage(scissorObj, -20, -300, 75, 450);
+            ctx.rotate(pos);
+            ctx.drawImage(scissorObj, -20, -300, 75, 450);
 
-                ctx.font = "bolder " + width * 3 * fontScale + "px " + selectedFont;
-                ctx.fillStyle = "white";
-                ctx.translate(0, -length / 2);
-                ctx.rotate(Math.PI / 2)
-                if (pos < Math.PI && pos >= 0) {
-                    ctx.rotate(Math.PI);
-                }
-                ctx.fillText(wizard.toUpperCase(), 0, 0);
-                if (pos < Math.PI && pos >= 0) {
-                    ctx.rotate(-Math.PI);
-                }
-                ctx.rotate(-Math.PI / 2);
-                ctx.translate(0, length / 2);
+            ctx.font = "bolder " + width * 3 * fontScale + "px " + selectedFont;
+            ctx.fillStyle = "white";
+            ctx.translate(0, -length / 2);
+            ctx.rotate(Math.PI / 2)
+            if (pos < Math.PI && pos >= 0) {
+                ctx.rotate(Math.PI);
+            }
+            ctx.fillText(wizard.toUpperCase(), 0, 0);
+            if (pos < Math.PI && pos >= 0) {
+                ctx.rotate(-Math.PI);
+            }
+            ctx.rotate(-Math.PI / 2);
+            ctx.translate(0, length / 2);
 
-                ctx.rotate(-pos);
-            };
+            ctx.rotate(-pos);
         }
 
 

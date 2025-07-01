@@ -22,4 +22,10 @@ router.get('/', authenticateToken, async function (req, res, next) {
         usersClockPosition:usersClockPosition});
 });
 
+router.get('/updateToClock', authenticateToken, async function (req, res, next) {
+    let clockPositions = await db.getAllClockPositions();
+    let usersClockPositions = await db.getAllUsersClockFacePositions();
+    res.json({clockPositions, usersClockPositions});
+})
+
 module.exports = router;
