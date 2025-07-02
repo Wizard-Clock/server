@@ -6,6 +6,7 @@ block content
             canvas(id="wizardingClockFace" class="img-fluid" width="871" height="846")
 
     script.
+        const { cubicBezier } = Motion;
         const canvas = document.getElementById('wizardingClockFace');
         const ctx = canvas.getContext('2d');
         let clockPositions = JSON.parse('!{JSON.stringify(clockPositions)}');
@@ -22,6 +23,7 @@ block content
         const scissorObj = new Image();
         scissorObj.src = '/public/images/half-scissor-outline.png';
         scissorObj.alt = "Clock Hand";
+        const scissorEasing = cubicBezier(.33,-0.24,.56,1.07);
 
         const compareArrays = (a, b) => {
             return JSON.stringify(a) === JSON.stringify(b);
@@ -146,6 +148,7 @@ block content
                         wizard: wizardWithPositionArray[num].name,
                         radToTravel: 0,
                         pos: location,
+                        movingPos: location,
                         length: radius * 0.7,
                         width: radius * 0.05,
                     });
@@ -161,20 +164,20 @@ block content
                                 if (wizardCurrState.radToTravel === 0) {
                                     // Fix any backwards movement
                                     let disToMove = wizardTarget.pos - wizardCurrState.pos;
-                                    disToMove = disToMove > 0 ? disToMove : disToMove + (2 * Math.PI);
-                                    wizardCurrState.radToTravel = disToMove / 500;
-                                    wizardCurrState.loopNum = 0;
+                                    wizardCurrState.radToTravel = disToMove > 0 ? disToMove : disToMove + (2 * Math.PI);
+                                    wizardCurrState.startTime = Date.now();
                                 }
 
-                                if (wizardCurrState.loopNum < 500) {
-                                    wizardCurrState.pos += wizardCurrState.radToTravel;
-                                    wizardCurrState.loopNum++;
+                                if (Date.now() - wizardCurrState.startTime <= 5000) {
+                                    let easingRate = scissorEasing((Date.now() - wizardCurrState.startTime) / 5000);
+                                    wizardCurrState.movingPos = wizardCurrState.pos + (wizardCurrState.radToTravel * easingRate);
                                 } else {
                                     wizardCurrState.pos = wizardTarget.pos;
+                                    wizardCurrState.movingPos = wizardTarget.pos;
                                 }
                             } else {
                                 wizardCurrState.radToTravel = 0;
-                                wizardCurrState.loopNum = 0;
+                                wizardCurrState.startTime = 0;
                             }
 
                         }
@@ -184,7 +187,7 @@ block content
 
             // draw currentState
             for (let wizardState of currentWizardState) {
-                this.drawHand(ctx, wizardState.pos, wizardState.length, wizardState.width, wizardState.wizard);
+                this.drawHand(ctx, wizardState.movingPos, wizardState.length, wizardState.width, wizardState.wizard);
             }
         }
 
