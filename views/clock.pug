@@ -52,21 +52,19 @@ block content
 
             // Check against the current data
             if (!compareArrays(updatedData.clockPositions, clockPositions)) {
-                console.log("diff: clockPositions")
                 clockPositions = updatedData.clockPositions;
-                console.log("update: " + clockPositions);
                 updateOccurred = true;
             }
             if (!compareArrays(updatedData.usersClockPositions, wizardWithPositionArray)) {
-                console.log("diff: wizardWithPositionArray")
                 wizardWithPositionArray = updatedData.usersClockPositions;
-                console.log(updatedData.usersClockPositions);
                 updateOccurred = true;
             }
 
             if (updateOccurred || firstUpdate) {
                 firstUpdate = false;
+
                 // Update Wizard Info
+                targetWizardState.length = 0;
                 for (let num = 0; num < wizardWithPositionArray.length; num++) {
                     const wizardClockPosition = wizardWithPositionArray[num];
                     const wizardOffset = ((num - ((wizardWithPositionArray.length - 1) / 2)) / wizardWithPositionArray.length * 0.6);
@@ -78,7 +76,6 @@ block content
                     }
                     location = (2 * Math.PI / clockPositions.length) * (location + .2);
 
-                    // set targetstate
                     targetWizardState.push({
                         wizard: wizardWithPositionArray[num].name,
                         pos: location,
@@ -160,10 +157,12 @@ block content
                     for (let wizardTarget of targetWizardState) {
                         if (wizardCurrState.wizard === wizardTarget.wizard) {
                             if (wizardCurrState.pos !== wizardTarget.pos) {
+                                // Initialize Pos Movement
                                 if (wizardCurrState.radToTravel === 0) {
                                     wizardCurrState.radToTravel = (wizardTarget.pos - wizardCurrState.pos) / 500;
                                     wizardCurrState.loopNum = 0;
                                 }
+
                                 if (wizardCurrState.loopNum < 500) {
                                     wizardCurrState.pos += wizardCurrState.radToTravel;
                                     wizardCurrState.loopNum++;
