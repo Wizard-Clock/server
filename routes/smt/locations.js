@@ -21,6 +21,7 @@ router.get('/', authenticateToken, async function (req, res, next) {
         const clockPosition = await db.getClockPositionFromLocationID(location.id);
         if (clockPosition) {
             location.clockPosition = clockPosition.face_position;
+            location.clockPositionName = clockPosition.name;
         }
     }
     res.render('locations', {

@@ -25,7 +25,7 @@ block content
                             tr()
                                 th(scope="row" id="location-id")= location.id
                                 if location.clockPosition
-                                    td()= location.clockPosition
+                                    td()= location.clockPosition + " (" + location.clockPositionName + ")"
                                 else
                                     td() NA
                                 td()= location.name
@@ -82,18 +82,18 @@ block content
                             button(type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close")
                         div(class="modal-body")
                             form(class="row g-3" id="editLocationForm")
-                                div(class="col-md-8")
+                                div(class="col-md-7")
                                     section()
                                         label(for="locationNameEditInput" class="form-label") Name
                                         input(type="text" class="form-control loc-name" name="name" id="locationNameEditInput" required)
-                                div(class="col-md-4")
+                                div(class="col-md-5")
                                     section()
                                         label(for="clockPosSelectEditInput" class="form-label") Clock Position
                                         select(id="clockPosSelectEditInput" class="form-select clock-pos" name="clockPosition")
                                             option(selected value="") None
                                                 for position in positions
                                                     if position.face_position !== 13
-                                                        option(value= position.face_position)=position.face_position
+                                                        option(value= position.face_position)=position.face_position + " (" + position.name + ")"
                                 div(class="col-md-4")
                                     section()
                                         label(for="latitudeEdit" class="form-label") Latitude&nbsp;
@@ -125,18 +125,18 @@ block content
                             button(type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close")
                         div(class="modal-body")
                             form(class="row g-3" id="addLocationForm")
-                                div(class="col-md-8")
+                                div(class="col-md-7")
                                     section()
                                         label(for="locationNameAddInput" class="form-label") Name
                                         input(type="text" class="form-control" name="name" id="locationNameInput" required)
-                                div(class="col-md-4")
+                                div(class="col-md-5")
                                     section()
                                         label(for="clockPosSelectInput" class="form-label") Clock Position
                                         select(id="clockPosSelectInput" class="form-select" name="clockPosition")
                                             option(selected value="") None
                                             for position in positions
                                                 if position.face_position !== 13
-                                                    option(value= position.face_position)=position.face_position
+                                                    option(value= position.face_position)=position.face_position + " (" + position.name + ")"
                                 div(class="col-md-4")
                                     section()
                                         label(for="latitudeAdd" class="form-label") Latitude&nbsp;

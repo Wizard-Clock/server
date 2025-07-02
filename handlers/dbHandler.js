@@ -321,6 +321,20 @@ async function getAllClockPositions() {
     });
 }
 
+async function updateClockPosition(clockPosition) {
+    return await new Promise((resolve, reject) => {
+        sqlite_inst.run(`UPDATE clock_face SET name=? WHERE id=?`, [
+            clockPosition.name,
+            clockPosition.id
+        ], (err, rows) => {
+            if (err)
+                reject(err);
+            else
+                resolve(rows);
+        });
+    });
+}
+
 async function getUserLocationFromUserID(userID) {
     return await new Promise((resolve, reject) => {
         sqlite_inst.all('SELECT * FROM user_location WHERE user_id=?', userID, (err, rows) => {
@@ -424,6 +438,7 @@ module.exports = {
     getAllUsersClockFacePositions,
     getClockPositionFromLocationID,
     getAllClockPositions,
+    updateClockPosition,
     updateUserLocation,
     sqlite_inst
 };
