@@ -23,6 +23,22 @@ router.get('/', authenticateToken, async function (req, res, next) {
         usersClockPosition:usersClockPosition});
 });
 
+router.get('/standalone', authenticateToken, async function (req, res, next) {
+    const user = await db.getUserFromID(req.userID);
+    const userRole = await db.getRoleFromUserID(req.userID);
+
+    // Get all Clock Face Postions + Name;
+    const clockPositions = await db.getAllClockPositions();
+
+    // Get all User Locations on Clock
+    const usersClockPosition= await db.getAllUsersClockFacePositions();
+
+    res.render('standaloneClock', {
+        title: 'Clock',
+        clockPositions: clockPositions,
+        usersClockPosition:usersClockPosition});
+});
+
 router.get('/updateToClock', authenticateToken, async function (req, res, next) {
     let clockPositions = await db.getAllClockPositions();
     let usersClockPositions = await db.getAllUsersClockFacePositions();
