@@ -159,7 +159,10 @@ block content
                             if (wizardCurrState.pos !== wizardTarget.pos) {
                                 // Initialize Pos Movement
                                 if (wizardCurrState.radToTravel === 0) {
-                                    wizardCurrState.radToTravel = (wizardTarget.pos - wizardCurrState.pos) / 500;
+                                    // Fix any backwards movement
+                                    let disToMove = wizardTarget.pos - wizardCurrState.pos;
+                                    disToMove = disToMove > 0 ? disToMove : disToMove + (2 * Math.PI);
+                                    wizardCurrState.radToTravel = disToMove / 500;
                                     wizardCurrState.loopNum = 0;
                                 }
 
