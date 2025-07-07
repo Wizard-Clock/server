@@ -15,18 +15,32 @@ router.get('/', authenticateToken, async function (req, res, next) {
     // Get all User Locations on Clock
     const usersClockPosition= await db.getAllUsersClockFacePositions();
 
+    const clockPositionsWithLocation = [];
+    for (let cPosition of clockPositions) {
+        let locationsPerPosition = await db.getAllLocationsForClockPosition(cPosition.id);
+        let locationString = "";
+        for (let location of locationsPerPosition) {
+            locationString += location + ", ";
+        }
+        locationString = locationString.substring(0, locationString.length - 2);
+
+        clockPositionsWithLocation.push({
+            positionName: cPosition.name,
+            locations: locationString.length === 0 ? "None" : locationString,
+        });
+    }
+
     res.render('clock', {
         title: 'Clock',
         username: user.username,
         role: userRole.role,
         clockPositions: clockPositions,
-        usersClockPosition:usersClockPosition});
+        usersClockPosition:usersClockPosition,
+        clockPositionLocations: clockPositionsWithLocation
+    });
 });
 
 router.get('/standalone', authenticateToken, async function (req, res, next) {
-    const user = await db.getUserFromID(req.userID);
-    const userRole = await db.getRoleFromUserID(req.userID);
-
     // Get all Clock Face Postions + Name;
     const clockPositions = await db.getAllClockPositions();
 

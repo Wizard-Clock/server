@@ -1,6 +1,7 @@
 const sqlite = require('sqlite3');
 const crypto = require('crypto');
 const fs = require('fs');
+const dobby = require("../handlers/discordHandler");
 const migrationsDir = require('path').dirname(require.main.filename) + '/migrations/';
 
 const sqlite_inst = new sqlite.Database(process.env.DATABASE_NAME, (err) => {
@@ -261,6 +262,16 @@ async function getLocationFromID(locationID) {
     });
 }
 
+async function getAllLocationsForClockPosition(clockPositionID) {
+    let locationIDs = await getAllLocationIDsFromPositionID(clockPositionID);
+
+    const locations = [];
+    for (let entry of locationIDs) {
+        await getLocationFromID(entry.location_id).then(value => locations.push(value.name));
+    }
+    return locations;
+}
+
 async function getLocationFromName(locationName) {
     return await new Promise((resolve, reject) => {
         sqlite_inst.all('SELECT * FROM locations WHERE name=?', locationName, (err, rows) => {
@@ -357,6 +368,17 @@ async function getPositionLocationFromLocationID(locationID) {
     });
 }
 
+async function getAllLocationIDsFromPositionID(positionID) {
+    return await new Promise((resolve, reject) => {
+        sqlite_inst.all('SELECT * FROM position_locations WHERE position_id=?', positionID, (err, rows) => {
+            if (err)
+                reject(err);
+            else
+                resolve(rows);
+        });
+    });
+}
+
 async function getClockPositionFromUserID(user_id) {
     let location = await getUserLocationFromUserID(user_id);
     let positionLocation = await getPositionLocationFromLocationID(location.location_id);
@@ -406,6 +428,7 @@ async function getAllUsersClockFacePositions() {
 }
 
 async function updateUserLocation(userID, locationID) {
+    dobby.notifyLocationChange(userID, locationID);
     return await new Promise((resolve, reject) => {
         sqlite_inst.all(`INSERT INTO user_location (user_id, location_id) VALUES (?, ?) ON CONFLICT(user_id) DO UPDATE SET location_id=?`, [
             userID,
@@ -419,8 +442,6 @@ async function updateUserLocation(userID, locationID) {
         });
     })
 }
-
-
 
 module.exports = {
     addUser,
@@ -437,6 +458,7 @@ module.exports = {
     deleteLocation,
     getAllUsersClockFacePositions,
     getClockPositionFromLocationID,
+    getAllLocationsForClockPosition,
     getAllClockPositions,
     updateClockPosition,
     updateUserLocation,

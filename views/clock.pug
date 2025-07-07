@@ -22,10 +22,9 @@ block content
                             tr()
                                 th(scope="row")= position.face_position
                                 td()= position.name
-                                if position.face_position === 13
-                                    td()= "Roaming values not assigned to any location."
-                                else
-                                    td()= "TBD"
+                                each clockMap in clockPositionLocations
+                                    if clockMap.positionName === position.name
+                                        td()= clockMap.locations
                                 td()
                                     button(type="button" class="btn btn-light" data-bs-toggle="modal" data-bs-target="#editClockPositionModal" data-bs-position= position)
                                         i(class="bi bi-pencil-square")
