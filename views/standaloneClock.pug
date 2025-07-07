@@ -30,12 +30,12 @@ html
             }
     body(style="")
         div(class="d-flex justify-content-center align-items-center" id="clockDiv")
-            canvas(id="wizardingClockFace" class="img-fluid" width="871" height="846")
+            canvas(id="wizardingClockFace" class="img-fluid mt-3" width="871" height="846")
 
     script.
         const {cubicBezier} = Motion;
         const canvas = document.getElementById('wizardingClockFace');
-        let canvasDim = calculateAspectRatioFit(871, 846, window.innerWidth, window.innerHeight);
+        let canvasDim = calculateAspectRatioFit(871, 846, window.innerWidth, window.innerHeight-30);
         canvas.width = canvasDim.width;
         canvas.height = canvasDim.height;
         const ctx = canvas.getContext('2d');
