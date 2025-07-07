@@ -5,7 +5,7 @@ const db = require("../../handlers/dbHandler");
 const authenticateToken = require("../../handlers/authHandler");
 const passport = require("passport");
 
-router.all('/health', authenticateToken, async function (req, res, next) {
+router.all('/health', async function (req, res, next) {
     return res.status(200).json({ message: 'API up and running.' });
 });
 
@@ -32,7 +32,7 @@ router.post('/updateUserLocation', authenticateToken, async function (req, res, 
 
     for (let location of locations) {
         if (isUserWithinLocation(userLoc.latitude, userLoc.longitude, location.latitude, location.longitude, location.radius)) {
-            await db.updateUserLocation(userID, loc.id).catch(() =>{
+            await db.updateUserLocation(userID, location.id).catch(() =>{
                 return res.status(500);
             });
             return res.status(202).json({ message: 'User location updated.' });

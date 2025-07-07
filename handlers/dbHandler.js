@@ -428,7 +428,9 @@ async function getAllUsersClockFacePositions() {
 }
 
 async function updateUserLocation(userID, locationID) {
-    dobby.notifyLocationChange(userID, locationID);
+    let user = await getUserFromID(userID);
+    let clockPosition = await getClockPositionFromLocationID(locationID);
+    dobby.notifyLocationChange(user.username, clockPosition.name);
     return await new Promise((resolve, reject) => {
         sqlite_inst.all(`INSERT INTO user_location (user_id, location_id) VALUES (?, ?) ON CONFLICT(user_id) DO UPDATE SET location_id=?`, [
             userID,
