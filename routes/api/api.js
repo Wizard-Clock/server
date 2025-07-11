@@ -5,6 +5,7 @@ const db = require("../../handlers/dbHandler");
 const authenticateToken = require("../../handlers/authHandler");
 const passport = require("passport");
 const pocketWatchHandler = require("../../handlers/pocketWatchHandler");
+const path = require("path");
 
 router.all('/health', async function (req, res, next) {
     return res.status(200).json({ message: 'API up and running.' });
@@ -47,9 +48,10 @@ router.post('/updateUserLocation', authenticateToken, async function (req, res, 
     return res.status(202).json({ message: 'User location updated.' });
 });
 
-router.post('/createPocketWatch', authenticateToken, async function (req, res, next) {
+router.get('/createPocketWatch', authenticateToken, async function (req, res, next) {
     await pocketWatchHandler.createPocketWatchImage();
-    return res.status(202).json({ message: 'Image Created successfully.' });
+    res.status(200)
+        .sendFile(path.join(__dirname, '../../public/images/GENERATED-pocket-watch-clock-face.png'));
 })
 
 function isUserWithinLocation(userLat, userLong, locationLat, locationLong, radius) {
