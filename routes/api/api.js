@@ -4,6 +4,7 @@ const router = express.Router();
 const db = require("../../handlers/dbHandler");
 const authenticateToken = require("../../handlers/authHandler");
 const passport = require("passport");
+const pocketWatchHandler = require("../../handlers/pocketWatchHandler");
 
 router.all('/health', async function (req, res, next) {
     return res.status(200).json({ message: 'API up and running.' });
@@ -46,6 +47,11 @@ router.post('/updateUserLocation', authenticateToken, async function (req, res, 
     return res.status(202).json({ message: 'User location updated.' });
 });
 
+router.post('/createPocketWatch', authenticateToken, async function (req, res, next) {
+    await pocketWatchHandler.createPocketWatchImage();
+    return res.status(202).json({ message: 'Image Created successfully.' });
+})
+
 function isUserWithinLocation(userLat, userLong, locationLat, locationLong, radius) {
     return getDistanceFromLatLonInM(userLat, userLong, locationLat, locationLong) <= radius;
 }
@@ -68,6 +74,5 @@ function getDistanceFromLatLonInM(userLat, userLong, locationLat, locationLong) 
 function deg2rad(deg) {
     return deg * (Math.PI/180)
 }
-
 
 module.exports = router;

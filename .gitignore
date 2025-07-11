@@ -4,3 +4,6 @@ node_modules/
 # WebStorm
 .idea/
 *.db
+
+# Wizarding Clock Specific
+public/images/GENERATED-pocket-watch-clock-face.png
