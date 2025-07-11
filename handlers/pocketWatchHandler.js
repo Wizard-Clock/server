@@ -1,8 +1,7 @@
 const { createCanvas, Image, registerFont } = require('canvas');
-registerFont('public/fonts/XanhMono-Regular.ttf', { family: 'Xanh Mono' })
 const db = require("../handlers/dbHandler");
 const fs = require('fs');
-const path = require('path')
+const path = require('path');
 const pocketWatchBase = {
     sourceUrl : path.join(__dirname, '../public/images/pocket-watch-clock-face.png'),
     writeToUrl: path.join(__dirname, '../public/images/GENERATED-pocket-watch-clock-face.png'),
@@ -16,6 +15,7 @@ const pocketWatchBase = {
 };
 
 async function createPocketWatchImage() {
+    registerFont(path.join(__dirname, '../public/fonts/XanhMono-Regular.ttf'), { family: 'Xanh Mono' });
     const canvas = createCanvas(pocketWatchBase.width, pocketWatchBase.height);
     const ctx = canvas.getContext('2d');
 
@@ -35,8 +35,8 @@ async function createPocketWatchImage() {
         if (fs.existsSync(pocketWatchBase.writeToUrl)) {
             fs.unlinkSync(pocketWatchBase.writeToUrl);
         }
-        const buffer = canvas.toBuffer('image/png')
-        fs.writeFileSync(pocketWatchBase.writeToUrl, buffer)
+        const buffer = canvas.toBuffer('image/png');
+        fs.writeFileSync(pocketWatchBase.writeToUrl, buffer);
     }
 
     // Much help from https://github.com/malcolmrigg/wizard-clock-card/tree/master
