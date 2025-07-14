@@ -14,6 +14,13 @@ const pocketWatchBase = {
     radiusMod: .6
 };
 
+const watchHandBase = {
+    sourceUrl : path.join(__dirname, '../public/images/half-scissor-outline.png'),
+    width: 128,
+    height: 700,
+    radiusMod: .5
+};
+
 async function createPocketWatchImage() {
     registerFont(path.join(__dirname, '../public/fonts/XanhMono-Regular.ttf'), { family: 'Xanh Mono' });
     const canvas = createCanvas(pocketWatchBase.width, pocketWatchBase.height);
@@ -21,17 +28,24 @@ async function createPocketWatchImage() {
 
     // Get all Clock Face Postions + Name;
     const clockPositions = await db.getAllClockPositions();
+    const wizardWithPositionArray = await db.getAllUsersClockFacePositions();
+    const currentWizardState = [];
 
     const pocketWatchImage = new Image();
     pocketWatchImage.onload = () => drawClock();
     pocketWatchImage.onerror = err => { throw err };
     pocketWatchImage.src = pocketWatchBase.sourceUrl;
 
+    const watchHandImage = new Image();
+    watchHandImage.onerror = err => { throw err };
+    watchHandImage.src = watchHandBase.sourceUrl;
+
     async function drawClock() {
         ctx.resetTransform();
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         ctx.drawImage(pocketWatchImage, 0, 0, canvas.width, canvas.height);
         await drawNumbers(ctx, pocketWatchBase.center.height/2 - 18, clockPositions);
+        await drawTime(ctx, pocketWatchBase.center.height/2 - 18, clockPositions, wizardWithPositionArray);
         if (fs.existsSync(pocketWatchBase.writeToUrl)) {
             fs.unlinkSync(pocketWatchBase.writeToUrl);
         }
@@ -82,6 +96,60 @@ async function createPocketWatchImage() {
                 ctx.rotate((charWidthArray[j]) * Math.PI / 180);
             }
         }
+    }
+
+    async function drawTime(ctx) {
+        ctx.resetTransform();
+        ctx.translate(pocketWatchBase.center.width, pocketWatchBase.center.height);
+
+        // Update Wizard Info
+        for (let num = 0; num < wizardWithPositionArray.length; num++) {
+            const wizardClockPosition = wizardWithPositionArray[num];
+            const wizardOffset = ((num - ((wizardWithPositionArray.length - 1) / 2)) / wizardWithPositionArray.length * 0.6);
+            let location = wizardOffset;
+            for (let loc of clockPositions) {
+                if (loc.name === wizardClockPosition.position.name) {
+                    location = wizardOffset + loc.face_position;
+                }
+            }
+            location = (2 * Math.PI / clockPositions.length) * (location + .2);
+
+            currentWizardState.push({
+                wizard: wizardWithPositionArray[num].name,
+                pos: location,
+                length: (pocketWatchBase.center.height / 2) * 0.7,
+                width: (pocketWatchBase.center.width) * 0.05,
+            });
+        }
+
+        // draw currentState
+        for (let wizardState of currentWizardState) {
+            await drawHand(ctx, wizardState.pos, wizardState.length, wizardState.width, wizardState.wizard);
+        }
+    }
+
+    async function drawHand(ctx, pos, length, width, wizard) {
+        let fontScale = 0.3;
+        let selectedFont = 'Aboreto';
+
+        ctx.rotate(pos);
+        ctx.drawImage(watchHandImage, -20* watchHandBase.radiusMod,
+            -400* watchHandBase.radiusMod, watchHandBase.width* watchHandBase.radiusMod,
+            watchHandBase.height* watchHandBase.radiusMod);
+        ctx.font = "bolder " + width * 3 * fontScale + "px " + selectedFont;
+        ctx.fillStyle = "white";
+        ctx.translate(6, -length / 2);
+        ctx.rotate(Math.PI / 2)
+        if (pos < Math.PI && pos >= 0) {
+            ctx.rotate(Math.PI);
+        }
+        ctx.fillText(wizard.toUpperCase(), 0, 0);
+        if (pos < Math.PI && pos >= 0) {
+            ctx.rotate(-Math.PI);
+        }
+        ctx.rotate(-Math.PI / 2);
+        ctx.translate(-6, length / 2);
+        ctx.rotate(-pos);
     }
 }
 
