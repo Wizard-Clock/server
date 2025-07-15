@@ -7,3 +7,4 @@ node_modules/
 
 # Wizarding Clock Specific
 public/images/GENERATED-pocket-watch-clock-face.png
+.env
