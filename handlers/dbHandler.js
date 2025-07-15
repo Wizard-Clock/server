@@ -2,7 +2,7 @@ const sqlite = require('sqlite3');
 const crypto = require('crypto');
 const fs = require('fs');
 const dobby = require("../handlers/discordHandler");
-const migrationsDir = require('path').dirname(require.main.filename) + '/db/migrations/';
+const migrationsDir = require('path').dirname(require.main.filename) + '/migrations/';
 
 const dbDir = require('path').dirname(require.main.filename) + '/db/';
 const dbName = (process.env.DATABASE_NAME === ":memory:" ? "" : dbDir) + process.env.DATABASE_NAME;
@@ -432,7 +432,7 @@ async function getAllUsersClockFacePositions() {
 async function updateUserLocation(userID, locationID) {
     let user = await getUserFromID(userID);
     let clockPosition = await getClockPositionFromLocationID(locationID);
-    dobby.notifyLocationChange(user.username, clockPosition.name);
+    await dobby.notifyLocationChange(user.username, clockPosition.name);
     return await new Promise((resolve, reject) => {
         sqlite_inst.all(`INSERT INTO user_location (user_id, location_id) VALUES (?, ?) ON CONFLICT(user_id) DO UPDATE SET location_id=?`, [
             userID,

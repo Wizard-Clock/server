@@ -49,8 +49,8 @@ async function sendWebhook(params) {
         if (startup) {
             if (res.status === 204) {
                 console.log("Discord Webhooks Enabled.");
-            } else if (res.status === 401) {
-                console.log("Invalid Discord Webhook URL. Discord Webhooks Disabled.");
+            } else {
+                console.log("Invalid Discord Webhook URL or Parameters. Discord Webhooks Disabled.");
             }
         }
         startup = false;
