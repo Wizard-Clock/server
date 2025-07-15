@@ -37,7 +37,7 @@ router.post('/addLocation', authenticateToken, async function (req, res, next) {
     await form.parse(req, async (err, location) => {
         const locationObj = {
             name: location.name[0],
-            clockPosition: location.clockPosition ?  location.clockPosition[0] : "",
+            clockPosition: location.clockPosition ? location.clockPosition[0] : "",
             latitude: location.latitude[0],
             longitude: location.longitude[0],
             radius: location.radius[0],

@@ -170,7 +170,7 @@ block content
                     attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
                 }).addTo(map);
 
-                let locations = JSON.parse('!{JSON.stringify(locations)}');
+                let locations = JSON.parse(`!{JSON.stringify(locations)}`);
                 for (let location of locations) {
                     if (!location.isDefault) {
                         L.circle([location.latitude, location.longitude], {
