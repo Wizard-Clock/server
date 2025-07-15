@@ -2,9 +2,11 @@ const sqlite = require('sqlite3');
 const crypto = require('crypto');
 const fs = require('fs');
 const dobby = require("../handlers/discordHandler");
-const migrationsDir = require('path').dirname(require.main.filename) + '/migrations/';
+const migrationsDir = require('path').dirname(require.main.filename) + '/db/migrations/';
 
-const sqlite_inst = new sqlite.Database(process.env.DATABASE_NAME, (err) => {
+const dbDir = require('path').dirname(require.main.filename) + '/db/';
+const dbName = (process.env.DATABASE_NAME === ":memory:" ? "" : dbDir) + process.env.DATABASE_NAME;
+const sqlite_inst = new sqlite.Database(dbName, (err) => {
     if (err) {
         return console.error(err.message);
     }  console.log('Connected to the SQLite database.');
