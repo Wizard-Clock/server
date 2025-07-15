@@ -1,16 +1,11 @@
 require('dotenv').config()
 const express = require('express');
-const ws = require("ws");
 const path = require('path');
 const createError = require('http-errors');
 const logger = require('morgan');
 require('./handlers/authHandler');
 
 const app = express();
-const wsServer = new ws.Server({ noServer: true });
-wsServer.on('connection', socket => {
-  socket.on('message', message => console.log(message));
-});
 
 // Parser
 const cookieParser = require('cookie-parser');
@@ -63,11 +58,7 @@ app.use(function(err, req, res, next) {
 
 module.exports = app;
 
-const httpServer = app.listen(process.env.PORT, () => {
-  console.log(`Server listening on port ${process.env.PORT}`)
+app.listen(process.env.PORT, () => {
+  console.log(`Server startup occurred at: ${new Date().toUTCString()}`);
+  console.log(`Listening on port ${process.env.PORT}`)
 });
-httpServer.on('upgrade', (req, socket, head) => {
-  wsServer.handleUpgrade(req, socket, head, (ws) => {
-    wsServer.emit('connection', ws, req)
-  })
-})
