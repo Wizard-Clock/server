@@ -28,6 +28,7 @@ router.post('/login', async function (req, res, next) {
 });
 
 router.post('/updateUserLocation', authenticateToken, async function (req, res, next) {
+    console.log("User location update received.");
     const userID = req.userID;
     const userLoc = req.body.location;
     const locations = await db.getAllLocations();
