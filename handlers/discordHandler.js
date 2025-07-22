@@ -1,6 +1,7 @@
 const webhookUsername = "Dobby";
 const webhookAvatar = "https://static.wikia.nocookie.net/harrypotter/images/f/f0/Dobbyelve.jpg";
 let startup = true;
+let isValidWebhook = true;
 notifyServerStartup();
 
 async function notifyServerStartup() {
@@ -39,6 +40,7 @@ async function notifyLocationChange(username, clockPositionName) {
 }
 
 async function sendWebhook(params) {
+    if  (!isValidWebhook) {return}
     fetch(process.env.DISCORD_WEBHOOK_URL, {
         method: "POST",
         headers: {
@@ -54,6 +56,9 @@ async function sendWebhook(params) {
             }
         }
         startup = false;
+    }).catch(() => {
+        console.log("Invalid Discord Webhook URL or Parameters. Discord Webhooks Disabled.");
+        isValidWebhook = false;
     });
 }
 

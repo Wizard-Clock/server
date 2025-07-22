@@ -436,7 +436,12 @@ async function getAllUsersClockFacePositions() {
 async function updateUserLocation(userID, locationID) {
     let user = await getUserFromID(userID);
     let clockPosition = await getClockPositionFromLocationID(locationID);
-    await dobby.notifyLocationChange(user.username, clockPosition.name);
+
+    await getClockPositionFromUserID(userID).then((result) => {
+        if (result.face_position !== clockPosition.face_position) {
+            dobby.notifyLocationChange(user.username, clockPosition.name);
+        }
+    });
     return await new Promise((resolve, reject) => {
         sqlite_inst.all(`INSERT INTO user_location (user_id, location_id) VALUES (?, ?) ON CONFLICT(user_id) DO UPDATE SET location_id=?`, [
             userID,
