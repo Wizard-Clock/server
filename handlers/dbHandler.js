@@ -40,25 +40,8 @@ sqlite_inst.serialize(() => {
         crypto.pbkdf2Sync('admin', salt, 310000, 32, 'sha256'),
         salt
     ]);
-    salt = crypto.randomBytes(16);
-    sqlite_inst.run(`INSERT OR IGNORE INTO users (id,username, hashed_password, salt) VALUES (?, ?, ?, ?)`, [
-        2,
-        'user',
-        crypto.pbkdf2Sync('user', salt, 310000, 32, 'sha256'),
-        salt
-    ]);
-    sqlite_inst.run(`INSERT OR IGNORE INTO user_location (user_id, location_id) VALUES (2, 1)`);
     sqlite_inst.run(`INSERT OR IGNORE INTO user_roles (user_id, role_id) VALUES(1,1)`);
-    sqlite_inst.run(`INSERT OR IGNORE INTO user_roles (user_id, role_id) VALUES(2,2)`);
-    sqlite_inst.run(`INSERT OR IGNORE INTO locations (name, latitude, longitude, radius, description) VALUES (?, ?, ?, ?, ?)`, [
-        "The Burrow",
-        "40.892690",
-        "-98.362411",
-        100,
-        "The home of the creator.",
-    ]);
-    sqlite_inst.run(`INSERT OR IGNORE INTO user_location (user_id, location_id) VALUES (1, 2)`);
-    sqlite_inst.run('INSERT OR IGNORE INTO position_locations (location_id, position_id)  VALUES(2,1)');
+    sqlite_inst.run(`INSERT OR IGNORE INTO user_location (user_id, location_id) VALUES (1, 1)`);
     sqlite_inst.run("COMMIT");
 });
 
@@ -80,7 +63,7 @@ async function addUser(username, password, role) {
     ]);
 
     const defaultLocation = await getDefaultLocation();
-    await updateUserLocation(userID, defaultLocation.id);
+    await setUserLocation(userID, defaultLocation.id);
 }
 
 async function updateUser(user) {
@@ -433,15 +416,7 @@ async function getAllUsersClockFacePositions() {
     return usersClockPosition;
 }
 
-async function updateUserLocation(userID, locationID) {
-    let user = await getUserFromID(userID);
-    let clockPosition = await getClockPositionFromLocationID(locationID);
-
-    await getClockPositionFromUserID(userID).then((result) => {
-        if (result.face_position !== clockPosition.face_position) {
-            dobby.notifyLocationChange(user.username, clockPosition.name);
-        }
-    });
+async function setUserLocation(userID, locationID) {
     return await new Promise((resolve, reject) => {
         sqlite_inst.all(`INSERT INTO user_location (user_id, location_id) VALUES (?, ?) ON CONFLICT(user_id) DO UPDATE SET location_id=?`, [
             userID,
@@ -454,6 +429,18 @@ async function updateUserLocation(userID, locationID) {
                 resolve(rows);
         });
     })
+}
+
+async function updateUserLocation(userID, locationID) {
+    let user = await getUserFromID(userID);
+    let clockPosition = await getClockPositionFromLocationID(locationID);
+
+    await getClockPositionFromUserID(userID).then((result) => {
+        if (result.face_position !== clockPosition.face_position) {
+            dobby.notifyLocationChange(user.username, clockPosition.name);
+        }
+    });
+    return setUserLocation(userID, locationID);
 }
 
 module.exports = {
