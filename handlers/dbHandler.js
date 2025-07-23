@@ -42,6 +42,7 @@ sqlite_inst.serialize(() => {
     ]);
     sqlite_inst.run(`INSERT OR IGNORE INTO user_roles (user_id, role_id) VALUES(1,1)`);
     sqlite_inst.run(`INSERT OR IGNORE INTO user_location (user_id, location_id) VALUES (1, 1)`);
+    sqlite_inst.run(`DELETE FROM user_location_log`)
     sqlite_inst.run("COMMIT");
 });
 
@@ -431,6 +432,33 @@ async function setUserLocation(userID, locationID) {
     })
 }
 
+async function updateUserLocationLog(userID, latitude, longitude) {
+    return await new Promise((resolve, reject) => {
+        sqlite_inst.all(`INSERT INTO user_location_log (user_id, latitude, longitude, timestamp) VALUES (?, ?, ?, ?)`, [
+            userID,
+            latitude,
+            longitude,
+            new Date().toISOString()
+        ], (err, rows) => {
+            if (err)
+                reject(err);
+            else
+                resolve(rows);
+        });
+    })
+}
+
+async function getUserLocationLog(userID) {
+    return await new Promise((resolve, reject) => {
+        sqlite_inst.all('SELECT * FROM user_location_log WHERE user_id=?', userID, (err, rows) => {
+            if (err)
+                reject(err);
+            else
+                resolve(rows);
+        });
+    });
+}
+
 async function updateUserLocation(userID, locationID) {
     let user = await getUserFromID(userID);
     let clockPosition = await getClockPositionFromLocationID(locationID);
@@ -462,5 +490,7 @@ module.exports = {
     getAllClockPositions,
     updateClockPosition,
     updateUserLocation,
+    updateUserLocationLog,
+    getUserLocationLog,
     sqlite_inst
 };

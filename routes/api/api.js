@@ -32,6 +32,7 @@ router.post('/updateUserLocation', authenticateToken, async function (req, res, 
     const userID = req.userID;
     const userLoc = req.body.location;
     const locations = await db.getAllLocations();
+    await db.updateUserLocationLog(userID, userLoc.latitude, userLoc.longitude);
 
     for (let location of locations) {
         if (isUserWithinLocation(userLoc.latitude, userLoc.longitude, location.latitude, location.longitude, location.radius)) {

@@ -44,6 +44,15 @@ CREATE TABLE IF NOT EXISTS "user_roles" (
     FOREIGN KEY ('role_id') REFERENCES roles('id')
 );
 **
+CREATE TABLE IF NOT EXISTS "user_location_log" (
+   'id' INTEGER PRIMARY KEY NOT NULL,
+   'user_id' integer NOT NULL,
+   'latitude' TEXT NOT NULL,
+   'longitude' TEXT NOT NULL,
+   'timestamp' TEXT NOT NULL,
+   FOREIGN KEY ('user_id') REFERENCES users('id')
+);
+**
 CREATE TABLE IF NOT EXISTS "user_location" (
     'user_id' INTEGER NOT NULL UNIQUE,
     'location_id' INTEGER NOT NULL,

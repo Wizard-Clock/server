@@ -12,6 +12,9 @@ router.get("/", authenticateToken, async function (req, res, next) {
     let users = await db.getAllUsers();
     for (let user of users) {
         await db.getRoleFromUserID(user.id).then(role => {user.role = role.role});
+        let positionList = []
+        await db.getUserLocationLog(user.id).then(locations => {positionList = locations});
+        user.posistionLog = positionList;
     }
     const user = await db.getUserFromID(req.userID);
     res.render('wizards',{title: 'Wizards', username: user.username, role: userRole.role, wizards: users, roles: await db.getAllRoles()});

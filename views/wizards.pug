@@ -13,6 +13,7 @@ block content
                             th(scope="col") Role
                             th(scope="col") Edit
                             th(scope="col") Delete
+                            th(scope="col") View Path
                     tbody()
                         each wizard in wizards
                             tr()
@@ -28,8 +29,25 @@ block content
                                     td()
                                         button(type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal" data-bs-wizard-id= wizard.id data-bs-wizard-name= wizard.username)
                                             i(class="bi bi-trash3-fill")
+                                td()
+                                    if wizard.posistionLog.length > 0
+                                        button(type="button" class="btn btn-outline-dark" data-bs-toggle="modal" data-bs-target="#viewPathModal" data-bs-wizard-log= wizard.posistionLog)
+                                            i(class="bi bi-map")
+                                    else
+                                        p() No Logged Locations
                 button(type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addUserModal") Add User&nbsp;
                     i(class="bi bi-person-plus-fill")
+
+            div(class="modal fade" id="viewPathModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="viewPathModalLabel" aria-hidden="true")
+                div(class="modal-dialog modal-dialog-centered modal-lg")
+                    div(class="modal-content")
+                        div(class="modal-header")
+                            h1(class="modal-title fs-5" id="viewPathModalLabel") User Path
+                            button(type="button" class="btn-close" onclick="dismissPathView()" aria-label="Close")
+                        div(class="modal-body")
+                            div(id="map")
+                        div(class="modal-footer")
+                            button(type="button" class="btn btn-secondary" onclick="dismissPathView()") Close Map
 
             div(class="modal fade" id="deleteModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true")
                 div(class="modal-dialog modal-dialog-centered")
@@ -113,6 +131,40 @@ block content
                             button(type="button" class="btn btn-secondary" data-bs-dismiss="modal") Cancel
 
             script.
+                const userMap = L.map('map').setView([41.737023, -99.587382], 5);
+                L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    maxZoom: 19,
+                    attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+                }).addTo(userMap);
+                let userLine;
+
+                let viewPathModal = document.getElementById('viewPathModal');
+                if (viewPathModal) {
+                    viewPathModal.addEventListener('show.bs.modal', event => {
+                        setTimeout(function () {
+                            userMap.invalidateSize();
+                        }, 500);
+                        const button = event.relatedTarget;
+
+                        const wizardLog = JSON.parse(button.getAttribute('data-bs-wizard-log'));
+                        let latLongMap = [];
+                        for (let posLog of wizardLog) {
+                            latLongMap.push([posLog.latitude, posLog.longitude]);
+                        }
+
+                        userLine = L.polyline(latLongMap, {color: 'red'}).addTo(userMap);
+                        userMap.fitBounds(userLine.getBounds());
+                    });
+                }
+
+                async function dismissPathView() {
+                    let viewPathModal = document.getElementById('viewPathModal');
+                    if (viewPathModal) {
+                        if (userLine != null && userMap.hasLayer(userLine)) {userMap.removeLayer(userLine)}
+                        $('#viewPathModal').modal('hide');
+                    }
+                }
+
                 let deleteModal = document.getElementById('deleteModal');
                 if (deleteModal) {
                     deleteModal.addEventListener('show.bs.modal', event => {
