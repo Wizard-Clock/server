@@ -1,5 +1,5 @@
 # Wizarding Clock Server
-- Proposed Tech Stack
+- Tech Stack
     - DB: sqllite 3
     - Runtime: Node.js
         - Auth Service: Passport.js
@@ -17,7 +17,7 @@ docker run
   -e JWT_SECRET="CHANGEMEPLEASE"
   -e DISCORD_WEBHOOK_URL="https://CHANGEMEPLEASE"
   -p '8080:8080/tcp' 
-  -v wcdata:/app/db 'docker.io/s1r1usblack/wizarding-clock-server:[TAG("dev","release")]' 
+  -v wcdata:/app/db 'ghcr.io/wizard-clock/wizarding-clock-server:("dev","latest")' 
 ```
 - Docker Compose
 ```
@@ -26,7 +26,7 @@ name: Wizarding Clock Server
 services:
   wc-server:
     container_name: Wizarding-Clock-Server
-    image: docker.io/s1r1usblack/wizarding-clock-server:[TAG("dev","release")]
+    image: ghcr.io/wizard-clock/wizarding-clock-server:("dev","latest")
     ports:
       - 8080:8080
     environment:
