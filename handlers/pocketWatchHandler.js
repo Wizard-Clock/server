@@ -23,6 +23,7 @@ const watchHandBase = {
 
 async function createPocketWatchImage() {
     registerFont(path.join(__dirname, '../public/fonts/XanhMono-Regular.ttf'), { family: 'Xanh Mono' });
+    await fs.unlinkSync(pocketWatchBase.writeToUrl);
     const canvas = createCanvas(pocketWatchBase.width, pocketWatchBase.height);
     const ctx = canvas.getContext('2d');
 
@@ -46,9 +47,6 @@ async function createPocketWatchImage() {
         ctx.drawImage(pocketWatchImage, 0, 0, canvas.width, canvas.height);
         await drawNumbers(ctx, pocketWatchBase.center.height/2 - 18, clockPositions);
         await drawTime(ctx, pocketWatchBase.center.height/2 - 18, clockPositions, wizardWithPositionArray);
-        if (fs.existsSync(pocketWatchBase.writeToUrl)) {
-            fs.unlinkSync(pocketWatchBase.writeToUrl);
-        }
         const buffer = canvas.toBuffer('image/png');
         fs.writeFileSync(pocketWatchBase.writeToUrl, buffer);
     }
