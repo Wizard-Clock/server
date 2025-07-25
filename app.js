@@ -30,6 +30,7 @@ app.use('/', require('./routes/auth'));
 app.use('/wizards', require('./routes/smt/wizards'));
 app.use('/locations', require('./routes/smt/locations'));
 app.use('/clock', require('./routes/smt/clock'));
+app.use('/serverSettings', require('./routes/smt/serverSettings'));
 app.use('/api', require('./routes/api/api'));
 
 app.use(logger('dev'));
@@ -55,6 +56,8 @@ app.use(function(err, req, res, next) {
   res.status(err.status || 500);
   res.render('error');
 });
+
+require("./handlers/serverSettingHandler").default.getInstance();
 
 module.exports = app;
 

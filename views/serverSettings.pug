@@ -1,0 +1,43 @@
+extends layout
+
+block content
+    div(class="row justify-content-center")
+        div(class="col-auto w-75")
+            h1(class="pb-2 mb-4 border-bottom") Server Settings
+            div(class="accordion" id="serverSettingsAccordion")
+                div(class="accordion-item")
+                    h2(class="accordion-header" id="discordAccordionHeader")
+                        button(class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#discordCollapse" aria-controls="discordCollapse") Discord Settings
+                    div(id="discordCollapse" class="accordion-collapse collapse" aria-labelledby="discordAccordionHeader" data-bs-parent="#serverSettingsAccordion")
+                        div(class="accordion-body")
+                            div()
+                                form(id="discordSettingsForm" action="/serverSettings/updateSettings" method="post")
+                                    label(for="webhook-url" class="form-label") Discord Webhook URL:
+                                    div(class="input-group mb-3")
+                                        input(type="text" class="form-control" name="discordWebhook" id="webhook-url")
+                                    div(class="form-check form-switch mb-3")
+                                        label(class="form-check-label" for="enableDiscordNotifications") Turn on Discord Notifications
+                                        input(class="form-check-input" type="checkbox" role="switch" name="enableDiscord" id="enableDiscordNotifications")
+                                    label(class="form-label") Notification Frequency:
+                                    div(class="form-check")
+                                        input(class="form-check-input" type="radio" name="notifyEveryPositionUpdate" id="onEverUpdateRdo")
+                                        label(class="form-check-label" for="onEverUpdateRdo") On Every Position Update
+                                    div(class="form-check")
+                                        input(class="form-check-input" type="radio" name="notifyEveryPositionUpdate" id="positionChangeRdo")
+                                        label(class="form-check-label" for="positionChangeRdo") On Wizard Clock Position Changes Only
+                                    div(class="d-grid gap-2 d-md-flex justify-content-md-end")
+                                        button(type="submit" class="btn btn-primary") Save Changes
+
+            script.
+                const settingValues = JSON.parse(`!{JSON.stringify(settings)}`);
+                console.log(settingValues);
+
+                // Initialize Setting Values
+                const discordSettingForm =document.getElementById('discordSettingsForm');
+                document.getElementById('webhook-url').value = settingValues["discordWebhook"];
+                document.getElementById('enableDiscordNotifications').value = settingValues["enableDiscord"];
+                if (settingValues["notifyEveryPositionUpdate"]) {
+                    document.getElementById('onEverUpdateRdo').checked = true;
+                } else {
+                    document.getElementById('positionChangeRdo').checked = true;
+                }

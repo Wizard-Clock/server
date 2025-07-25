@@ -34,7 +34,7 @@ html
               ul(class="dropdown-menu")
                 if role === "admin"
                   li()
-                    a(class="dropdown-item brand_font" href="#") Server Settings
+                    a(class="dropdown-item brand_font" href="/serverSettings") Server Settings
                 li()
                   a(class="dropdown-item brand_font" href="#" onclick="document.forms[\"logoutForm\"].submit();") Logout
                   form(name='logoutForm' action='/logout' method='post')
