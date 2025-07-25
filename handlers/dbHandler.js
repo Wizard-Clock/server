@@ -459,6 +459,17 @@ async function getUserLocationLog(userID) {
     });
 }
 
+async function clearUserLog(userID) {
+    return await new Promise((resolve, reject) => {
+        sqlite_inst.all('DELETE FROM user_location_log WHERE user_id=?', userID, (err, rows) => {
+            if (err)
+                reject(err);
+            else
+                resolve(rows);
+        });
+    });
+}
+
 async function updateUserLocation(userID, locationID) {
     let user = await getUserFromID(userID);
     let clockPosition = await getClockPositionFromLocationID(locationID);
@@ -492,5 +503,6 @@ module.exports = {
     updateUserLocation,
     updateUserLocationLog,
     getUserLocationLog,
+    clearUserLog,
     sqlite_inst
 };

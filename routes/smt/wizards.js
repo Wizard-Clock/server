@@ -20,6 +20,11 @@ router.get("/", authenticateToken, async function (req, res, next) {
     res.render('wizards',{title: 'Wizards', username: user.username, role: userRole.role, wizards: users, roles: await db.getAllRoles()});
 });
 
+router.post('/clearUserLog', authenticateToken, async function (req, res, next) {
+    await db.clearUserLog(req.body.id);
+    res.send({success: true});
+})
+
 router.post('/addUser', authenticateToken, async function (req, res, next) {
     const form = formidable({ multiples: true });
     await form.parse(req, async (err, user) => {

@@ -14,6 +14,7 @@ block content
                             th(scope="col") Edit
                             th(scope="col") Delete
                             th(scope="col") View Path
+                            th(scope="col") Clear Path Log
                     tbody()
                         each wizard in wizards
                             tr()
@@ -35,6 +36,13 @@ block content
                                             i(class="bi bi-map")
                                     else
                                         p() No Logged Locations
+                                td()
+                                    if wizard.posistionLog.length > 0
+                                        button(type="button" class="btn btn-outline-danger" onclick=`clearUserLog(${wizard.id})`)
+                                            i(class="bi bi-trash3-fill")
+                                    else
+                                        p() Log is Empty
+
                 button(type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addUserModal") Add User&nbsp;
                     i(class="bi bi-person-plus-fill")
 
@@ -162,6 +170,42 @@ block content
                     if (viewPathModal) {
                         if (userLine != null && userMap.hasLayer(userLine)) {userMap.removeLayer(userLine)}
                         $('#viewPathModal').modal('hide');
+                    }
+                }
+
+                async function clearUserLog(wizardID) {
+                    if (wizardID) {
+                        let response = await fetch('/wizards/clearUserLog', {
+                            method: 'POST',
+                            headers: {
+                                "Content-Type": "application/json",
+                            },
+                            body: JSON.stringify({id: wizardID})
+                        });
+                        await response.json();
+                        window.location.reload();
+                    }
+                }
+
+                async function deleteUserAction() {
+                    let viewPathModal = document.getElementById('viewPathModal');
+                    if (viewPathModal) {
+                        let idString = document.getElementById('viewPathModal').querySelector('.wizard_id').textContent;
+                        idString = idString.slice(3).trim();
+                        let response = await fetch('/wizards/deleteUser', {
+                            method: 'POST',
+                            headers: {
+                                "Content-Type": "application/json",
+                            },
+                            body: JSON.stringify({id: idString})
+                        });
+                        let result = await response.json();
+                        if (result.success) {
+                            $('#deleteModal').modal('hide');
+                            window.location.reload();
+                        } else {
+                            alert("Deletion Error");
+                        }
                     }
                 }
 
