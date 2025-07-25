@@ -77,18 +77,18 @@ CREATE TABLE IF NOT EXISTS "role_permissions" (
       FOREIGN KEY ('permission_id') REFERENCES permissions('id')
 );
 **
-CREATE TABLE IF NOT EXISTS "app_settings" (
-      'id' INTEGER PRIMARY KEY NOT NULL,
-      'name' integer NOT NULL UNIQUE,
-      'value' TEXT NOT NULL
-);
-**
 CREATE TABLE IF NOT EXISTS "follower_link" (
        'id' INTEGER PRIMARY KEY NOT NULL,
        'follower_id' integer NOT NULL UNIQUE,
        'lead_id' integer NOT NULL,
        FOREIGN KEY ('follower_id') REFERENCES users('id'),
        FOREIGN KEY ('lead_id') REFERENCES users('id')
+);
+**
+CREATE TABLE IF NOT EXISTS "server_settings" (
+       'id' INTEGER PRIMARY KEY NOT NULL,
+       'setting_name' TEXT NOT NULL UNIQUE,
+       'value' TEXT NOT NULL
 );
 **
 INSERT OR IGNORE INTO roles (id,role, description) VALUES
