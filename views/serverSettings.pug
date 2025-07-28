@@ -34,8 +34,8 @@ block content
 
                 // Initialize Setting Values
                 document.getElementById('webhook-url').value = settingValues['discordWebhook'];
-                document.getElementById('enableDiscordNotifications').checked = settingValues['enableDiscord'];
-                if (settingValues['notifyEveryPositionUpdate']) {
+                document.getElementById('enableDiscordNotifications').checked = settingValues['enableDiscord'] === "true";
+                if (settingValues['notifyEveryPositionUpdate'] === "true") {
                     document.getElementById('onEverUpdateRdo').checked = true;
                 } else {
                     document.getElementById('positionChangeRdo').checked = true;
@@ -52,8 +52,8 @@ block content
                         },
                         body: JSON.stringify({
                             discordWebhook: document.getElementById('webhook-url').value,
-                            enableDiscord: document.getElementById('enableDiscordNotifications').checked,
-                            notifyEveryPositionUpdate: document.getElementById('onEverUpdateRdo').checked
+                            enableDiscord: document.getElementById('enableDiscordNotifications').checked.toString(),
+                            notifyEveryPositionUpdate: document.getElementById('onEverUpdateRdo').checked.toString()
                         })
                     });
                     let result = await response.json();

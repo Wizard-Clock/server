@@ -12,12 +12,13 @@ router.get('/', authenticateToken, async function (req, res, next) {
         return res.redirect("/clock");
     }
     const user = await db.getUserFromID(req.userID);
+    const serverSettings = await settingsService.getAllSettings();
 
     res.render('serverSettings', {
         title: 'Server Settings',
         username: user.username,
         role: userRole.role,
-        settings: settingsService.getAllSettings()
+        settings: serverSettings
     });
 });
 
@@ -32,7 +33,7 @@ router.post('/updateDiscordSettings', authenticateToken, async function (req, re
         await settingsService.set(discordSetting.name, discordSetting.value);
     }
 
-    if (req.body.enableDiscord) {
+    if (req.body.enableDiscord === "true") {
         dobby.enableDiscordPlugin();
     }
     res.send({success: true});

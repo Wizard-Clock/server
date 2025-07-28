@@ -59,7 +59,11 @@ export default class ServerSettingsService {
                 this._saveSettings();
             } else {
                 console.log("Server Settings found.");
-                this.serverSettings = value;
+                let state = {};
+                value.forEach((setting) => {
+                    state[setting.setting_name] = setting.value;
+                });
+                this.serverSettings = state
             }
         });
     }

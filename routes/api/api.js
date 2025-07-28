@@ -69,7 +69,7 @@ router.get('/createPocketWatch', authenticateToken, async function (req, res, ne
 async function fireLocationUpdate(userID, locationID) {
     let clockPosition = await db.getClockPositionFromLocationID(locationID);
     await db.getClockPositionFromUserID(userID).then((result) => {
-        if (settingsService.getSettingValue("notifyEveryPositionUpdate")) {
+        if (settingsService.getSettingValue("notifyEveryPositionUpdate") === "true") {
             db.getUserFromID(userID).then((result) => {
                 dobby.notifyLocationChange(result.username, clockPosition.name)
             })
