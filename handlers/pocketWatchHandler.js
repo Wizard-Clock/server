@@ -20,10 +20,20 @@ const watchHandBase = {
     height: 700,
     radiusMod: .5
 };
+let isFinished;
+
+function isPocketWatchFinished() {
+    return isFinished;
+}
 
 async function createPocketWatchImage() {
+    isFinished = false;
     registerFont(path.join(__dirname, '../public/fonts/XanhMono-Regular.ttf'), { family: 'Xanh Mono' });
-    await fs.unlinkSync(pocketWatchBase.writeToUrl);
+    try {
+        await fs.unlinkSync(pocketWatchBase.writeToUrl);
+    } catch {
+        //do nothing
+    }
     const canvas = createCanvas(pocketWatchBase.width, pocketWatchBase.height);
     const ctx = canvas.getContext('2d');
 
@@ -49,6 +59,8 @@ async function createPocketWatchImage() {
         await drawTime(ctx, pocketWatchBase.center.height/2 - 18, clockPositions, wizardWithPositionArray);
         const buffer = canvas.toBuffer('image/png');
         fs.writeFileSync(pocketWatchBase.writeToUrl, buffer);
+        console.log("Pocket Watch Created.");
+        isFinished = true;
     }
 
     // Much help from https://github.com/malcolmrigg/wizard-clock-card/tree/master
@@ -152,5 +164,6 @@ async function createPocketWatchImage() {
 }
 
 module.exports = {
-    createPocketWatchImage
+    createPocketWatchImage,
+    isPocketWatchFinished
 };

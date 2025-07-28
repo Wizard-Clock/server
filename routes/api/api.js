@@ -55,9 +55,15 @@ router.post('/updateUserLocation', authenticateToken, async function (req, res, 
 });
 
 router.get('/createPocketWatch', authenticateToken, async function (req, res, next) {
-    await pocketWatchHandler.createPocketWatchImage();
-    res.status(200)
-        .sendFile(path.join(__dirname, '../../public/images/GENERATED-pocket-watch-clock-face.png'));
+    await pocketWatchHandler.createPocketWatchImage().then(() => {
+        let clockCheck = setInterval(() => {
+            if (pocketWatchHandler.isPocketWatchFinished()) {
+                res.status(200)
+                    .sendFile(path.join(__dirname, '../../public/images/GENERATED-pocket-watch-clock-face.png'));
+                clearInterval(clockCheck);
+            }
+        }, 2000);
+    });
 })
 
 async function fireLocationUpdate(userID, locationID) {
