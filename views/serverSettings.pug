@@ -8,16 +8,17 @@ block content
                 div(class="accordion-item")
                     h2(class="accordion-header" id="discordAccordionHeader")
                         button(class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#discordCollapse" aria-controls="discordCollapse") Discord Settings
-                    div(id="discordCollapse" class="accordion-collapse collapse" aria-labelledby="discordAccordionHeader" data-bs-parent="#serverSettingsAccordion")
+                    div(id="discordCollapse" class="accordion-collapse collapse show" aria-labelledby="discordAccordionHeader" data-bs-parent="#serverSettingsAccordion")
                         div(class="accordion-body")
                             div()
-                                form(id="discordSettingsForm" action="/serverSettings/updateSettings" method="post")
-                                    label(for="webhook-url" class="form-label") Discord Webhook URL:
-                                    div(class="input-group mb-3")
-                                        input(type="text" class="form-control" name="discordWebhook" id="webhook-url")
+                                form(id="discordSettingsForm")
+                                    div(class="mb-3")
+                                        label(for="webhook-url" class="form-label") Discord Webhook URL:
+                                        input(type="text" class="form-control" name="discordWebhook" id="webhook-url" aria-describedby="discordWebhookHelp")
+                                        div(id="discordWebhookHelp" class="form-text") More info on how to generate a webhook <a href="https://docs.gitlab.com/user/project/integrations/discord_notifications/" target="_blank" rel="noopener noreferrer">here</a>.
                                     div(class="form-check form-switch mb-3")
-                                        label(class="form-check-label" for="enableDiscordNotifications") Turn on Discord Notifications
                                         input(class="form-check-input" type="checkbox" role="switch" name="enableDiscord" id="enableDiscordNotifications")
+                                        label(class="form-check-label" for="enableDiscordNotifications") Turn on Discord Notifications
                                     label(class="form-label") Notification Frequency:
                                     div(class="form-check")
                                         input(class="form-check-input" type="radio" name="notifyEveryPositionUpdate" id="onEverUpdateRdo")
@@ -30,14 +31,36 @@ block content
 
             script.
                 const settingValues = JSON.parse(`!{JSON.stringify(settings)}`);
-                console.log(settingValues);
 
                 // Initialize Setting Values
-                const discordSettingForm =document.getElementById('discordSettingsForm');
-                document.getElementById('webhook-url').value = settingValues["discordWebhook"];
-                document.getElementById('enableDiscordNotifications').value = settingValues["enableDiscord"];
-                if (settingValues["notifyEveryPositionUpdate"]) {
+                document.getElementById('webhook-url').value = settingValues['discordWebhook'];
+                document.getElementById('enableDiscordNotifications').checked = settingValues['enableDiscord'];
+                if (settingValues['notifyEveryPositionUpdate']) {
                     document.getElementById('onEverUpdateRdo').checked = true;
                 } else {
                     document.getElementById('positionChangeRdo').checked = true;
+                }
+
+                let discordSettingsForm = document.getElementById('discordSettingsForm');
+                discordSettingsForm.onsubmit = async (e) => {
+                    e.preventDefault();
+
+                    let response = await fetch('/serverSettings/updateDiscordSettings', {
+                        method: 'POST',
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify({
+                            discordWebhook: document.getElementById('webhook-url').value,
+                            enableDiscord: document.getElementById('enableDiscordNotifications').checked,
+                            notifyEveryPositionUpdate: document.getElementById('onEverUpdateRdo').checked
+                        })
+                    });
+                    let result = await response.json();
+                    if (result.success) {
+                        discordSettingsForm.reset();
+                        window.location.reload();
+                    } else {
+                        alert("Submission Error");
+                    }
                 }
