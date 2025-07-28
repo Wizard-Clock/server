@@ -7,27 +7,28 @@ block content
         div(class="d-flex justify-content-center align-items-center mt-3")
             a(role="button" class="btn btn-outline-secondary" href="/clock/standalone" target="_blank") Open Fullscreen Clock&nbsp;
                 i(class="bi bi-clock")
-        div(class="col-auto w-75")
-            div()
-                h1(class="py-2 my-4 border-bottom") Clock Face Management
-                table(class="table table-striped table-hover")
-                    thead()
-                        tr()
-                            th(scope="col") Position Number
-                            th(scope="col") Name
-                            th(scope="col") Assigned Locations
-                            th(scope="col") Edit
-                    tbody()
-                        each position in clockPositions
+        if role === "admin"
+            div(class="col-auto w-75")
+                div()
+                    h1(class="py-2 my-4 border-bottom") Clock Face Management
+                    table(class="table table-striped table-hover")
+                        thead()
                             tr()
-                                th(scope="row")= position.face_position
-                                td()= position.name
-                                each clockMap in clockPositionLocations
-                                    if clockMap.positionName === position.name
-                                        td()= clockMap.locations
-                                td()
-                                    button(type="button" class="btn btn-light" data-bs-toggle="modal" data-bs-target="#editClockPositionModal" data-bs-position= position)
-                                        i(class="bi bi-pencil-square")
+                                th(scope="col") Position Number
+                                th(scope="col") Name
+                                th(scope="col") Assigned Locations
+                                th(scope="col") Edit
+                        tbody()
+                            each position in clockPositions
+                                tr()
+                                    th(scope="row")= position.face_position
+                                    td()= position.name
+                                    each clockMap in clockPositionLocations
+                                        if clockMap.positionName === position.name
+                                            td()= clockMap.locations
+                                    td()
+                                        button(type="button" class="btn btn-light" data-bs-toggle="modal" data-bs-target="#editClockPositionModal" data-bs-position= position)
+                                            i(class="bi bi-pencil-square")
 
     div(class="modal fade" id="editClockPositionModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="editClockPositionModalLabel" aria-hidden="true")
         div(class="modal-dialog modal-dialog-centered")
@@ -269,7 +270,6 @@ block content
                 document.getElementById('editClockPositionForm').reset();
                 const button = event.relatedTarget;
                 const clockPosition = JSON.parse(button.getAttribute('data-bs-position'));
-                console.log(clockPosition.id)
 
                 editClockPositionModal.setAttribute("data-bs-position-id", clockPosition.id);
 
