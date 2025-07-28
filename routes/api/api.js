@@ -38,7 +38,7 @@ router.post('/updateUserLocation', authenticateToken, async function (req, res, 
 
     for (let location of locations) {
         if (isUserWithinLocation(userLoc.latitude, userLoc.longitude, location.latitude, location.longitude, location.radius)) {
-            fireLocationUpdate(userID, location.id);
+            await fireLocationUpdate(userID, location.id);
             await db.updateUserLocation(userID, location.id).catch(() =>{
                 return res.status(500);
             });
@@ -47,7 +47,7 @@ router.post('/updateUserLocation', authenticateToken, async function (req, res, 
     }
 
     const defaultLocation = await db.getDefaultLocation();
-    fireLocationUpdate(userID, defaultLocation.id);
+    await fireLocationUpdate(userID, defaultLocation.id);
     await db.updateUserLocation(userID, defaultLocation.id).catch(() =>{
         return res.status(500);
     });
@@ -64,10 +64,14 @@ async function fireLocationUpdate(userID, locationID) {
     let clockPosition = await db.getClockPositionFromLocationID(locationID);
     await db.getClockPositionFromUserID(userID).then((result) => {
         if (settingsService.getSettingValue("notifyEveryPositionUpdate")) {
-            dobby.notifyLocationChange(user.username, clockPosition.name);
+            db.getUserFromID(userID).then((result) => {
+                dobby.notifyLocationChange(result.username, clockPosition.name)
+            })
         } else {
             if (result.face_position !== clockPosition.face_position) {
-                dobby.notifyLocationChange(user.username, clockPosition.name);
+                db.getUserFromID(userID).then((result) => {
+                    dobby.notifyLocationChange(result.username, clockPosition.name)
+                })
             }
         }
     });
