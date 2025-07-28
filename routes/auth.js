@@ -24,7 +24,8 @@ router.post('/login', function (req, res, next) {
                 res.send(err);
             }
             const token = jwt.sign(user.id, process.env.JWT_SECRET);
-            res.cookie('nargle', token, { httpOnly: true, secure: true, maxAge: 3600000 });
+            let age = req.body.rememberMe ? 31557600000 : 3600000;
+            res.cookie('nargle', token, { httpOnly: true, secure: true, maxAge: age });
             return res.redirect('/clock');
         })
     })
