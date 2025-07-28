@@ -2,10 +2,12 @@ const express = require('express');
 const jwt = require('jsonwebtoken');
 const router = express.Router();
 const db = require("../../handlers/dbHandler");
+const dobby = require("../../handlers/discordHandler");
 const authenticateToken = require("../../handlers/authHandler");
 const passport = require("passport");
 const pocketWatchHandler = require("../../handlers/pocketWatchHandler");
 const path = require("path");
+const settingsService = require("../../handlers/serverSettingHandler").default.getInstance();
 
 router.all('/health', async function (req, res, next) {
     return res.status(200).json({ message: 'API up and running.' });
@@ -36,6 +38,7 @@ router.post('/updateUserLocation', authenticateToken, async function (req, res, 
 
     for (let location of locations) {
         if (isUserWithinLocation(userLoc.latitude, userLoc.longitude, location.latitude, location.longitude, location.radius)) {
+            fireLocationUpdate(userID, location.id);
             await db.updateUserLocation(userID, location.id).catch(() =>{
                 return res.status(500);
             });
@@ -44,6 +47,7 @@ router.post('/updateUserLocation', authenticateToken, async function (req, res, 
     }
 
     const defaultLocation = await db.getDefaultLocation();
+    fireLocationUpdate(userID, defaultLocation.id);
     await db.updateUserLocation(userID, defaultLocation.id).catch(() =>{
         return res.status(500);
     });
@@ -55,6 +59,19 @@ router.get('/createPocketWatch', authenticateToken, async function (req, res, ne
     res.status(200)
         .sendFile(path.join(__dirname, '../../public/images/GENERATED-pocket-watch-clock-face.png'));
 })
+
+async function fireLocationUpdate(userID, locationID) {
+    let clockPosition = await db.getClockPositionFromLocationID(locationID);
+    await db.getClockPositionFromUserID(userID).then((result) => {
+        if (settingsService.getSettingValue("notifyEveryPositionUpdate")) {
+            dobby.notifyLocationChange(user.username, clockPosition.name);
+        } else {
+            if (result.face_position !== clockPosition.face_position) {
+                dobby.notifyLocationChange(user.username, clockPosition.name);
+            }
+        }
+    });
+}
 
 function isUserWithinLocation(userLat, userLong, locationLat, locationLong, radius) {
     return getDistanceFromLatLonInM(userLat, userLong, locationLat, locationLong) <= radius;

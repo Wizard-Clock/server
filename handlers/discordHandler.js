@@ -1,14 +1,26 @@
+const settingsService = require("../handlers/serverSettingHandler").default.getInstance();
+
 const webhookUsername = "Dobby";
 const webhookAvatar = "https://static.wikia.nocookie.net/harrypotter/images/f/f0/Dobbyelve.jpg";
-let startup = true;
+let attemptStartup = true;
 let isValidWebhook = true;
-notifyServerStartup();
 
 async function notifyServerStartup() {
     let params = {
         username: webhookUsername,
         avatar_url: webhookAvatar,
         content: "Server has started up at " + new Date().toUTCString()
+    }
+    await sendWebhook(params);
+}
+
+async function enableDiscordPlugin() {
+    attemptStartup = true;
+    isValidWebhook = true;
+    let params = {
+        username: webhookUsername,
+        avatar_url: webhookAvatar,
+        content: "Discord plugin for Wizarding Clock Enabled"
     }
     await sendWebhook(params);
 }
@@ -40,22 +52,22 @@ async function notifyLocationChange(username, clockPositionName) {
 }
 
 async function sendWebhook(params) {
-    if  (!isValidWebhook) {return}
-    fetch(process.env.DISCORD_WEBHOOK_URL, {
+    if (!settingsService.getSettingValue("enableDiscord") || !isValidWebhook) {return}
+    fetch(settingsService.getSettingValue("discordWebhook"), {
         method: "POST",
         headers: {
             'Content-type': 'application/json'
         },
         body: JSON.stringify(params)
     }).then(res => {
-        if (startup) {
+        if (attemptStartup) {
             if (res.status === 204) {
                 console.log("Discord Webhooks Enabled.");
             } else {
                 console.log("Invalid Discord Webhook URL or Parameters. Discord Webhooks Disabled.");
             }
         }
-        startup = false;
+        attemptStartup = false;
     }).catch(() => {
         console.log("Invalid Discord Webhook URL or Parameters. Discord Webhooks Disabled.");
         isValidWebhook = false;
@@ -63,5 +75,7 @@ async function sendWebhook(params) {
 }
 
 module.exports = {
+    notifyServerStartup,
+    enableDiscordPlugin,
     notifyLocationChange
 };

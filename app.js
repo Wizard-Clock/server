@@ -57,11 +57,11 @@ app.use(function(err, req, res, next) {
   res.render('error');
 });
 
-require("./handlers/serverSettingHandler").default.getInstance();
-
 module.exports = app;
 
 app.listen(process.env.PORT, () => {
   console.log(`Server startup occurred at: ${new Date().toUTCString()}`);
-  console.log(`Listening on port ${process.env.PORT}`)
+  console.log(`Listening on port ${process.env.PORT}`);
+  require("./handlers/serverSettingHandler").default.getInstance();
+  setTimeout(() => {require("./handlers/discordHandler").notifyServerStartup()}, 5000)
 });

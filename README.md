@@ -23,7 +23,6 @@ docker run
   -e TZ="America/Chicago"
   -e DATABASE_NAME="CHANGEME.db"
   -e JWT_SECRET="CHANGEMEPLEASE"
-  -e DISCORD_WEBHOOK_URL="https://CHANGEMEPLEASE"
   -p '8080:8080/tcp' 
   -v wcdata:/app/db 'ghcr.io/wizard-clock/wizarding-clock-server:("dev","latest")' 
 ```
@@ -40,7 +39,6 @@ services:
     environment:
       DATABASE_NAME: CHANGEME.db
       JWT_SECRET: CHANGEMEPLEASE
-      DISCORD_WEBHOOK_URL: https://CHANGEMEPLEASE
     volumes:
       - wcdata:/app/db
     restart: always

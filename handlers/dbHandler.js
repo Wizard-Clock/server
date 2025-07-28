@@ -1,7 +1,6 @@
 const sqlite = require('sqlite3');
 const crypto = require('crypto');
 const fs = require('fs');
-const dobby = require("../handlers/discordHandler");
 const migrationsDir = require('path').dirname(require.main.filename) + '/migrations/';
 
 const dbDir = require('path').dirname(require.main.filename) + '/db/';
@@ -471,14 +470,6 @@ async function clearUserLog(userID) {
 }
 
 async function updateUserLocation(userID, locationID) {
-    let user = await getUserFromID(userID);
-    let clockPosition = await getClockPositionFromLocationID(locationID);
-
-    await getClockPositionFromUserID(userID).then((result) => {
-        if (result.face_position !== clockPosition.face_position) {
-            dobby.notifyLocationChange(user.username, clockPosition.name);
-        }
-    });
     return setUserLocation(userID, locationID);
 }
 
@@ -524,6 +515,7 @@ module.exports = {
     deleteLocation,
     getAllUsersClockFacePositions,
     getClockPositionFromLocationID,
+    getClockPositionFromUserID,
     getAllLocationsForClockPosition,
     getAllClockPositions,
     updateClockPosition,
