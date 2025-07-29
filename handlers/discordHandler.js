@@ -20,7 +20,19 @@ async function enableDiscordPlugin() {
     let params = {
         username: webhookUsername,
         avatar_url: webhookAvatar,
-        content: "Discord plugin for Wizarding Clock Enabled"
+        embeds: [
+            {
+                "title": "Discord plugin for Wizarding Clock Enabled/Updated.",
+                "fields": [
+                    {
+                        "name": "Notify Every Position Update",
+                        "value": "Value:  " + settingsService.getSettingValue("notifyEveryPositionUpdate"),
+                        "inline": true
+                    }
+                ]
+            }
+        ],
+        content: new Date().toUTCString()
     }
     await sendWebhook(params);
 }
