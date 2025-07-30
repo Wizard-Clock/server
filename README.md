@@ -7,11 +7,12 @@
 </p>
 
 # Wizarding Clock Server
-- Tech Stack
-    - DB: sqllite 3
-    - Runtime: Node.js
-        - Auth Service: Passport.js
-    - Backend Routing: Express.js
+### Tech Stack
+- DB: sqllite 3
+- Runtime: Node.js
+    - Auth Service: Passport.js
+- Backend Routing: Express.js
+### For more info see wiki [here](https://github.com/Wizard-Clock/server/wiki)!
 
 ## Docker Instructions
 - Docker Run

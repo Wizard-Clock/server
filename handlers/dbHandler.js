@@ -41,7 +41,7 @@ sqlite_inst.serialize(() => {
     ]);
     sqlite_inst.run(`INSERT OR IGNORE INTO user_roles (user_id, role_id) VALUES(1,1)`);
     sqlite_inst.run(`INSERT OR IGNORE INTO user_location (user_id, location_id) VALUES (1, 1)`);
-    sqlite_inst.run(`DELETE FROM user_location_log`)
+    sqlite_inst.run(`DELETE FROM user_location_log`);
     sqlite_inst.run("COMMIT");
 });
 
@@ -65,6 +65,10 @@ async function addUser(username, password, role) {
     const defaultLocation = await getDefaultLocation();
     await setUserLocation(userID, defaultLocation.id);
 }
+
+setInterval(async () => {
+    sqlite_inst.run(`DELETE FROM user_location_log`);
+}, 86400000);
 
 async function updateUser(user) {
     const oldUser = await getUserFromID(user.id);
