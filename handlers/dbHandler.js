@@ -195,6 +195,17 @@ async function getLeadIDFromFollowerID(followerID) {
     });
 }
 
+async function getFollowerInfoFromLeadID(leadID) {
+    return await new Promise((resolve, reject) => {
+        sqlite_inst.all('SELECT * FROM follower_link WHERE lead_id=?', leadID, (err, rows) => {
+            if (err)
+                reject(err);
+            else
+                resolve(rows);
+        });
+    });
+}
+
 // Role Management
 async function getAllRoles() {
     return await new Promise((resolve, reject) => {
@@ -558,6 +569,7 @@ module.exports = {
     getAllUsers,
     getUserFromID,
     getLeadFromFollowerID,
+    getFollowerInfoFromLeadID,
     getRoleFromUserID,
     getAllRoles,
     getDefaultLocation,

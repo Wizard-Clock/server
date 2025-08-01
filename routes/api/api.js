@@ -39,8 +39,20 @@ router.post('/updateUserLocation', authenticateToken, async function (req, res, 
     console.log("User location update received.");
     const userID = req.userID;
     const userLoc = req.body.location;
+    const followers = [];
     const locations = await db.getAllLocations();
+
+    await db.getFollowerInfoFromLeadID(userID).then(results => {
+        for (let followInfo of results) {
+            followers.push(followInfo.follower_id);
+        }
+    });
     await db.updateUserLocationLog(userID, userLoc.latitude, userLoc.longitude);
+    if (followers.length > 0) {
+        for (let idx = 0; idx < followers.length; idx++) {
+            await db.updateUserLocationLog(followers[idx], userLoc.latitude, userLoc.longitude);
+        }
+    }
 
     for (let location of locations) {
         if (isUserWithinLocation(userLoc.latitude, userLoc.longitude, location.latitude, location.longitude, location.radius)) {
@@ -48,6 +60,9 @@ router.post('/updateUserLocation', authenticateToken, async function (req, res, 
             await db.updateUserLocation(userID, location.id).catch(() =>{
                 return res.status(500);
             });
+            if (followers.length > 0) {
+                await updateFollowersLocations(followers, location.id);
+            }
             return res.status(202).json({ message: 'User location updated.' });
         }
     }
@@ -57,6 +72,9 @@ router.post('/updateUserLocation', authenticateToken, async function (req, res, 
     await db.updateUserLocation(userID, defaultLocation.id).catch(() =>{
         return res.status(500);
     });
+    if (followers.length > 0) {
+        await updateFollowersLocations(followers, defaultLocation.id);
+    }
     return res.status(202).json({ message: 'User location updated.' });
 });
 
@@ -71,6 +89,13 @@ router.get('/createPocketWatch', authenticateToken, async function (req, res, ne
         }, 2000);
     });
 })
+
+async function updateFollowersLocations(followers, locationID) {
+    for (let idx = 0; idx < followers.length; idx++) {
+        await fireLocationUpdate(followers[idx], locationID);
+        await db.updateUserLocation(followers[idx], locationID);
+    }
+}
 
 async function fireLocationUpdate(userID, locationID) {
     let clockPosition = await db.getClockPositionFromLocationID(locationID);
