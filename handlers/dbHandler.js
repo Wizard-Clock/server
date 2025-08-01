@@ -175,8 +175,8 @@ async function applyFollowLink(followerID, leadID) {
         ]);
 }
 
-async function removeFollowLink(userInfo) {
-    await sqlite_inst.run(`DELETE FROM follower_link WHERE follower_id=?`, userInfo.id, () => {});
+async function removeFollowLink(followerID) {
+    await sqlite_inst.run(`DELETE FROM follower_link WHERE follower_id=?`, followerID, () => {});
 }
 
 async function getLeadFromFollowerID(followerID) {
