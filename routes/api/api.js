@@ -16,14 +16,20 @@ router.all('/health', async function (req, res, next) {
 router.post('/login', async function (req, res, next) {
     passport.authenticate('local', (err, user) => {
         if (err || !user) {
-            return res.status(400).json({ message: 'Invalid credentials' });
+            return res.status(400).json({ message: 'Invalid credentials.' });
         }
-        req.login(user, {session: false}, err => {
+        req.login(user, {session: false}, async err => {
             if (err) {
-                return res.status(400).json({ message: 'Invalid credentials' });
+                return res.status(400).json({message: 'Invalid credentials.'});
             }
+
+            let userRole = await db.getRoleFromUserID(user.id);
+            if (userRole.role === 'child') {
+                return res.status(401).json({message: 'Underage magic detected, unable to login child.'});
+            }
+            
             const token = jwt.sign(user.id, process.env.JWT_SECRET);
-            return res.json({ token })
+            return res.json({token})
         })
     })
     (req, res);
