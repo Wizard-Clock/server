@@ -33,11 +33,12 @@ sqlite_inst.serialize(() => {
     });
 
     let salt = crypto.randomBytes(16);
-    sqlite_inst.run(`INSERT OR IGNORE INTO users (id,username, hashed_password, salt) VALUES (?, ?, ?, ?)`, [
+    sqlite_inst.run(`INSERT OR IGNORE INTO users (id,username, hashed_password, salt, isFollower) VALUES (?, ?, ?, ?, ?)`, [
         1,
         'admin',
         crypto.pbkdf2Sync('admin', salt, 310000, 32, 'sha256'),
-        salt
+        salt,
+        'false'
     ]);
     sqlite_inst.run(`INSERT OR IGNORE INTO user_roles (user_id, role_id) VALUES(1,1)`);
     sqlite_inst.run(`INSERT OR IGNORE INTO user_location (user_id, location_id) VALUES (1, 1)`);
@@ -46,12 +47,13 @@ sqlite_inst.serialize(() => {
 });
 
 // User Management
-async function addUser(username, password, role) {
+async function addUser(username, password, role, isFollower, leadID) {
     let salt = crypto.randomBytes(16);
-    await sqlite_inst.run(`INSERT INTO users (username, hashed_password, salt) VALUES (?, ?, ?)`, [
+    await sqlite_inst.run(`INSERT INTO users (username, hashed_password, salt, isFollower) VALUES (?, ?, ?, ?)`, [
         username,
         crypto.pbkdf2Sync(password, salt, 310000, 32, 'sha256'),
-        salt
+        salt,
+        isFollower.toString()
     ]);
 
     let userID, roleID;
@@ -64,6 +66,10 @@ async function addUser(username, password, role) {
 
     const defaultLocation = await getDefaultLocation();
     await setUserLocation(userID, defaultLocation.id);
+
+    if (isFollower) {
+        await applyFollowLink(userID, leadID);
+    }
 }
 
 setInterval(async () => {
@@ -86,6 +92,8 @@ async function updateUser(user) {
         ], (err, rows) => {})
     }
 
+    await updateUserFollowStatus(user);
+
     let updateRole = false;
     await getRoleFromUserID(user.id).then(value => updateRole = value.role !== user.role);
     if (updateRole) {
@@ -105,6 +113,7 @@ async function updateUser(user) {
 
 async function deleteUser(userID) {
     await sqlite_inst.run(`DELETE FROM user_roles WHERE user_id=?`, userID, (err, rows) => {});
+    await removeFollowLink(userID);
     return await new Promise((resolve, reject) => {
         sqlite_inst.run(`DELETE FROM users WHERE id=?`, userID, (err, rows) => {
             if (err)
@@ -140,6 +149,44 @@ async function getUserFromID(user_id) {
 async function getUserFromName(name) {
     return await new Promise((resolve, reject) => {
         sqlite_inst.all('SELECT * FROM users WHERE username=?', name, (err, rows) => {
+            if (err)
+                reject(err);
+            else
+                resolve(rows[0]);
+        });
+    });
+}
+
+//Follow Management
+async function updateUserFollowStatus(userInfo) {
+    if (userInfo.isFollower === "true") {
+        await applyFollowLink(userInfo.id, userInfo.leadID);
+    } else {
+        await removeFollowLink(userInfo.id);
+    }
+    await sqlite_inst.run(`UPDATE users SET isFollower=? WHERE id=?`, [userInfo.isFollower, userInfo.id], () => {});
+}
+
+async function applyFollowLink(followerID, leadID) {
+    sqlite_inst.all(`INSERT INTO follower_link (follower_id, lead_id) VALUES (?, ?) ON CONFLICT(follower_id) DO UPDATE SET lead_id=?`,[
+            followerID,
+            leadID,
+            leadID
+        ]);
+}
+
+async function removeFollowLink(userInfo) {
+    await sqlite_inst.run(`DELETE FROM follower_link WHERE follower_id=?`, userInfo.id, () => {});
+}
+
+async function getLeadFromFollowerID(followerID) {
+    let leadID = await getLeadIDFromFollowerID(followerID);
+    return getUserFromID(leadID.lead_id);
+}
+
+async function getLeadIDFromFollowerID(followerID) {
+    return await new Promise((resolve, reject) => {
+        sqlite_inst.all('SELECT lead_id FROM follower_link WHERE follower_id=?', followerID, (err, rows) => {
             if (err)
                 reject(err);
             else
@@ -510,6 +557,7 @@ module.exports = {
     deleteUser,
     getAllUsers,
     getUserFromID,
+    getLeadFromFollowerID,
     getRoleFromUserID,
     getAllRoles,
     getDefaultLocation,

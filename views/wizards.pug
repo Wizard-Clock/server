@@ -11,6 +11,8 @@ block content
                             th(scope="col") ID
                             th(scope="col") Username
                             th(scope="col") Role
+                            th(scope="col") Follower
+                            th(scope="col") Wizard Following
                             th(scope="col") Edit
                             th(scope="col") Delete
                             th(scope="col") View Path
@@ -21,6 +23,11 @@ block content
                                 th(scope="row" id="wizardID")= wizard.id
                                 td()= wizard.username
                                 td()= wizard.role
+                                td()= wizard.isFollower
+                                if wizard.isFollower === "true"
+                                    td()= wizard.lead.username
+                                else
+                                    td()= "N/A"
                                 td()
                                     button(type="button" class="btn btn-light" data-bs-toggle="modal" data-bs-target="#editModal" data-bs-wizard= wizard)
                                         i(class="bi bi-pencil-square")
@@ -43,7 +50,7 @@ block content
                                     else
                                         p() Log is Empty
 
-                button(type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addUserModal") Add Wizard&nbsp;
+                button(type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addUserModal" onclick=`setUpAddForm()`) Add Wizard&nbsp;
                     i(class="bi bi-person-plus-fill")
 
             div(class="modal fade" id="viewPathModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="viewPathModalLabel" aria-hidden="true")
@@ -102,6 +109,17 @@ block content
                                     section()
                                         label(for="passwordEditConfirm" class="form-label") Confirm Password
                                         input(type="password" class="form-control" id="passwordEditConfirm")
+                                div(class="col-md-6")
+                                    section()
+                                        input(class="form-check-input followerEditCB followCheck" type="checkbox" value="" name="isFollower" id="followerEditCheck")
+                                        label(for="followerEditCheck" class="form-label") &nbsp;Is Follower?
+                                div(class="col-md-6" id="leadInputEditDiv")
+                                    section()
+                                        label(for="selectEditLead" class="form-label") Lead Wizard
+                                        select(id="selectEditLead" class="form-select lead-select" name="leadID")
+                                            each wiz in wizards
+                                                if wiz.role !== "child"
+                                                    option(value= wiz.id)= wiz.username
                         div(class="modal-footer")
                             button(type="button" class="btn btn-secondary" data-bs-dismiss="modal") Cancel
                             button(type="button" class="btn btn-primary" onclick="editUserAction()") Apply Changes
@@ -133,6 +151,17 @@ block content
                                     section()
                                         label(for="passwordAddFinal" class="form-label") Confirm Password
                                         input(type="password" class="form-control" id="passwordAddFinal" required)
+                                div(class="col-md-6")
+                                    section()
+                                        input(class="form-check-input followerAddCB" type="checkbox" value="" name="isFollower" id="followerAddCheck")
+                                        label(for="followerAddCheck" class="form-label") &nbsp;Is Follower?
+                                div(class="col-md-6" id="leadInputAddDiv")
+                                    section()
+                                        label(for="selectLead" class="form-label") Lead Wizard
+                                        select(id="selectLead" class="form-select" name="leadID")
+                                            each wiz in wizards
+                                                if wiz.role !== "child"
+                                                    option(value= wiz.id)= wiz.username
                                 div(class="col-12")
                                     button(type="submit" class="btn btn-primary") Add User
                         div(class="modal-footer")
@@ -256,6 +285,13 @@ block content
                         editModal.querySelector('.user-id').value = wiz.id;
                         editModal.querySelector('.username').value = wiz.username;
                         editModal.querySelector('.role-select').value = wiz.role;
+                        editModal.querySelector('.followCheck').checked = (wiz.isFollower === "true");
+                        if (wiz.isFollower === "true") {
+                            $("#leadInputEditDiv").show();
+                            editModal.querySelector('.lead-select').value = wiz.lead.id;
+                        } else {
+                            $("#leadInputEditDiv").hide();
+                        }
                     });
                 }
 
@@ -270,17 +306,25 @@ block content
                                 return;
                             }
                         }
+                        let isFollower = document.getElementById('followerEditCheck').checked;
+                        let leadID = document.getElementById('selectEditLead').value;
+                        let wizardID = document.getElementById('userid').value;
+                        if (leadID === wizardID) {
+                            alert("Wizard cannot follow themselves.");
+                            return;
+                        }
                         let response = await fetch('/wizards/updateUser', {
                             method: 'POST',
                             headers: {
                                 "Content-Type": "application/json",
                             },
                             body: JSON.stringify({
-                                id: document.getElementById('userid').value,
+                                id: wizardID,
                                 username: document.getElementById('usernameEdit').value,
                                 role: document.getElementById('roleEdit').value,
-                                password: pass
-
+                                password: pass,
+                                isFollower: isFollower.toString(),
+                                leadID: leadID
                             })
                         });
                         let result = await response.json();
@@ -293,12 +337,24 @@ block content
                     }
                 }
 
+                function setUpAddForm() {
+                    $("#leadInputAddDiv").hide();
+                    document.getElementById('followerAddCheck').checked = false;
+                }
+
                 let addUserForm = document.getElementById('addUserForm');
                 addUserForm.onsubmit = async (e) => {
                     e.preventDefault();
                     let firstPass = document.getElementById('passwordAddPlain').value;
                     let secPass = document.getElementById('passwordAddFinal').value;
-                    if (firstPass === secPass) {
+                    let isFollower = document.getElementById('followerAddCheck').checked;
+                    let leadID = document.getElementById('selectLead').value;
+
+                    if (firstPass !== secPass) {
+                        alert("Passwords much match.");
+                    } else if (isFollower && !leadID) {
+                        alert("Must assign the wizard a Lead Wizard.");
+                    } else {
                         let response = await fetch('/wizards/addUser', {
                             method: 'POST',
                             body: new FormData(addUserForm)
@@ -310,7 +366,21 @@ block content
                         } else {
                             alert("Submission Error");
                         }
-                    } else {
-                        alert("Passwords much match.");
                     }
                 }
+
+                $(".followerEditCB").change(function () {
+                    if (this.checked) {
+                        $("#leadInputEditDiv").show();
+                    } else {
+                        $("#leadInputEditDiv").hide();
+                    }
+                });
+
+                $(".followerAddCB").change(function () {
+                    if (this.checked) {
+                        $("#leadInputAddDiv").show();
+                    } else {
+                        $("#leadInputAddDiv").hide();
+                    }
+                });

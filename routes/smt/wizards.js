@@ -12,9 +12,15 @@ router.get("/", authenticateToken, async function (req, res, next) {
     let users = await db.getAllUsers();
     for (let user of users) {
         await db.getRoleFromUserID(user.id).then(role => {user.role = role.role});
+
         let positionList = []
         await db.getUserLocationLog(user.id).then(locations => {positionList = locations});
         user.posistionLog = positionList;
+
+        if (user.isFollower === "true") {
+            let leadUser = await db.getLeadFromFollowerID(user.id);
+            user.lead = leadUser;
+        }
     }
     const user = await db.getUserFromID(req.userID);
     res.render('wizards',{title: 'Wizards', username: user.username, role: userRole.role, wizards: users, roles: await db.getAllRoles()});
@@ -28,7 +34,9 @@ router.post('/clearUserLog', authenticateToken, async function (req, res, next) 
 router.post('/addUser', authenticateToken, async function (req, res, next) {
     const form = formidable({ multiples: true });
     await form.parse(req, async (err, user) => {
-        await db.addUser(user.username[0], user.password[0], user.role[0]);
+        let isFollower = user.isFollower ? true : false;
+        let leadID = isFollower ? (user.leadID ? user.leadID[0] : "") : "";
+        await db.addUser(user.username[0], user.password[0], user.role[0], isFollower, leadID);
         res.send({success: true});
     });
 })
