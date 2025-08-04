@@ -37,7 +37,7 @@ async function enableDiscordPlugin() {
     await sendWebhook(params);
 }
 
-async function notifyLocationChange(username, clockPositionName) {
+async function notifyLocationChange(username, clockPositionName, isHearbeat) {
     let params = {
         username: webhookUsername,
         avatar_url: webhookAvatar,
@@ -53,7 +53,43 @@ async function notifyLocationChange(username, clockPositionName) {
                     {
                         "name": "Location",
                         "value": clockPositionName,
+                        "inline": false
+                    },
+                    {
+                        "name": "Heartbeat",
+                        "value": isHearbeat,
+                        "inline": false
+                    }
+                ]
+            }
+        ],
+        content: new Date().toUTCString()
+    }
+    sendWebhook(params);
+}
+
+async function notifyFollowerLocationChange(username, leadUsername, clockPositionName) {
+    let params = {
+        username: webhookUsername,
+        avatar_url: webhookAvatar,
+        embeds: [
+            {
+                "title": "Wizard Followed!",
+                "fields": [
+                    {
+                        "name": "Wizard",
+                        "value": "Master " + username,
                         "inline": true
+                    },
+                    {
+                        "name": "Is Following",
+                        "value": "Master " + leadUsername,
+                        "inline": true
+                    },
+                    {
+                        "name": "Location",
+                        "value": clockPositionName,
+                        "inline": false
                     }
                 ]
             }
@@ -89,5 +125,6 @@ async function sendWebhook(params) {
 module.exports = {
     notifyServerStartup,
     enableDiscordPlugin,
-    notifyLocationChange
+    notifyLocationChange,
+    notifyFollowerLocationChange
 };

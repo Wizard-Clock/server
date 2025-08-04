@@ -56,7 +56,7 @@ router.post('/updateUserLocation', authenticateToken, async function (req, res, 
 
     for (let location of locations) {
         if (isUserWithinLocation(userLoc.latitude, userLoc.longitude, location.latitude, location.longitude, location.radius)) {
-            await fireLocationUpdate(userID, location.id);
+            await fireLocationUpdate(userID, location.id, req.body.heartbeat);
             await db.updateUserLocation(userID, location.id).catch(() =>{
                 return res.status(500);
             });
@@ -68,7 +68,7 @@ router.post('/updateUserLocation', authenticateToken, async function (req, res, 
     }
 
     const defaultLocation = await db.getDefaultLocation();
-    await fireLocationUpdate(userID, defaultLocation.id);
+    await fireLocationUpdate(userID, defaultLocation.id, req.body.heartbeat);
     await db.updateUserLocation(userID, defaultLocation.id).catch(() =>{
         return res.status(500);
     });
@@ -97,17 +97,28 @@ async function updateFollowersLocations(followers, locationID) {
     }
 }
 
-async function fireLocationUpdate(userID, locationID) {
+async function fireLocationUpdate(userID, locationID, isHearbeat) {
     let clockPosition = await db.getClockPositionFromLocationID(locationID);
     await db.getClockPositionFromUserID(userID).then((result) => {
         if (settingsService.getSettingValue("notifyEveryPositionUpdate") === "true") {
-            db.getUserFromID(userID).then((result) => {
-                dobby.notifyLocationChange(result.username, clockPosition.name)
+            db.getUserFromID(userID).then(async (result) => {
+                if (result.isFollower === "false") {
+                    await dobby.notifyLocationChange(result.username, clockPosition.name, isHearbeat);
+                } else {
+                    let lead = await db.getLeadFromFollowerID(result.id);
+                    await dobby.notifyFollowerLocationChange(result.username, lead.username, clockPosition.name);
+                }
+
             })
         } else {
             if (result.face_position !== clockPosition.face_position) {
-                db.getUserFromID(userID).then((result) => {
-                    dobby.notifyLocationChange(result.username, clockPosition.name)
+                db.getUserFromID(userID).then(async (result) => {
+                    if (result.isFollower === "false") {
+                        await dobby.notifyLocationChange(result.username, clockPosition.name, isHearbeat);
+                    } else {
+                        let lead = await db.getLeadFromFollowerID(result.id);
+                        await dobby.notifyFollowerLocationChange(result.username, lead.username, clockPosition.name);
+                    }
                 })
             }
         }
