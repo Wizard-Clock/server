@@ -5,8 +5,6 @@ const db = require("../../handlers/dbHandler");
 const dobby = require("../../handlers/discordHandler");
 const authenticateToken = require("../../handlers/authHandler");
 const passport = require("passport");
-const pocketWatchHandler = require("../../handlers/pocketWatchHandler");
-const path = require("path");
 const settingsService = require("../../handlers/serverSettingHandler").default.getInstance();
 
 router.all('/health', async function (req, res, next) {
@@ -77,18 +75,6 @@ router.post('/updateUserLocation', authenticateToken, async function (req, res, 
     }
     return res.status(202).json({ message: 'User location updated.' });
 });
-
-router.get('/createPocketWatch', authenticateToken, async function (req, res, next) {
-    await pocketWatchHandler.createPocketWatchImage().then(() => {
-        let clockCheck = setInterval(() => {
-            if (pocketWatchHandler.isPocketWatchFinished()) {
-                res.status(200)
-                    .sendFile(path.join(__dirname, '../../public/images/GENERATED-pocket-watch-clock-face.png'));
-                clearInterval(clockCheck);
-            }
-        }, 2000);
-    });
-})
 
 async function updateFollowersLocations(followers, locationID) {
     for (let idx = 0; idx < followers.length; idx++) {

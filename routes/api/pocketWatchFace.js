@@ -13,7 +13,8 @@ router.get('/', authenticateToken, async function (req, res, next) {
     res.render('pocketWatch', {
         title: 'Pocket Watch',
         clockPositions: clockPositions,
-        usersClockPosition:usersClockPosition});
+        usersClockPosition:usersClockPosition,
+        headerAuth:req.headers['authorization'].slice(6).trim()});
 })
 
 router.get('/faceRefresh', authenticateToken, async function (req, res, next) {

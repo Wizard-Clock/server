@@ -1,4 +1,5 @@
 doctype html
+meta(name="viewport" content="width=device-width, initial-scale=1")
 html
     head
         title Wizarding Clock - #{title}
@@ -19,7 +20,7 @@ html
                 height: 100%;
             }
     body()
-        div(class="d-flex justify-content-center align-items-center" id="clockDiv")
+        div(class="container-fluid d-flex justify-content-center align-items-center")
             canvas(id="wizardingClockFace" class="img-fluid")
 
     script.
@@ -91,7 +92,10 @@ html
             let updateOccurred = false;
             // Get the current data
             let response = await fetch('/api/watchFace/faceRefresh', {
-                method: 'GET'
+                method: 'GET',
+                headers: {
+                    "Authorization": "Bearer " + JSON.parse(`!{JSON.stringify(headerAuth)}`),
+                }
             });
             let updatedData = await response.json();
 
