@@ -32,6 +32,7 @@ app.use('/locations', require('./routes/smt/locations'));
 app.use('/clock', require('./routes/smt/clock'));
 app.use('/serverSettings', require('./routes/smt/serverSettings'));
 app.use('/api', require('./routes/api/api'));
+app.use('/api/watchFace', require('./routes/api/pocketWatchFace'));
 
 app.use(logger('dev'));
 app.use(express.json());

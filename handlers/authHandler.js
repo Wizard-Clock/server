@@ -78,7 +78,7 @@ passport.use(new JWTStrategy({
 
 // Middleware to verify JWT
 function authenticateToken(req, res, next) {
-    if (req.baseUrl === "/api") {
+    if (req.baseUrl === "/api" || req.baseUrl === "/api/watchFace") {
         const token = req.headers['authorization'].slice(6).trim();
         // If there is no token, return an error
         if(token == null) {

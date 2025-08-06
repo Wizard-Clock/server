@@ -1,0 +1,284 @@
+doctype html
+html
+    head
+        title Wizarding Clock - #{title}
+        link(rel="preconnect" href="https://fonts.googleapis.com")
+        link(rel="preconnect" href="https://fonts.gstatic.com" crossorigin)
+        link(rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous")
+        link(rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css")
+        link(rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Aboreto&family=Xanh+Mono&display=swap")
+        link(rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="")
+        script(src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin="")
+        script(src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I4" crossorigin="anonymous")
+        script(src="https://cdn.jsdelivr.net/npm/motion@latest/dist/motion.js")
+        script(src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js")
+        style.
+            html, body {
+                font: 14px "Lucida Grande", Helvetica, Arial;
+                margin: 0;
+                height: 100%;
+            }
+    body()
+        div(class="d-flex justify-content-center align-items-center" id="clockDiv")
+            canvas(id="wizardingClockFace" class="img-fluid")
+
+    script.
+        const pocketWatchBase = {
+            sourceUrl: '/public/images/pocket-watch-clock-face.png',
+            width: 693,
+            height: 960,
+            center: {
+                width: 350,
+                height: 606
+            },
+            radiusMod: 0.6
+        };
+        const watchHandBase = {
+            sourceUrl: '/public/images/half-scissor-outline.png',
+            width: 128,
+            height: 700,
+            radiusMod: .5
+        };
+
+        const {cubicBezier} = Motion;
+        const scissorEasing = cubicBezier(.33, -0.24, .56, 1.07);
+
+        let canvas = document.getElementById('wizardingClockFace');
+        let canvasDim = calculateAspectRatioFit(pocketWatchBase.width, pocketWatchBase.height, window.innerWidth, window.innerHeight);
+        console.log(canvasDim)
+        canvas.width = canvasDim.width;
+        canvas.height = canvasDim.height;
+
+        let clockPositions = JSON.parse('!{JSON.stringify(clockPositions)}');
+        let wizardWithPositionArray = JSON.parse('!{JSON.stringify(usersClockPosition)}');
+        const currentWizardState = [];
+        const targetWizardState = [];
+        let firstUpdate = true;
+
+        const clockFace = new Image();
+        clockFace.crossOrigin = 'anonymous';
+        clockFace.src = pocketWatchBase.sourceUrl;
+        clockFace.alt = "Wizarding Clock Face";
+
+        const scissorObj = new Image();
+        scissorObj.src = watchHandBase.sourceUrl;
+        scissorObj.alt = "Clock Hand";
+
+        window.requestAnimationFrame(drawClock);
+
+        async function drawClock() {
+            // Add image to Canvas
+            canvasDim = calculateAspectRatioFit(pocketWatchBase.width, pocketWatchBase.height, window.innerWidth, window.innerHeight);
+            await refreshWizardData();
+            if (Math.floor(canvasDim.width) !== Math.floor(canvas.width) || Math.floor(canvasDim.height) !== Math.floor(canvas.height)) {
+                await updateCanvasSize();
+            }
+            let ctx = canvas.getContext('2d');
+            ctx.resetTransform();
+            ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+            ctx.drawImage(clockFace, 0, 0, canvasDim.width, canvasDim.height);
+            await drawNumbers(ctx, pocketWatchBase.center.width * canvasDim.ratio, clockPositions);
+            await drawTime(ctx, pocketWatchBase.center.width * canvasDim.ratio);
+            window.requestAnimationFrame(drawClock);
+        }
+
+        async function updateCanvasSize() {
+            canvas.width = canvasDim.width;
+            canvas.height = canvasDim.height;
+        }
+
+        async function refreshWizardData() {
+            let updateOccurred = false;
+            // Get the current data
+            let response = await fetch('/api/watchFace/faceRefresh', {
+                method: 'GET'
+            });
+            let updatedData = await response.json();
+
+            // Check against the current data
+            if (!compareArrays(updatedData.clockPositions, clockPositions)) {
+                clockPositions = updatedData.clockPositions;
+                updateOccurred = true;
+            }
+            if (!compareArrays(updatedData.usersClockPositions, wizardWithPositionArray)) {
+                wizardWithPositionArray = updatedData.usersClockPositions;
+                updateOccurred = true;
+            }
+
+            if (updateOccurred || firstUpdate) {
+                firstUpdate = false;
+
+                // Update Wizard Info
+                targetWizardState.length = 0;
+                for (let num = 0; num < wizardWithPositionArray.length; num++) {
+                    const wizardClockPosition = wizardWithPositionArray[num];
+                    const wizardOffset = ((num - ((wizardWithPositionArray.length - 1) / 2)) / wizardWithPositionArray.length * 0.6);
+                    let location = wizardOffset;
+                    for (let loc of clockPositions) {
+                        if (loc.name === wizardClockPosition.position.name) {
+                            location = wizardOffset + loc.face_position;
+                        }
+                    }
+                    location = (2 * Math.PI / clockPositions.length) * (location + .2);
+
+                    targetWizardState.push({
+                        wizard: wizardWithPositionArray[num].name,
+                        pos: location,
+                        length: (canvas.height / 2) * 0.7,
+                        width: (canvas.height / 2) * 0.05,
+                    });
+                }
+            }
+        }
+
+        // Much help from https://github.com/malcolmrigg/wizard-clock-card/tree/master
+        async function drawNumbers(ctx, radius, positions) {
+            let selectedFont = 'Xanh Mono';
+            ctx.textBaseline = "middle";
+            ctx.textAlign = "center";
+            ctx.fillStyle = 'black';
+
+            // Have to compensate for the clock not being a true circle
+            const startingAdjustArray = [0.81, 0.82, 0.76, 0.76, 0.74, 0.74, 0.73, 0.73, 0.75, 0.73, 0.71, 0.71, .79];
+            const ovalCompensateArray = [0, 5, 10, 10, 7, 3, 0, 3, 7, 6, 4, -2, -3];
+
+            for (let num = 0; num < positions.length; num++) {
+                // Unfun Required Math
+                const positionTranslateArray = [-99, -75, -68, -72, -83, -98, -110, -122, -132, -140, -146, -148];
+                const positionRotateArray = [-55, -30, -5, 20, 35, 40, 38, 38, 38, 28, 17, 10];
+                const fontScaleArray = [0.9, 0.8, 0.7, 0.6, 0.6, 0.55, 0.55, 0.5, 0.5, 0.45, 0.4, 0.35];
+                const charWidthArray = [3.8, 4, 3.9, 3.5, 2.8, 2.5, 2.5, 2.5, 2.8, 2.8, 2.8];
+
+                ctx.resetTransform();
+                ctx.translate(pocketWatchBase.center.width * canvasDim.ratio, pocketWatchBase.center.height * canvasDim.ratio);
+                let ang = (2 * Math.PI / positions.length) * (num + startingAdjustArray[num]);
+                ctx.rotate(ang);
+
+                // Now draw, rotate, reset, and repeat
+                let text = positions[num].name.toUpperCase();
+                for (let j = 0; j < text.length; j++) {
+                    ctx.font = "bold " + radius * 0.15 * fontScaleArray[j] + "px " + selectedFont;
+
+                    // From Center to Edge
+                    ctx.translate(0, (0 - (radius + ovalCompensateArray[num] * (canvasDim.ratio) + positionTranslateArray[j] * (canvasDim.ratio))));
+                    // Rotate to letter position
+                    ctx.rotate(positionRotateArray[j] * Math.PI / 180);
+
+                    ctx.fillText(text[j], 0, 0);
+
+                    // Rotate back to straight
+                    ctx.rotate(-positionRotateArray[j] * Math.PI / 180);
+                    // From Edge to Center
+                    ctx.translate(0, -(0 - (radius + ovalCompensateArray[num] * (canvasDim.ratio) + positionTranslateArray[j] * (canvasDim.ratio))));
+
+                    ctx.rotate((charWidthArray[j]) * Math.PI / 180);
+                }
+
+            }
+        }
+
+        async function drawTime(ctx) {
+            ctx.resetTransform();
+            ctx.translate(pocketWatchBase.center.width * canvasDim.ratio, pocketWatchBase.center.height * canvasDim.ratio);
+
+            if (currentWizardState.length === 0) {
+                // Math for current wizard state creation
+                for (let num = 0; num < wizardWithPositionArray.length; num++) {
+                    const wizardOffset = ((num - ((wizardWithPositionArray.length - 1) / 2)) / wizardWithPositionArray.length * 0.6);
+                    let location = (2 * Math.PI / clockPositions.length) * (wizardOffset + .2);
+
+                    currentWizardState.push({
+                        wizard: wizardWithPositionArray[num].name,
+                        radToTravel: 0,
+                        pos: location,
+                        movingPos: location,
+                        length: (pocketWatchBase.center.height * canvasDim.ratio / 2) * 0.7,
+                        width: (pocketWatchBase.center.width * canvasDim.ratio) * 0.05,
+                    });
+
+                }
+            } else {
+                // Math for incrementing wizard state
+                for (let wizardCurrState of currentWizardState) {
+                    for (let wizardTarget of targetWizardState) {
+                        if (wizardCurrState.wizard === wizardTarget.wizard) {
+                            if (wizardCurrState.pos !== wizardTarget.pos) {
+                                // Initialize Pos Movement
+                                if (wizardCurrState.radToTravel === 0) {
+                                    // Fix any backwards movement
+                                    let disToMove = wizardTarget.pos - wizardCurrState.pos;
+                                    wizardCurrState.radToTravel = disToMove > 0 ? disToMove : disToMove + (2 * Math.PI);
+                                    wizardCurrState.startTime = Date.now();
+                                }
+
+                                if (Date.now() - wizardCurrState.startTime <= 5000) {
+                                    let easingRate = scissorEasing((Date.now() - wizardCurrState.startTime) / 5000);
+                                    wizardCurrState.movingPos = wizardCurrState.pos + (wizardCurrState.radToTravel * easingRate);
+                                } else {
+                                    wizardCurrState.pos = wizardTarget.pos;
+                                    wizardCurrState.movingPos = wizardTarget.pos;
+                                }
+                            } else {
+                                wizardCurrState.radToTravel = 0;
+                                wizardCurrState.startTime = 0;
+                            }
+
+                        }
+                    }
+                }
+            }
+
+            // draw currentState
+            for (let wizardState of currentWizardState) {
+                this.drawHand(ctx, wizardState.movingPos, wizardState.length, wizardState.width, wizardState.wizard);
+            }
+        }
+
+        async function drawHand(ctx, pos, length, width, wizard) {
+            let fontScale = 0.3;
+            let selectedFont = 'Aboreto';
+            scissorObj.id = wizard + "-clock-hand";
+
+            ctx.rotate(pos);
+            ctx.drawImage(scissorObj,
+                -20 * canvasDim.ratio, -200 * canvasDim.ratio,
+                watchHandBase.width * canvasDim.ratio * watchHandBase.radiusMod, watchHandBase.height * canvasDim.ratio* watchHandBase.radiusMod);
+
+            // ctx.drawImage(scissorObj, -20 * canvasDim.ratio,
+            //     -400 * watchHandBase.radiusMod, watchHandBase.width * watchHandBase.radiusMod,
+            //     watchHandBase.height * watchHandBase.radiusMod);
+            ctx.font = "bolder " + width * 3 * fontScale + "px " + selectedFont;
+            ctx.fillStyle = "white";
+            ctx.translate(-4, -length / 2);
+            ctx.rotate(Math.PI / 2)
+            if (pos < Math.PI && pos >= 0) {
+                ctx.rotate(Math.PI);
+            }
+            ctx.fillText(wizard.toUpperCase(), 0, 0);
+            if (pos < Math.PI && pos >= 0) {
+                ctx.rotate(-Math.PI);
+            }
+            ctx.rotate(-Math.PI / 2);
+            ctx.translate(-6, length / 2);
+            ctx.rotate(-pos);
+        }
+
+        function compareArrays(a, b) {
+            return JSON.stringify(a) === JSON.stringify(b);
+        }
+
+        /**
+         * Conserve aspect ratio of the original region. Useful when shrinking/enlarging
+         * images to fit into a certain area.
+         * source: https://stackoverflow.com/a/14731922
+         *
+         * @param {Number} srcWidth width of source image
+         * @param {Number} srcHeight height of source image
+         * @param {Number} maxWidth maximum available width
+         * @param {Number} maxHeight maximum available height
+         * @return {Object} { width, height }
+         */
+        function calculateAspectRatioFit(srcWidth, srcHeight, maxWidth, maxHeight) {
+            let ratio = Math.min(maxWidth / srcWidth, maxHeight / srcHeight);
+            return {width: srcWidth * ratio, height: srcHeight * ratio, ratio: ratio};
+        }
