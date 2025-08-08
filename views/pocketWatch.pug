@@ -46,7 +46,6 @@ html
 
         let canvas = document.getElementById('wizardingClockFace');
         let canvasDim = calculateAspectRatioFit(pocketWatchBase.width, pocketWatchBase.height, window.innerWidth, window.innerHeight);
-        console.log(canvasDim)
         canvas.width = canvasDim.width;
         canvas.height = canvasDim.height;
 
@@ -127,9 +126,7 @@ html
 
                     targetWizardState.push({
                         wizard: wizardWithPositionArray[num].name,
-                        pos: location,
-                        length: (canvas.height / 2) * 0.7,
-                        width: (canvas.height / 2) * 0.05,
+                        pos: location
                     });
                 }
             }
@@ -143,14 +140,14 @@ html
             ctx.fillStyle = 'black';
 
             // Have to compensate for the clock not being a true circle
-            const startingAdjustArray = [0.81, 0.82, 0.76, 0.76, 0.74, 0.74, 0.73, 0.73, 0.75, 0.73, 0.71, 0.71, .79];
-            const ovalCompensateArray = [0, 4, 5, 5, 5, 0, 0, 3, 7, 6, 4, -2, -3];
+            const startingAdjustArray = [0.81, 0.79, 0.76, 0.76, 0.74, 0.74, 0.73, 0.73, 0.73, 0.71, 0.68, 0.71, 0.79];
+            const ovalCompensateArray = [0, 4, 5, 5, 5, 0, 0, 3, 5, 6, 0, -2, -3];
 
             for (let num = 0; num < positions.length; num++) {
                 // Unfun Required Math
-                const positionTranslateArray = [-120, -108, -105, -109, -120, -128, -135, -142, -151, -155, -160, -158];
+                const positionTranslateArray = [-120, -108, -105, -109, -118, -128, -135, -142, -149, -155, -158, -160];
                 const positionRotateArray = [-55, -30, -5, 20, 35, 40, 38, 38, 38, 28, 17, 10];
-                const fontScaleArray = [0.8, 0.7, 0.6, 0.6, 0.55, 0.55, 0.55, 0.5, 0.5, 0.45, 0.4, 0.35];
+                const fontScaleArray = [0.8, 0.7, 0.6, 0.6, 0.55, 0.5, 0.5, 0.45, 0.45, 0.4, 0.35, 0.3];
                 const charWidthArray = [3.8, 4, 3.9, 3.5, 2.8, 2.5, 2.5, 2.5, 2.8, 2.8, 2.8];
 
                 ctx.resetTransform();
@@ -195,9 +192,7 @@ html
                         wizard: wizardWithPositionArray[num].name,
                         radToTravel: 0,
                         pos: location,
-                        movingPos: location,
-                        length: (pocketWatchBase.center.height * canvasDim.ratio / 2) * 0.7,
-                        width: (pocketWatchBase.center.width * canvasDim.ratio) * 0.05,
+                        movingPos: location
                     });
 
                 }
@@ -234,12 +229,11 @@ html
 
             // draw currentState
             for (let wizardState of currentWizardState) {
-                this.drawHand(ctx, wizardState.movingPos, wizardState.length, wizardState.width, wizardState.wizard);
+                this.drawHand(ctx, wizardState.movingPos, wizardState.wizard);
             }
         }
 
-        async function drawHand(ctx, pos, length, width, wizard) {
-            let fontScale = 0.3;
+        async function drawHand(ctx, pos, wizard) {
             let selectedFont = 'Aboreto';
             scissorObj.id = wizard + "-clock-hand";
 
@@ -248,9 +242,9 @@ html
                 -15 * canvasDim.ratio, -200 * canvasDim.ratio,
                 (watchHandBase.width -75)* canvasDim.ratio, (watchHandBase.height - 350) * canvasDim.ratio);
 
-            ctx.font = "bolder " + width * .7 * canvasDim.ratio + "px " + selectedFont;
+            ctx.font = "bolder " + watchHandBase.width / 6 * canvasDim.ratio + "px " + selectedFont;
             ctx.fillStyle = "white";
-            ctx.translate(-4, -(length / 2.6) * canvasDim.ratio);
+            ctx.translate(-2, -(watchHandBase.height / 10 * canvasDim.ratio));
             ctx.rotate(Math.PI / 2)
             if (pos < Math.PI && pos >= 0) {
                 ctx.rotate(Math.PI);
@@ -260,7 +254,7 @@ html
                 ctx.rotate(-Math.PI);
             }
             ctx.rotate(-Math.PI / 2);
-            ctx.translate(-6, (length / 2.6) * canvasDim.ratio);
+            ctx.translate(2, (watchHandBase.height / 10 * canvasDim.ratio));
             ctx.rotate(-pos);
         }
 
