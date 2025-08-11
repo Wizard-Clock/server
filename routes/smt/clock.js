@@ -4,6 +4,7 @@ const wizardDAO = require("../../dao/wizardDao");
 const locationDAO = require("../../dao/locationDAO");
 const clockFaceDAO = require("../../dao/clockFaceDao");
 const roleDAO = require("../../dao/roleDao");
+const settingsService = require("../../handlers/serverSettingHandler").default.getInstance();
 const authenticateToken = require("../../handlers/authHandler");
 const {formidable} = require("formidable");
 
@@ -39,7 +40,8 @@ router.get('/', authenticateToken, async function (req, res, next) {
         role: userRole.role,
         clockPositions: clockPositions,
         usersClockPosition:usersClockPosition,
-        clockPositionLocations: clockPositionsWithLocation
+        clockPositionLocations: clockPositionsWithLocation,
+        serverVersion: settingsService.getSettingValue("serverVersion")
     });
 });
 

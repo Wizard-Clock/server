@@ -6,6 +6,7 @@ const followerDAO = require("../../dao/followerDao");
 const roleDAO = require("../../dao/roleDao");
 const {formidable} = require('formidable');
 const authenticateToken = require("../../handlers/authHandler");
+const settingsService = require("../../handlers/serverSettingHandler").default.getInstance();
 
 router.get("/", authenticateToken, async function (req, res, next) {
     const userRole = await roleDAO.getRoleFromUserID(req.userID);
@@ -26,7 +27,14 @@ router.get("/", authenticateToken, async function (req, res, next) {
         }
     }
     const user = await wizardDAO.getUserFromID(req.userID);
-    res.render('wizards',{title: 'Wizards', username: user.username, role: userRole.role, wizards: users, roles: await roleDAO.getAllRoles()});
+    res.render('wizards',{
+        title: 'Wizards',
+        username: user.username,
+        role: userRole.role,
+        wizards: users,
+        roles: await roleDAO.getAllRoles(),
+        serverVersion: settingsService.getSettingValue("serverVersion")
+    });
 });
 
 router.post('/clearUserLog', authenticateToken, async function (req, res, next) {

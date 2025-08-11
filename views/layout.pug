@@ -41,3 +41,15 @@ html
                     input(type="hidden")
     div(class="mt-5")
       block content
+  footer(class="d-flex flex-wrap justify-content-between align-items-center py-3 my-4 border-top")
+    div(class="col-md-4 d-flex align-items-center")
+      span(class="mb-3 mb-md-0 text-body-secondary brand_font") &nbsp;&nbsp;#{new Date().getFullYear()}, Wizarding Clock Project
+    ul(class="nav col-md-4 justify-content-end list-unstyled d-flex")
+      li(class="ms-3")
+        p(class="brand_font") v#{serverVersion}
+      li(class="ms-3")
+        a(class="link-dark text-body-secondary" href="https://github.com/Wizard-Clock" aria-label="Github")
+          i(class="bi bi-github")
+      li(class="ms-3")
+        a(class="link-dark text-body-secondary" href="https://github.com/Wizard-Clock/server/wiki" aria-label="Wiki")
+          i(class="bi bi-info-circle-fill")

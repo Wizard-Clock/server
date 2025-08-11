@@ -5,6 +5,7 @@ const locationDAO = require("../../dao/locationDAO");
 const clockFaceDAO = require("../../dao/clockFaceDao");
 const roleDAO = require("../../dao/roleDao");
 const authenticateToken = require("../../handlers/authHandler");
+const settingsService = require("../../handlers/serverSettingHandler").default.getInstance();
 const {formidable} = require("formidable");
 const LATITUDE_REGEX = "^(\+|-)?(?:90(?:(?:\.0{1,6})?)|(?:[0-9]|[1-8][0-9])(?:(?:\.[0-9]{1,6})?))$";
 const LONGITUDE_REGEX = "^(\\+|-)?(?:180(?:(?:\\.0{1,6})?)|(?:[0-9]|[1-9][0-9]|1[0-7][0-9])(?:(?:\\.[0-9]{1,6})?))$";
@@ -32,7 +33,9 @@ router.get('/', authenticateToken, async function (req, res, next) {
         username: user.username,
         role: userRole.role,
         locations: locations,
-        positions: await clockFaceDAO.getAllClockPositions()});
+        positions: await clockFaceDAO.getAllClockPositions(),
+        serverVersion: settingsService.getSettingValue("serverVersion")
+    });
 });
 
 router.post('/addLocation', authenticateToken, async function (req, res, next) {

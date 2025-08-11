@@ -19,7 +19,8 @@ router.get('/', authenticateToken, async function (req, res, next) {
         title: 'Server Settings',
         username: user.username,
         role: userRole.role,
-        settings: serverSettings
+        settings: serverSettings,
+        serverVersion: settingsService.getSettingValue("serverVersion")
     });
 });
 
