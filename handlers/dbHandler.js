@@ -50,55 +50,6 @@ setInterval(async () => {
     sqlite_inst.run(`DELETE FROM user_location_log`);
 }, 86400000);
 
-//Follow Management
-async function updateUserFollowStatus(userInfo) {
-    if (userInfo.isFollower === "true") {
-        await applyFollowLink(userInfo.id, userInfo.leadID);
-    } else {
-        await removeFollowLink(userInfo.id);
-    }
-    await sqlite_inst.run(`UPDATE users SET isFollower=? WHERE id=?`, [userInfo.isFollower, userInfo.id], () => {});
-}
-
-async function applyFollowLink(followerID, leadID) {
-    sqlite_inst.all(`INSERT INTO follower_link (follower_id, lead_id) VALUES (?, ?) ON CONFLICT(follower_id) DO UPDATE SET lead_id=?`,[
-            followerID,
-            leadID,
-            leadID
-        ]);
-}
-
-async function removeFollowLink(followerID) {
-    await sqlite_inst.run(`DELETE FROM follower_link WHERE follower_id=?`, followerID, () => {});
-}
-
-async function getLeadFromFollowerID(followerID) {
-    let leadID = await getLeadIDFromFollowerID(followerID);
-    return getUserFromID(leadID.lead_id);
-}
-
-async function getLeadIDFromFollowerID(followerID) {
-    return await new Promise((resolve, reject) => {
-        sqlite_inst.all('SELECT lead_id FROM follower_link WHERE follower_id=?', followerID, (err, rows) => {
-            if (err)
-                reject(err);
-            else
-                resolve(rows[0]);
-        });
-    });
-}
-
-async function getFollowerInfoFromLeadID(leadID) {
-    return await new Promise((resolve, reject) => {
-        sqlite_inst.all('SELECT * FROM follower_link WHERE lead_id=?', leadID, (err, rows) => {
-            if (err)
-                reject(err);
-            else
-                resolve(rows);
-        });
-    });
-}
-
 // Location Management
 async function addLocation(location) {
     await sqlite_inst.run(`INSERT INTO locations (name, latitude, longitude, radius, description) VALUES (?, ?, ?, ?, ?)`, [
@@ -354,8 +305,6 @@ async function setUserLocation(userID, locationID) {
 
 
 module.exports = {
-    getLeadFromFollowerID,
-    getFollowerInfoFromLeadID,
     getDefaultLocation,
     getAllLocations,
     addLocation,

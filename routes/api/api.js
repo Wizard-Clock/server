@@ -3,6 +3,7 @@ const jwt = require('jsonwebtoken');
 const router = express.Router();
 const db = require("../../handlers/dbHandler");
 const wizardDAO = require("../../dao/wizardDao");
+const followerDAO = require("../../dao/followerDAO");
 const loggingDAO = require("../../dao/loggingDao");
 const roleDAO = require("../../dao/roleDao");
 const dobby = require("../../handlers/discordHandler");
@@ -54,7 +55,7 @@ router.post('/updateUserLocation', authenticateToken, async function (req, res, 
     const followers = [];
     const locations = await db.getAllLocations();
 
-    await db.getFollowerInfoFromLeadID(userID).then(results => {
+    await followerDAO.getFollowerInfoFromLeadID(userID).then(results => {
         for (let followInfo of results) {
             followers.push(followInfo.follower_id);
         }
@@ -105,7 +106,7 @@ async function fireLocationUpdate(userID, locationID, isHearbeat) {
                 if (result.isFollower === "false") {
                     await dobby.notifyLocationChange(result.username, clockPosition.name, isHearbeat);
                 } else {
-                    let lead = await db.getLeadFromFollowerID(result.id);
+                    let lead = await followerDAO.getLeadFromFollowerID(result.id);
                     await dobby.notifyFollowerLocationChange(result.username, lead.username, clockPosition.name);
                 }
 
@@ -116,7 +117,7 @@ async function fireLocationUpdate(userID, locationID, isHearbeat) {
                     if (result.isFollower === "false") {
                         await dobby.notifyLocationChange(result.username, clockPosition.name, isHearbeat);
                     } else {
-                        let lead = await db.getLeadFromFollowerID(result.id);
+                        let lead = await followerDAO.getLeadFromFollowerID(result.id);
                         await dobby.notifyFollowerLocationChange(result.username, lead.username, clockPosition.name);
                     }
                 })

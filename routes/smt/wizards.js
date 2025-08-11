@@ -1,8 +1,8 @@
 const express = require('express');
 const router = express.Router();
-const db = require("../../handlers/dbHandler");
 const wizardDAO = require("../../dao/wizardDao");
 const loggingDAO = require("../../dao/loggingDao");
+const followerDAO = require("../../dao/followerDao");
 const roleDAO = require("../../dao/roleDao");
 const {formidable} = require('formidable');
 const authenticateToken = require("../../handlers/authHandler");
@@ -21,7 +21,7 @@ router.get("/", authenticateToken, async function (req, res, next) {
         user.posistionLog = positionList;
 
         if (user.isFollower === "true") {
-            let leadUser = await db.getLeadFromFollowerID(user.id);
+            let leadUser = await followerDAO.getLeadFromFollowerID(user.id);
             user.lead = leadUser;
         }
     }
