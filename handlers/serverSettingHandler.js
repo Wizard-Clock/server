@@ -1,4 +1,4 @@
-import db from "../handlers/dbHandler.js";
+import ssDAO from "../dao/serverSettingDao.js";
 
 const DEFAULT_SERVER_SETTINGS = [
     {name: 'discordWebhook', group: 'discord', dataType: 'string', defaultValue: 'https://discord.com/api/webhooks/'},
@@ -52,7 +52,7 @@ export default class ServerSettingsService {
      * Load the server-settings from db
      */
     async _loadApplicationSettings() {
-        await db.getAllServerSettings().then((value) => {
+        await ssDAO.getAllServerSettings().then((value) => {
             if (value.length <= 0) {
                 console.log("Server Settings not found, initializing with default settings.");
                 this.serverSettings = this._getDefaultSettings();
@@ -90,6 +90,6 @@ export default class ServerSettingsService {
                 dbFormatedServerSettings.push({name: key, value: this.serverSettings[key]});
             }
         }
-        db.updateAllServerSettings(dbFormatedServerSettings).then(() => console.log("Server Settings Saved."));
+        ssDAO.updateAllServerSettings(dbFormatedServerSettings).then(() => console.log("Server Settings Saved."));
     }
 }
