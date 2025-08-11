@@ -2,7 +2,7 @@ const db = require("../handlers/dbHandler");
 
 async function updateUserLocationLog(userID, latitude, longitude) {
     return await new Promise((resolve, reject) => {
-        db.sqlite_inst.all(`INSERT INTO user_location_log (user_id, latitude, longitude, timestamp) VALUES (?, ?, ?, ?)`, [
+        db.all(`INSERT INTO user_location_log (user_id, latitude, longitude, timestamp) VALUES (?, ?, ?, ?)`, [
             userID,
             latitude,
             longitude,
@@ -18,7 +18,7 @@ async function updateUserLocationLog(userID, latitude, longitude) {
 
 async function getUserLocationLog(userID) {
     return await new Promise((resolve, reject) => {
-        db.sqlite_inst.all('SELECT * FROM user_location_log WHERE user_id=?', userID, (err, rows) => {
+        db.all('SELECT * FROM user_location_log WHERE user_id=?', userID, (err, rows) => {
             if (err)
                 reject(err);
             else
@@ -29,7 +29,7 @@ async function getUserLocationLog(userID) {
 
 async function clearUserLocationLog(userID) {
     return await new Promise((resolve, reject) => {
-        db.sqlite_inst.all('DELETE FROM user_location_log WHERE user_id=?', userID, (err, rows) => {
+        db.all('DELETE FROM user_location_log WHERE user_id=?', userID, (err, rows) => {
             if (err)
                 reject(err);
             else

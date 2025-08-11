@@ -4,7 +4,7 @@ const crypto = require("crypto");
 
 async function addUser(username, password, role, isFollower, leadID) {
     let salt = crypto.randomBytes(16);
-    await db.sqlite_inst.run(`INSERT INTO users (username, hashed_password, salt, isFollower) VALUES (?, ?, ?, ?)`, [
+    await db.run(`INSERT INTO users (username, hashed_password, salt, isFollower) VALUES (?, ?, ?, ?)`, [
         username,
         crypto.pbkdf2Sync(password, salt, 310000, 32, 'sha256'),
         salt,
@@ -27,12 +27,12 @@ async function updateUser(user) {
     const oldUser = await getUserFromID(user.id);
 
     if (oldUser.username !== user.username) {
-        await sqlite_inst.run(`UPDATE users SET username=? WHERE id=?`, [user.username, user.id], (err, rows) => {})
+        await db.run(`UPDATE users SET username=? WHERE id=?`, [user.username, user.id], (err, rows) => {})
     }
 
     if (user.password !== "") {
         let salt = crypto.randomBytes(16);
-        await sqlite_inst.run(`UPDATE users SET hashed_password=?, salt=? WHERE id=?`, [
+        await db.run(`UPDATE users SET hashed_password=?, salt=? WHERE id=?`, [
             crypto.pbkdf2Sync(user.password, salt, 310000, 32, 'sha256'),
             salt,
             user.id
@@ -47,7 +47,7 @@ async function deleteUser(userID) {
     await roleDAO.removeUserFromRole(userID);
     await removeFollowLink(userID);
     return await new Promise((resolve, reject) => {
-        db.sqlite_inst.run(`DELETE FROM users WHERE id=?`, userID, (err, rows) => {
+        db.run(`DELETE FROM users WHERE id=?`, userID, (err, rows) => {
             if (err)
                 reject(err);
             else
@@ -58,7 +58,7 @@ async function deleteUser(userID) {
 
 async function getAllUsers() {
     return await new Promise((resolve, reject) => {
-        db.sqlite_inst.all('SELECT * FROM users', (err, rows) => {
+        db.all('SELECT * FROM users', (err, rows) => {
             if (err)
                 reject(err);
             else
@@ -69,7 +69,7 @@ async function getAllUsers() {
 
 async function getUserFromID(user_id) {
     return await new Promise((resolve, reject) => {
-        db.sqlite_inst.all('SELECT * FROM users WHERE id=?', user_id, (err, rows) => {
+        db.all('SELECT * FROM users WHERE id=?', user_id, (err, rows) => {
             if (err)
                 reject(err);
             else
@@ -80,7 +80,7 @@ async function getUserFromID(user_id) {
 
 async function getUserFromName(name) {
     return await new Promise((resolve, reject) => {
-        db.sqlite_inst.all('SELECT * FROM users WHERE username=?', name, (err, rows) => {
+        db.all('SELECT * FROM users WHERE username=?', name, (err, rows) => {
             if (err)
                 reject(err);
             else
@@ -89,11 +89,42 @@ async function getUserFromName(name) {
     });
 }
 
+async function getUserLocationFromUserID(userID) {
+    return await new Promise((resolve, reject) => {
+        db.all('SELECT * FROM user_location WHERE user_id=?', userID, (err, rows) => {
+            if (err)
+                reject(err);
+            else
+                resolve(rows[0]);
+        });
+    });
+}
+
+async function setUserLocation(userID, locationID) {
+    return await new Promise((resolve, reject) => {
+        db.all(`INSERT INTO user_location (user_id, location_id) VALUES (?, ?) ON CONFLICT(user_id) DO UPDATE SET location_id=?`, [
+            userID,
+            locationID,
+            locationID
+        ], (err, rows) => {
+            if (err)
+                reject(err);
+            else
+                resolve(rows);
+        });
+    })
+}
+
+async function updateUserLocation(userID, locationID) {
+    return setUserLocation(userID, locationID);
+}
+
 module.exports = {
     addUser,
     updateUser,
     deleteUser,
     getAllUsers,
     getUserFromID,
-    getUserFromName
+    getUserFromName,
+    getUserLocationFromUserID
 }
