@@ -42,8 +42,32 @@ async function getRoleFromRoleName(roleName) {
     });
 }
 
+async function updateUserRole(userID, roleToAssign) {
+    let prevRole = await getRoleFromUserID(userID);
+    if (roleToAssign !== prevRole) {
+        let roleID;
+        await getRoleFromRoleName(roleToAssign).then(value => roleID = value.id);
+
+        return await new Promise((resolve, reject) => {
+            db.sqlite_inst.run(`UPDATE user_roles SET role_id=? WHERE user_id=?`, [roleID, userID], (err, rows) => {
+                if (err)
+                    reject(err);
+                else
+                    resolve(rows);
+            });
+        });
+    }
+}
+
+async function removeUserFromRole(userID) {
+    await db.sqlite_inst.run(`DELETE FROM user_roles WHERE user_id=?`, userID,
+        (err, rows) => {});
+}
+
 module.exports = {
     addUserToRole,
+    updateUserRole,
+    removeUserFromRole,
     getAllRoles,
     getRoleFromRoleName,
     getRoleFromUserID
