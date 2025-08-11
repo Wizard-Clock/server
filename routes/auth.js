@@ -2,6 +2,7 @@ const express = require('express');
 const passport = require('passport');
 const jwt = require('jsonwebtoken');
 const authenticateToken = require("../handlers/authHandler");
+const settingsService = require("../handlers/serverSettingHandler").default.getInstance();
 
 const router = express.Router();
 
@@ -11,7 +12,11 @@ router.get('/', authenticateToken, function(req, res) {
 });
 
 router.get('/login', function(req, res, next) {
-    res.render('login', { title: 'Login' , errorMsg: ""});
+    res.render('login', {
+        title: 'Login' ,
+        errorMsg: "",
+        serverVersion: settingsService.getSettingValue("serverVersion")
+    });
 });
 
 router.post('/login', function (req, res, next) {

@@ -61,6 +61,16 @@ async function getClockPositionFromUserID(user_id) {
     }
 }
 
+async function getClockPositionFromUserLocation(userLocation) {
+    let positionLocation = await getClockPositionLocationFromLocationID(userLocation.location_id);
+    if (!positionLocation) {
+        let locationID = await locationDAO.getDefaultLocation();
+        return getClockPositionFromLocationID(locationID);
+    } else {
+        return getClockPositionFromID(positionLocation.position_id);
+    }
+}
+
 async function getClockPositionFromLocationID(locationID) {
     let position = await getClockPositionLocationFromLocationID(locationID);
 
@@ -100,5 +110,5 @@ module.exports = {
     getClockPositionFromID,
     getClockPositionFromUserID,
     getClockPositionFromLocationID,
-
+    getClockPositionFromUserLocation
 }

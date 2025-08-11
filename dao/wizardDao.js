@@ -1,6 +1,7 @@
 const db = require("../handlers/dbHandler");
 const roleDAO = require("../dao/roleDao");
 const followerDAO = require("../dao/followerDao");
+const clockFaceDAO = require("../dao/clockFaceDao");
 const locationDAO = require("../dao/locationDAO");
 const crypto = require("crypto");
 
@@ -129,10 +130,11 @@ async function updateUserLocation(userID, locationID) {
 }
 
 async function getAllUsersClockFacePositions() {
-    const users = await wizardDAO.getAllUsers();
+    const users = await getAllUsers();
     let usersClockPosition = [];
     for (let user of users) {
-        let position = await getClockPositionFromUserID(user.id);
+        let userLocation = await getUserLocationFromUserID(user.id);
+        let position = await clockFaceDAO.getClockPositionFromUserLocation(userLocation);
         let wizard= {name: user.username, position: position};
         usersClockPosition.push(wizard);
     }
