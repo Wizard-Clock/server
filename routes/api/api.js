@@ -3,6 +3,7 @@ const jwt = require('jsonwebtoken');
 const router = express.Router();
 const db = require("../../handlers/dbHandler");
 const wizardDAO = require("../../dao/wizardDao");
+const loggingDAO = require("../../dao/loggingDao");
 const roleDAO = require("../../dao/roleDao");
 const dobby = require("../../handlers/discordHandler");
 const authenticateToken = require("../../handlers/authHandler");
@@ -58,10 +59,10 @@ router.post('/updateUserLocation', authenticateToken, async function (req, res, 
             followers.push(followInfo.follower_id);
         }
     });
-    await db.updateUserLocationLog(userID, userLoc.latitude, userLoc.longitude);
+    await loggingDAO.updateUserLocationLog(userID, userLoc.latitude, userLoc.longitude);
     if (followers.length > 0) {
         for (let idx = 0; idx < followers.length; idx++) {
-            await db.updateUserLocationLog(followers[idx], userLoc.latitude, userLoc.longitude);
+            await loggingDAO.updateUserLocationLog(followers[idx], userLoc.latitude, userLoc.longitude);
         }
     }
 

@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const db = require("../../handlers/dbHandler");
 const wizardDAO = require("../../dao/wizardDao");
+const loggingDAO = require("../../dao/loggingDao");
 const roleDAO = require("../../dao/roleDao");
 const {formidable} = require('formidable');
 const authenticateToken = require("../../handlers/authHandler");
@@ -16,7 +17,7 @@ router.get("/", authenticateToken, async function (req, res, next) {
         await roleDAO.getRoleFromUserID(user.id).then(role => {user.role = role.role});
 
         let positionList = []
-        await db.getUserLocationLog(user.id).then(locations => {positionList = locations});
+        await loggingDAO.getUserLocationLog(user.id).then(locations => {positionList = locations});
         user.posistionLog = positionList;
 
         if (user.isFollower === "true") {
@@ -29,7 +30,7 @@ router.get("/", authenticateToken, async function (req, res, next) {
 });
 
 router.post('/clearUserLog', authenticateToken, async function (req, res, next) {
-    await db.clearUserLog(req.body.id);
+    await loggingDAO.clearUserLocationLog(req.body.id);
     res.send({success: true});
 })
 

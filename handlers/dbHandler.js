@@ -352,48 +352,6 @@ async function setUserLocation(userID, locationID) {
     })
 }
 
-async function updateUserLocationLog(userID, latitude, longitude) {
-    return await new Promise((resolve, reject) => {
-        sqlite_inst.all(`INSERT INTO user_location_log (user_id, latitude, longitude, timestamp) VALUES (?, ?, ?, ?)`, [
-            userID,
-            latitude,
-            longitude,
-            new Date().toISOString()
-        ], (err, rows) => {
-            if (err)
-                reject(err);
-            else
-                resolve(rows);
-        });
-    })
-}
-
-async function getUserLocationLog(userID) {
-    return await new Promise((resolve, reject) => {
-        sqlite_inst.all('SELECT * FROM user_location_log WHERE user_id=?', userID, (err, rows) => {
-            if (err)
-                reject(err);
-            else
-                resolve(rows);
-        });
-    });
-}
-
-async function clearUserLog(userID) {
-    return await new Promise((resolve, reject) => {
-        sqlite_inst.all('DELETE FROM user_location_log WHERE user_id=?', userID, (err, rows) => {
-            if (err)
-                reject(err);
-            else
-                resolve(rows);
-        });
-    });
-}
-
-async function updateUserLocation(userID, locationID) {
-    return setUserLocation(userID, locationID);
-}
-
 
 module.exports = {
     getLeadFromFollowerID,
@@ -410,8 +368,5 @@ module.exports = {
     getAllClockPositions,
     updateClockPosition,
     updateUserLocation,
-    updateUserLocationLog,
-    getUserLocationLog,
-    clearUserLog,
     sqlite_inst
 };
