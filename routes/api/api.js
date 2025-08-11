@@ -33,6 +33,17 @@ router.post('/login', async function (req, res, next) {
     (req, res);
 });
 
+router.post('/credentialCheck', authenticateToken, async function (req, res, next) {
+    const reqUsername = req.body.username;
+    const credUsername = await db.getUserFromID(req.userID);
+
+    if  (credUsername && credUsername === reqUsername) {
+        return res.status(200).json({ message: 'Credentials are Valid.'});
+    } else {
+        return res.status(400).json({message: 'Invalid credentials.'});
+    }
+})
+
 router.post('/updateUserLocation', authenticateToken, async function (req, res, next) {
     console.log("User location update received.");
     const userID = req.userID;

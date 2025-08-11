@@ -82,7 +82,7 @@ function authenticateToken(req, res, next) {
         const token = req.headers['authorization'].slice(6).trim();
         // If there is no token, return an error
         if(token == null) {
-            return res.status(401).json({ message: 'User not authenticated.' });
+            return res.status(400).json({ message: 'Invalid Credentials.' });
         }
 
         jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
