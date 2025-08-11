@@ -7,10 +7,10 @@ const clockFaceDAO = require("../../dao/clockFaceDao");
 const followerDAO = require("../../dao/followerDao");
 const loggingDAO = require("../../dao/loggingDao");
 const roleDAO = require("../../dao/roleDao");
-const dobby = require("../../handlers/discordHandler");
-const authenticateToken = require("../../handlers/authHandler");
+const dobby = require("../../controllers/discordController");
+const authenticateToken = require("../../controllers/authController");
 const passport = require("passport");
-const settingsService = require("../../handlers/serverSettingHandler").default.getInstance();
+const settingsService = require("../../controllers/serverSettingController").default.getInstance();
 
 router.all('/health', async function (req, res, next) {
     return res.status(200).json({ message: 'API up and running.' });

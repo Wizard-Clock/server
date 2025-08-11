@@ -4,8 +4,8 @@ const wizardDAO = require("../../dao/wizardDao");
 const locationDAO = require("../../dao/locationDAO");
 const clockFaceDAO = require("../../dao/clockFaceDao");
 const roleDAO = require("../../dao/roleDao");
-const settingsService = require("../../handlers/serverSettingHandler").default.getInstance();
-const authenticateToken = require("../../handlers/authHandler");
+const settingsService = require("../../controllers/serverSettingController").default.getInstance();
+const authenticateToken = require("../../controllers/authController");
 const {formidable} = require("formidable");
 
 /* GET home page. */

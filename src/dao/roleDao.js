@@ -1,4 +1,4 @@
-const db = require("../handlers/dbHandler");
+const db = require("../controllers/dbController");
 
 async function addUserToRole(userID, role) {
     let roleID

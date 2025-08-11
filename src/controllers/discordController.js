@@ -1,4 +1,4 @@
-const settingsService = require("./serverSettingHandler").default.getInstance();
+const settingsService = require("./serverSettingController").default.getInstance();
 
 const webhookUsername = "Dobby";
 const webhookAvatar = "https://static.wikia.nocookie.net/harrypotter/images/f/f0/Dobbyelve.jpg";

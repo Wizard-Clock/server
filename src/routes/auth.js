@@ -1,8 +1,8 @@
 const express = require('express');
 const passport = require('passport');
 const jwt = require('jsonwebtoken');
-const authenticateToken = require("../handlers/authHandler");
-const settingsService = require("../handlers/serverSettingHandler").default.getInstance();
+const authenticateToken = require("../controllers/authController");
+const settingsService = require("../controllers/serverSettingController").default.getInstance();
 
 const router = express.Router();
 

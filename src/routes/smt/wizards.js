@@ -5,8 +5,8 @@ const loggingDAO = require("../../dao/loggingDao");
 const followerDAO = require("../../dao/followerDao");
 const roleDAO = require("../../dao/roleDao");
 const {formidable} = require('formidable');
-const authenticateToken = require("../../handlers/authHandler");
-const settingsService = require("../../handlers/serverSettingHandler").default.getInstance();
+const authenticateToken = require("../../controllers/authController");
+const settingsService = require("../../controllers/serverSettingController").default.getInstance();
 
 router.get("/", authenticateToken, async function (req, res, next) {
     const userRole = await roleDAO.getRoleFromUserID(req.userID);

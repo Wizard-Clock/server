@@ -1,7 +1,7 @@
 const LocalStrategy = require('passport-local').Strategy;
 const passport = require('passport');
 const crypto = require('crypto');
-const db = require('./dbHandler');
+const db = require('./dbController');
 
 /* Configure password authentication strategy.
  *

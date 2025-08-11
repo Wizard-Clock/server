@@ -1,4 +1,4 @@
-const db = require("../handlers/dbHandler");
+const db = require("../controllers/dbController");
 
 async function getAllServerSettings() {
     return await new Promise((resolve, reject) => {

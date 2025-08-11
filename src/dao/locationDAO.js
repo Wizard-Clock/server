@@ -1,4 +1,4 @@
-const db = require("../handlers/dbHandler");
+const db = require("../controllers/dbController");
 const clockFaceDAO = require("./clockFaceDao");
 
 async function addLocation(location) {

@@ -1,10 +1,10 @@
 const express = require('express');
 const router = express.Router();
-const authenticateToken = require("../../handlers/authHandler");
+const authenticateToken = require("../../controllers/authController");
 const wizardDAO = require("../../dao/wizardDao");
 const roleDAO = require("../../dao/roleDao");
-const dobby = require("../../handlers/discordHandler");
-const settingsService = require("../../handlers/serverSettingHandler").default.getInstance();
+const dobby = require("../../controllers/discordController");
+const settingsService = require("../../controllers/serverSettingController").default.getInstance();
 
 
 router.get('/', authenticateToken, async function (req, res, next) {

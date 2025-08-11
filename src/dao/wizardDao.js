@@ -1,4 +1,4 @@
-const db = require("../handlers/dbHandler");
+const db = require("../controllers/dbController");
 const roleDAO = require("./roleDao");
 const followerDAO = require("./followerDao");
 const clockFaceDAO = require("./clockFaceDao");

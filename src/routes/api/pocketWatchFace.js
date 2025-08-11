@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const clockFaceDAO = require("../../dao/clockFaceDao");
 const wizardDAO = require("../../dao/wizardDao");
-const authenticateToken = require("../../handlers/authHandler");
+const authenticateToken = require("../../controllers/authController");
 
 router.get('/', authenticateToken, async function (req, res, next) {
     // Get all Clock Face Postions + Name;

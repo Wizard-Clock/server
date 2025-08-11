@@ -3,7 +3,7 @@ const express = require('express');
 const path = require('path');
 const createError = require('http-errors');
 const logger = require('morgan');
-require('./src/handlers/authHandler');
+require('./src/controllers/authController');
 
 const app = express();
 
@@ -63,6 +63,6 @@ module.exports = app;
 app.listen(process.env.PORT, () => {
   console.log(`Server startup occurred at: ${new Date().toUTCString()}`);
   console.log(`Listening on port ${process.env.PORT}`);
-  require("./src/handlers/serverSettingHandler").default.getInstance();
-  setTimeout(() => {require("./src/handlers/discordHandler").notifyServerStartup()}, 5000)
+  require("./src/controllers/serverSettingController").default.getInstance();
+  setTimeout(() => {require("./src/controllers/discordController").notifyServerStartup()}, 5000)
 });
