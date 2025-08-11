@@ -2,9 +2,10 @@ const sqlite = require('sqlite3');
 const crypto = require('crypto');
 const fs = require('fs');
 const path = require('path');
-const migrationsDir = path.normalize(require('path').dirname(require.main.filename) + '/migrations/');
+const appRoot = require('app-root-path');
+const migrationsDir = path.normalize(appRoot + '/migrations/');
 
-const dbDir = path.normalize(require('path').dirname(require.main.filename) + '/db/');
+const dbDir = path.normalize(appRoot + '/db/');
 if (!fs.existsSync(dbDir)){
     fs.mkdirSync(dbDir);
 }
