@@ -3,7 +3,7 @@ const express = require('express');
 const path = require('path');
 const createError = require('http-errors');
 const logger = require('morgan');
-require('./handlers/authHandler');
+require('./src/handlers/authHandler');
 
 const app = express();
 
@@ -23,16 +23,16 @@ const corsOptions ={
 app.use(cors(corsOptions))
 
 // view engine setup
-app.set('views', path.join(__dirname, 'views'));
+app.set('views', path.join(__dirname, '/src/views'));
 app.set('view engine', 'pug');
 
-app.use('/', require('./routes/auth'));
-app.use('/wizards', require('./routes/smt/wizards'));
-app.use('/locations', require('./routes/smt/locations'));
-app.use('/clock', require('./routes/smt/clock'));
-app.use('/serverSettings', require('./routes/smt/serverSettings'));
-app.use('/api', require('./routes/api/api'));
-app.use('/api/watchFace', require('./routes/api/pocketWatchFace'));
+app.use('/', require('./src/routes/auth'));
+app.use('/wizards', require('./src/routes/smt/wizards'));
+app.use('/locations', require('./src/routes/smt/locations'));
+app.use('/clock', require('./src/routes/smt/clock'));
+app.use('/serverSettings', require('./src/routes/smt/serverSettings'));
+app.use('/api', require('./src/routes/api/api'));
+app.use('/api/watchFace', require('./src/routes/api/pocketWatchFace'));
 
 app.use(logger('dev'));
 app.use(express.json());
@@ -63,6 +63,6 @@ module.exports = app;
 app.listen(process.env.PORT, () => {
   console.log(`Server startup occurred at: ${new Date().toUTCString()}`);
   console.log(`Listening on port ${process.env.PORT}`);
-  require("./handlers/serverSettingHandler").default.getInstance();
-  setTimeout(() => {require("./handlers/discordHandler").notifyServerStartup()}, 5000)
+  require("./src/handlers/serverSettingHandler").default.getInstance();
+  setTimeout(() => {require("./src/handlers/discordHandler").notifyServerStartup()}, 5000)
 });

@@ -1,6 +1,6 @@
 const db = require("../handlers/dbHandler");
-const wizardDAO = require("../dao/wizardDao");
-const locationDAO = require("../dao/locationDAO");
+const wizardDAO = require("./wizardDao");
+const locationDAO = require("./locationDAO");
 
 async function updateClockPosition(clockPosition) {
     return await new Promise((resolve, reject) => {

@@ -1,5 +1,5 @@
 const db = require("../handlers/dbHandler");
-const wizardDAO = require("../dao/wizardDao");
+const wizardDAO = require("./wizardDao");
 
 async function applyFollowLink(followerID, leadID) {
     db.all(`INSERT INTO follower_link (follower_id, lead_id) VALUES (?, ?) ON CONFLICT(follower_id) DO UPDATE SET lead_id=?`,[

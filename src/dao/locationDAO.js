@@ -1,5 +1,5 @@
 const db = require("../handlers/dbHandler");
-const clockFaceDAO = require("../dao/clockFaceDAO");
+const clockFaceDAO = require("./clockFaceDao");
 
 async function addLocation(location) {
     await db.run(`INSERT INTO locations (name, latitude, longitude, radius, description) VALUES (?, ?, ?, ?, ?)`, [

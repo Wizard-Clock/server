@@ -1,8 +1,8 @@
 const db = require("../handlers/dbHandler");
-const roleDAO = require("../dao/roleDao");
-const followerDAO = require("../dao/followerDao");
-const clockFaceDAO = require("../dao/clockFaceDao");
-const locationDAO = require("../dao/locationDAO");
+const roleDAO = require("./roleDao");
+const followerDAO = require("./followerDao");
+const clockFaceDAO = require("./clockFaceDao");
+const locationDAO = require("./locationDAO");
 const crypto = require("crypto");
 
 async function addUser(username, password, role, isFollower, leadID) {
