@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
-const db = require("../../handlers/dbHandler");
 const clockFaceDAO = require("../../dao/clockFaceDao");
+const wizardDAO = require("../../dao/wizardDao");
 const authenticateToken = require("../../handlers/authHandler");
 
 router.get('/', authenticateToken, async function (req, res, next) {
@@ -9,7 +9,7 @@ router.get('/', authenticateToken, async function (req, res, next) {
     const clockPositions = await clockFaceDAO.getAllClockPositions();
 
     // Get all User Locations on Clock
-    const usersClockPosition= await db.getAllUsersClockFacePositions();
+    const usersClockPosition= await wizardDAO.getAllUsersClockFacePositions();
 
     res.render('pocketWatch', {
         title: 'Pocket Watch',
@@ -19,8 +19,8 @@ router.get('/', authenticateToken, async function (req, res, next) {
 })
 
 router.get('/faceRefresh', authenticateToken, async function (req, res, next) {
-    let usersClockPositions = await db.getAllUsersClockFacePositions();
     let clockPositions = await clockFaceDAO.getAllClockPositions();
+    let usersClockPositions = await wizardDAO.getAllUsersClockFacePositions();
     res.json({clockPositions, usersClockPositions});
 })
 

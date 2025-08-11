@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
-const db = require("../../handlers/dbHandler");
 const wizardDAO = require("../../dao/wizardDao");
+const locationDAO = require("../../dao/locationDAO");
 const clockFaceDAO = require("../../dao/clockFaceDao");
 const roleDAO = require("../../dao/roleDao");
 const authenticateToken = require("../../handlers/authHandler");
@@ -16,11 +16,11 @@ router.get('/', authenticateToken, async function (req, res, next) {
     const clockPositions = await clockFaceDAO.getAllClockPositions();
 
     // Get all User Locations on Clock
-    const usersClockPosition= await db.getAllUsersClockFacePositions();
+    const usersClockPosition= await wizardDAO.getAllUsersClockFacePositions();
 
     const clockPositionsWithLocation = [];
     for (let cPosition of clockPositions) {
-        let locationsPerPosition = await db.getAllLocationsForClockPosition(cPosition.id);
+        let locationsPerPosition = await locationDAO.getAllLocationsForClockPosition(cPosition.id);
         let locationString = "";
         for (let location of locationsPerPosition) {
             locationString += location + ", ";
@@ -48,7 +48,7 @@ router.get('/standalone', authenticateToken, async function (req, res, next) {
     const clockPositions = await clockFaceDAO.getAllClockPositions();
 
     // Get all User Locations on Clock
-    const usersClockPosition= await db.getAllUsersClockFacePositions();
+    const usersClockPosition= await wizardDAO.getAllUsersClockFacePositions();
 
     res.render('standaloneClock', {
         title: 'Clock',
@@ -57,8 +57,8 @@ router.get('/standalone', authenticateToken, async function (req, res, next) {
 });
 
 router.get('/updateToClock', authenticateToken, async function (req, res, next) {
-    let usersClockPositions = await db.getAllUsersClockFacePositions();
     let clockPositions = await clockFaceDAO.getAllClockPositions();
+    let usersClockPositions = await wizardDAO.getAllUsersClockFacePositions();
     res.json({clockPositions, usersClockPositions});
 })
 

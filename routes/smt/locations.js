@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
-const db = require("../../handlers/dbHandler");
 const wizardDAO = require("../../dao/wizardDao");
+const locationDAO = require("../../dao/locationDAO");
 const clockFaceDAO = require("../../dao/clockFaceDao");
 const roleDAO = require("../../dao/roleDao");
 const authenticateToken = require("../../handlers/authHandler");
@@ -19,7 +19,7 @@ router.get('/', authenticateToken, async function (req, res, next) {
         return res.redirect("/clock");
     }
     const user = await wizardDAO.getUserFromID(req.userID);
-    let locations = await db.getAllLocations();
+    let locations = await locationDAO.getAllLocations();
     for (let location of locations) {
         const clockPosition = await clockFaceDAO.getClockPositionFromLocationID(location.id);
         if (clockPosition) {
@@ -46,7 +46,7 @@ router.post('/addLocation', authenticateToken, async function (req, res, next) {
             radius: location.radius[0],
             description: location.description ? location.description[0] : "",
         }
-        await db.addLocation(locationObj);
+        await locationDAO.addLocation(locationObj);
         res.send({success: true});
     });
 })
@@ -63,13 +63,13 @@ router.post('/editLocation', authenticateToken, async function (req, res, next) 
             radius: location.radius ? location.radius[0] : 0,
             description: location.description ? location.description[0] : "",
         }
-        await db.updateLocation(locationObj);
+        await locationDAO.updateLocation(locationObj);
         res.send({success: true});
     });
 })
 
 router.post('/deleteLocation', authenticateToken, async function (req, res, next) {
-    await db.deleteLocation(req.body.id);
+    await locationDAO.deleteLocation(req.body.id);
     res.send({success: true});
 })
 

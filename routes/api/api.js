@@ -1,8 +1,8 @@
 const express = require('express');
 const jwt = require('jsonwebtoken');
 const router = express.Router();
-const db = require("../../handlers/dbHandler");
 const wizardDAO = require("../../dao/wizardDao");
+const locationDAO = require("../../dao/locationDAO");
 const clockFaceDAO = require("../../dao/clockFaceDao");
 const followerDAO = require("../../dao/followerDAO");
 const loggingDAO = require("../../dao/loggingDao");
@@ -54,7 +54,7 @@ router.post('/updateUserLocation', authenticateToken, async function (req, res, 
     const userID = req.userID;
     const userLoc = req.body.location;
     const followers = [];
-    const locations = await db.getAllLocations();
+    const locations = await locationDAO.getAllLocations();
 
     await followerDAO.getFollowerInfoFromLeadID(userID).then(results => {
         for (let followInfo of results) {
@@ -71,7 +71,7 @@ router.post('/updateUserLocation', authenticateToken, async function (req, res, 
     for (let location of locations) {
         if (isUserWithinLocation(userLoc.latitude, userLoc.longitude, location.latitude, location.longitude, location.radius)) {
             await fireLocationUpdate(userID, location.id, req.body.heartbeat);
-            await db.updateUserLocation(userID, location.id).catch(() =>{
+            await wizardDAO.updateUserLocation(userID, location.id).catch(() =>{
                 return res.status(500);
             });
             if (followers.length > 0) {
@@ -81,9 +81,9 @@ router.post('/updateUserLocation', authenticateToken, async function (req, res, 
         }
     }
 
-    const defaultLocation = await db.getDefaultLocation();
+    const defaultLocation = await locationDAO.getDefaultLocation();
     await fireLocationUpdate(userID, defaultLocation.id, req.body.heartbeat);
-    await db.updateUserLocation(userID, defaultLocation.id).catch(() =>{
+    await wizardDAO.updateUserLocation(userID, defaultLocation.id).catch(() =>{
         return res.status(500);
     });
     if (followers.length > 0) {
@@ -95,7 +95,7 @@ router.post('/updateUserLocation', authenticateToken, async function (req, res, 
 async function updateFollowersLocations(followers, locationID) {
     for (let idx = 0; idx < followers.length; idx++) {
         await fireLocationUpdate(followers[idx], locationID);
-        await db.updateUserLocation(followers[idx], locationID);
+        await wizardDAO.updateUserLocation(followers[idx], locationID);
     }
 }
 

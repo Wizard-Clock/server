@@ -1,5 +1,7 @@
 const db = require("../handlers/dbHandler");
 const roleDAO = require("../dao/roleDao");
+const followerDAO = require("../dao/followerDao");
+const locationDAO = require("../dao/locationDAO");
 const crypto = require("crypto");
 
 async function addUser(username, password, role, isFollower, leadID) {
@@ -15,11 +17,11 @@ async function addUser(username, password, role, isFollower, leadID) {
     await getUserFromName(username).then(value => userID = value.id);
     await roleDAO.addUserToRole(userID, role);
 
-    const defaultLocation = await getDefaultLocation();
+    const defaultLocation = await locationDAO.getDefaultLocation();
     await setUserLocation(userID, defaultLocation.id);
 
     if (isFollower) {
-        await applyFollowLink(userID, leadID);
+        await followerDAO.applyFollowLink(userID, leadID);
     }
 }
 
@@ -39,13 +41,20 @@ async function updateUser(user) {
         ], (err, rows) => {})
     }
 
-    await updateUserFollowStatus(user);
+    if (user.isFollower === "true") {
+        await followerDAO.applyFollowLink(user.id, user.leadID);
+    } else {
+        await followerDAO.removeFollowLink(user.id);
+    }
+    await db.run(`UPDATE users SET isFollower=? WHERE id=?`,
+        [user.isFollower, user.id], () => {});
+
     await roleDAO.updateUserRole(user.name, user.role);
 }
 
 async function deleteUser(userID) {
     await roleDAO.removeUserFromRole(userID);
-    await removeFollowLink(userID);
+    await followerDAO.removeFollowLink(userID);
     return await new Promise((resolve, reject) => {
         db.run(`DELETE FROM users WHERE id=?`, userID, (err, rows) => {
             if (err)
@@ -119,6 +128,17 @@ async function updateUserLocation(userID, locationID) {
     return setUserLocation(userID, locationID);
 }
 
+async function getAllUsersClockFacePositions() {
+    const users = await wizardDAO.getAllUsers();
+    let usersClockPosition = [];
+    for (let user of users) {
+        let position = await getClockPositionFromUserID(user.id);
+        let wizard= {name: user.username, position: position};
+        usersClockPosition.push(wizard);
+    }
+    return usersClockPosition;
+}
+
 module.exports = {
     addUser,
     updateUser,
@@ -126,5 +146,7 @@ module.exports = {
     getAllUsers,
     getUserFromID,
     getUserFromName,
-    getUserLocationFromUserID
+    getUserLocationFromUserID,
+    updateUserLocation,
+    getAllUsersClockFacePositions
 }
