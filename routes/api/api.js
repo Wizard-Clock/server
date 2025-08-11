@@ -2,6 +2,7 @@ const express = require('express');
 const jwt = require('jsonwebtoken');
 const router = express.Router();
 const db = require("../../handlers/dbHandler");
+const wizardDAO = require("../../dao/wizardDao");
 const roleDAO = require("../../dao/roleDao");
 const dobby = require("../../handlers/discordHandler");
 const authenticateToken = require("../../handlers/authHandler");
@@ -36,7 +37,7 @@ router.post('/login', async function (req, res, next) {
 
 router.post('/credentialCheck', authenticateToken, async function (req, res, next) {
     const reqUsername = req.body.username;
-    const credUsername = await db.getUserFromID(req.userID);
+    const credUsername = await wizardDAO.getUserFromID(req.userID);
 
     if  (credUsername && credUsername === reqUsername) {
         return res.status(200).json({ message: 'Credentials are Valid.'});
@@ -99,7 +100,7 @@ async function fireLocationUpdate(userID, locationID, isHearbeat) {
     let clockPosition = await db.getClockPositionFromLocationID(locationID);
     await db.getClockPositionFromUserID(userID).then((result) => {
         if (settingsService.getSettingValue("notifyEveryPositionUpdate") === "true") {
-            db.getUserFromID(userID).then(async (result) => {
+            wizardDAO.getUserFromID(userID).then(async (result) => {
                 if (result.isFollower === "false") {
                     await dobby.notifyLocationChange(result.username, clockPosition.name, isHearbeat);
                 } else {
@@ -110,7 +111,7 @@ async function fireLocationUpdate(userID, locationID, isHearbeat) {
             })
         } else {
             if (result.face_position !== clockPosition.face_position) {
-                db.getUserFromID(userID).then(async (result) => {
+                wizardDAO.getUserFromID(userID).then(async (result) => {
                     if (result.isFollower === "false") {
                         await dobby.notifyLocationChange(result.username, clockPosition.name, isHearbeat);
                     } else {

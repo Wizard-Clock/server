@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const db = require("../../handlers/dbHandler");
+const wizardDAO = require("../../dao/wizardDao");
 const roleDAO = require("../../dao/roleDao");
 const authenticateToken = require("../../handlers/authHandler");
 const {formidable} = require("formidable");
@@ -16,7 +17,7 @@ router.get('/', authenticateToken, async function (req, res, next) {
     if (userRole.role !== "admin") {
         return res.redirect("/clock");
     }
-    const user = await db.getUserFromID(req.userID);
+    const user = await wizardDAO.getUserFromID(req.userID);
     let locations = await db.getAllLocations();
     for (let location of locations) {
         const clockPosition = await db.getClockPositionFromLocationID(location.id);

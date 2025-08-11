@@ -216,28 +216,6 @@ block content
                     }
                 }
 
-                async function deleteUserAction() {
-                    let viewPathModal = document.getElementById('viewPathModal');
-                    if (viewPathModal) {
-                        let idString = document.getElementById('viewPathModal').querySelector('.wizard_id').textContent;
-                        idString = idString.slice(3).trim();
-                        let response = await fetch('/wizards/deleteUser', {
-                            method: 'POST',
-                            headers: {
-                                "Content-Type": "application/json",
-                            },
-                            body: JSON.stringify({id: idString})
-                        });
-                        let result = await response.json();
-                        if (result.success) {
-                            $('#deleteModal').modal('hide');
-                            window.location.reload();
-                        } else {
-                            alert("Deletion Error");
-                        }
-                    }
-                }
-
                 let deleteModal = document.getElementById('deleteModal');
                 if (deleteModal) {
                     deleteModal.addEventListener('show.bs.modal', event => {
