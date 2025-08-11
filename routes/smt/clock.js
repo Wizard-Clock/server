@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const db = require("../../handlers/dbHandler");
 const wizardDAO = require("../../dao/wizardDao");
+const clockFaceDAO = require("../../dao/clockFaceDao");
 const roleDAO = require("../../dao/roleDao");
 const authenticateToken = require("../../handlers/authHandler");
 const {formidable} = require("formidable");
@@ -12,7 +13,7 @@ router.get('/', authenticateToken, async function (req, res, next) {
     const userRole = await roleDAO.getRoleFromUserID(req.userID);
 
     // Get all Clock Face Postions + Name;
-    const clockPositions = await db.getAllClockPositions();
+    const clockPositions = await clockFaceDAO.getAllClockPositions();
 
     // Get all User Locations on Clock
     const usersClockPosition= await db.getAllUsersClockFacePositions();
@@ -44,7 +45,7 @@ router.get('/', authenticateToken, async function (req, res, next) {
 
 router.get('/standalone', authenticateToken, async function (req, res, next) {
     // Get all Clock Face Postions + Name;
-    const clockPositions = await db.getAllClockPositions();
+    const clockPositions = await clockFaceDAO.getAllClockPositions();
 
     // Get all User Locations on Clock
     const usersClockPosition= await db.getAllUsersClockFacePositions();
@@ -56,8 +57,8 @@ router.get('/standalone', authenticateToken, async function (req, res, next) {
 });
 
 router.get('/updateToClock', authenticateToken, async function (req, res, next) {
-    let clockPositions = await db.getAllClockPositions();
     let usersClockPositions = await db.getAllUsersClockFacePositions();
+    let clockPositions = await clockFaceDAO.getAllClockPositions();
     res.json({clockPositions, usersClockPositions});
 })
 
@@ -68,7 +69,7 @@ router.post('/editClockPosition', authenticateToken, async function (req, res, n
             id: clockPosition.id[0],
             name: clockPosition.name[0].toUpperCase()
         }
-        await db.updateClockPosition(clockPositionObj);
+        await clockFaceDAO.updateClockPosition(clockPositionObj);
         res.send({success: true});
     });
 })

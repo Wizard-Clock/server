@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const db = require("../../handlers/dbHandler");
 const wizardDAO = require("../../dao/wizardDao");
+const clockFaceDAO = require("../../dao/clockFaceDao");
 const roleDAO = require("../../dao/roleDao");
 const authenticateToken = require("../../handlers/authHandler");
 const {formidable} = require("formidable");
@@ -20,7 +21,7 @@ router.get('/', authenticateToken, async function (req, res, next) {
     const user = await wizardDAO.getUserFromID(req.userID);
     let locations = await db.getAllLocations();
     for (let location of locations) {
-        const clockPosition = await db.getClockPositionFromLocationID(location.id);
+        const clockPosition = await clockFaceDAO.getClockPositionFromLocationID(location.id);
         if (clockPosition) {
             location.clockPosition = clockPosition.face_position;
             location.clockPositionName = clockPosition.name;
@@ -31,7 +32,7 @@ router.get('/', authenticateToken, async function (req, res, next) {
         username: user.username,
         role: userRole.role,
         locations: locations,
-        positions: await db.getAllClockPositions()});
+        positions: await clockFaceDAO.getAllClockPositions()});
 });
 
 router.post('/addLocation', authenticateToken, async function (req, res, next) {

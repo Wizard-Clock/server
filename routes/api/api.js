@@ -3,6 +3,7 @@ const jwt = require('jsonwebtoken');
 const router = express.Router();
 const db = require("../../handlers/dbHandler");
 const wizardDAO = require("../../dao/wizardDao");
+const clockFaceDAO = require("../../dao/clockFaceDao");
 const followerDAO = require("../../dao/followerDAO");
 const loggingDAO = require("../../dao/loggingDao");
 const roleDAO = require("../../dao/roleDao");
@@ -99,8 +100,8 @@ async function updateFollowersLocations(followers, locationID) {
 }
 
 async function fireLocationUpdate(userID, locationID, isHearbeat) {
-    let clockPosition = await db.getClockPositionFromLocationID(locationID);
-    await db.getClockPositionFromUserID(userID).then((result) => {
+    let clockPosition = await clockFaceDAO.getClockPositionFromLocationID(locationID);
+    await clockFaceDAO.getClockPositionFromUserID(userID).then((result) => {
         if (settingsService.getSettingValue("notifyEveryPositionUpdate") === "true") {
             wizardDAO.getUserFromID(userID).then(async (result) => {
                 if (result.isFollower === "false") {
