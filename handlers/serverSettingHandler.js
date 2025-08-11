@@ -4,6 +4,7 @@ const DEFAULT_SERVER_SETTINGS = [
     {name: 'discordWebhook', group: 'discord', dataType: 'string', defaultValue: 'https://discord.com/api/webhooks/'},
     {name: 'enableDiscord', group: 'discord', dataType: 'boolean', defaultValue: false},
     {name: 'notifyEveryPositionUpdate', group: 'discord', dataType: 'boolean', defaultValue: false},
+    {name: 'serverVersion', group: 'version', dataType: 'string', defaultValue: "0.1.0"},
 ]
 
 let instance;
