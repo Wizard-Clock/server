@@ -1,9 +1,14 @@
 const sqlite = require('sqlite3');
 const crypto = require('crypto');
 const fs = require('fs');
-const migrationsDir = require('path').dirname(require.main.filename) + '/migrations/';
+const path = require('path');
+const migrationsDir = path.normalize(require('path').dirname(require.main.filename) + '/migrations/');
 
-const dbDir = require('path').dirname(require.main.filename) + '/db/';
+const dbDir = path.normalize(require('path').dirname(require.main.filename) + '/db/');
+if (!fs.existsSync(dbDir)){
+    fs.mkdirSync(dbDir);
+}
+
 const dbName = (process.env.DATABASE_NAME === ":memory:" ? "" : dbDir) + process.env.DATABASE_NAME;
 const sqlite_inst = new sqlite.Database(dbName, (err) => {
     if (err) {
