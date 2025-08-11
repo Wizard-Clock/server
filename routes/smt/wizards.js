@@ -1,17 +1,18 @@
 const express = require('express');
 const router = express.Router();
 const db = require("../../handlers/dbHandler");
+const roleDAO = require("../../dao/roleDao");
 const {formidable} = require('formidable');
 const authenticateToken = require("../../handlers/authHandler");
 
 router.get("/", authenticateToken, async function (req, res, next) {
-    const userRole = await db.getRoleFromUserID(req.userID);
+    const userRole = await roleDAO.getRoleFromUserID(req.userID);
     if (userRole.role !== "admin") {
         return res.redirect("/clock");
     }
     let users = await db.getAllUsers();
     for (let user of users) {
-        await db.getRoleFromUserID(user.id).then(role => {user.role = role.role});
+        await roleDAO.getRoleFromUserID(user.id).then(role => {user.role = role.role});
 
         let positionList = []
         await db.getUserLocationLog(user.id).then(locations => {positionList = locations});
@@ -23,7 +24,7 @@ router.get("/", authenticateToken, async function (req, res, next) {
         }
     }
     const user = await db.getUserFromID(req.userID);
-    res.render('wizards',{title: 'Wizards', username: user.username, role: userRole.role, wizards: users, roles: await db.getAllRoles()});
+    res.render('wizards',{title: 'Wizards', username: user.username, role: userRole.role, wizards: users, roles: await roleDAO.getAllRoles()});
 });
 
 router.post('/clearUserLog', authenticateToken, async function (req, res, next) {

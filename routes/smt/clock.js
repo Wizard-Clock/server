@@ -1,13 +1,14 @@
 const express = require('express');
 const router = express.Router();
 const db = require("../../handlers/dbHandler");
+const roleDAO = require("../../dao/roleDao");
 const authenticateToken = require("../../handlers/authHandler");
 const {formidable} = require("formidable");
 
 /* GET home page. */
 router.get('/', authenticateToken, async function (req, res, next) {
     const user = await db.getUserFromID(req.userID);
-    const userRole = await db.getRoleFromUserID(req.userID);
+    const userRole = await roleDAO.getRoleFromUserID(req.userID);
 
     // Get all Clock Face Postions + Name;
     const clockPositions = await db.getAllClockPositions();

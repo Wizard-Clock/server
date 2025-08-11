@@ -2,12 +2,13 @@ const express = require('express');
 const router = express.Router();
 const authenticateToken = require("../../handlers/authHandler");
 const db = require("../../handlers/dbHandler");
+const roleDAO = require("../../dao/roleDao");
 const dobby = require("../../handlers/discordHandler");
 const settingsService = require("../../handlers/serverSettingHandler").default.getInstance();
 
 
 router.get('/', authenticateToken, async function (req, res, next) {
-    const userRole = await db.getRoleFromUserID(req.userID);
+    const userRole = await roleDAO.getRoleFromUserID(req.userID);
     if (userRole.role !== "admin") {
         return res.redirect("/clock");
     }

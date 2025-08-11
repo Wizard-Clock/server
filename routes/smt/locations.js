@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const db = require("../../handlers/dbHandler");
+const roleDAO = require("../../dao/roleDao");
 const authenticateToken = require("../../handlers/authHandler");
 const {formidable} = require("formidable");
 const LATITUDE_REGEX = "^(\+|-)?(?:90(?:(?:\.0{1,6})?)|(?:[0-9]|[1-8][0-9])(?:(?:\.[0-9]{1,6})?))$";
@@ -11,7 +12,7 @@ const LONGITUDE_REGEX = "^(\\+|-)?(?:180(?:(?:\\.0{1,6})?)|(?:[0-9]|[1-9][0-9]|1
 * */
 
 router.get('/', authenticateToken, async function (req, res, next) {
-    const userRole = await db.getRoleFromUserID(req.userID);
+    const userRole = await roleDAO.getRoleFromUserID(req.userID);
     if (userRole.role !== "admin") {
         return res.redirect("/clock");
     }

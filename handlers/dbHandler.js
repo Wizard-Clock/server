@@ -206,40 +206,6 @@ async function getFollowerInfoFromLeadID(leadID) {
     });
 }
 
-// Role Management
-async function getAllRoles() {
-    return await new Promise((resolve, reject) => {
-        sqlite_inst.all('SELECT * FROM roles', (err, rows) => {
-            if (err)
-                reject(err);
-            else
-                resolve(rows);
-        });
-    });
-}
-
-async function getRoleFromUserID(user_id) {
-    return await new Promise((resolve, reject) => {
-        sqlite_inst.all('SELECT * FROM roles WHERE id=(SELECT role_id FROM user_roles WHERE user_id=?)', user_id, (err, rows) => {
-            if (err)
-                reject(err);
-            else
-                resolve(rows[0]);
-        });
-    });
-}
-
-async function getRoleFromRoleName(roleName) {
-    return await new Promise((resolve, reject) => {
-        sqlite_inst.all('SELECT * FROM roles WHERE role=?', roleName, (err, rows) => {
-            if (err)
-                reject(err);
-            else
-                resolve(rows[0]);
-        });
-    });
-}
-
 // Location Management
 async function addLocation(location) {
     await sqlite_inst.run(`INSERT INTO locations (name, latitude, longitude, radius, description) VALUES (?, ?, ?, ?, ?)`, [
@@ -570,8 +536,6 @@ module.exports = {
     getUserFromID,
     getLeadFromFollowerID,
     getFollowerInfoFromLeadID,
-    getRoleFromUserID,
-    getAllRoles,
     getDefaultLocation,
     getAllLocations,
     addLocation,

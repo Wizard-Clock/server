@@ -2,6 +2,7 @@ const express = require('express');
 const jwt = require('jsonwebtoken');
 const router = express.Router();
 const db = require("../../handlers/dbHandler");
+const roleDAO = require("../../dao/roleDao");
 const dobby = require("../../handlers/discordHandler");
 const authenticateToken = require("../../handlers/authHandler");
 const passport = require("passport");
@@ -21,7 +22,7 @@ router.post('/login', async function (req, res, next) {
                 return res.status(400).json({message: 'Invalid credentials.'});
             }
 
-            let userRole = await db.getRoleFromUserID(user.id);
+            let userRole = await roleDAO.getRoleFromUserID(user.id);
             if (userRole.role === 'child') {
                 return res.status(401).json({message: 'Underage magic detected, unable to login child.'});
             }
