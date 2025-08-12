@@ -5,20 +5,18 @@ const followerDAO = require("../dao/followerDao");
 const wizardDAO = require("../dao/wizardDao");
 
 async function addUserInfo(username, password, role, isFollower, leadID) {
-    //TODO If follower, then assign to lead location
     const defaultLocation = await locationDAO.getDefaultLocation();
     await wizardDAO.addUser(username, password, role, isFollower).then(async () => {
         let newUser = await wizardDAO.getUserFromName(username)
         await roleDAO.addUserToRole(newUser.id, role);
         await wizardDAO.setUserLocation(newUser.id, defaultLocation.id);
         if (isFollower) {
-            await followerDAO.applyFollowLink(newUser.id, leadID);
+            await updateUserToFollower(newUser.id, leadID);
         }
     });
 }
 
 async function updateUserInfo(user) {
-    //TODO If updated to follower, then assign to lead location, unassign no change
     const oldUser = await wizardDAO.getUserFromID(user.id);
 
     if (oldUser.username !== user.username) {
@@ -29,7 +27,7 @@ async function updateUserInfo(user) {
     }
 
     if (user.isFollower === "true") {
-        await followerDAO.applyFollowLink(user.id, user.leadID);
+        await updateUserToFollower(user.id, user.leadID);
     } else {
         await followerDAO.removeFollowLink(user.id);
     }
@@ -50,6 +48,15 @@ async function deleteUserInfo(userID){
         }
     });
     return await wizardDAO.deleteUser(userID);
+}
+
+async function updateUserToFollower(followerID, leadID) {
+    await followerDAO.applyFollowLink(followerID, leadID);
+    await wizardDAO.getUserLocationFromUserID(leadID).then(async (locationInfo) => {
+        if (locationInfo) {
+            await wizardDAO.setUserLocation(followerID, locationInfo.location_id);
+        }
+    })
 }
 
 async function removeLeadFromFollowers(userID) {
