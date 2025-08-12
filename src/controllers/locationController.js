@@ -7,6 +7,38 @@ const clockFaceController =  require("./clockFaceController");
 const dobby = require("./discordController");
 const settingsService = require("../controllers/serverSettingController").default.getInstance();
 
+async function addLocationInfo(location) {
+    await locationDAO.addLocation(location);
+    if (location.clockPosition) {
+        let locationID;
+        await locationDAO.getLocationFromName(location.name).then(value => locationID = value.id);
+        return clockFaceDAO.updatePositionLocations(location.clockPosition, locationID);
+    }
+}
+
+async function updateLocationInfo(location) {
+    await locationDAO.updateLocation(location);
+    if (location.clockPosition) {
+        return clockFaceDAO.updatePositionLocations(location.clockPosition, location.id);
+    } else {
+        return await locationDAO.removeLocationFromPosition(location.id);
+    }
+}
+
+async  function deleteLocationInfo(locationID) {
+    await locationDAO.removeLocationFromPosition(locationID);
+    await locationDAO.deleteLocation(locationID);
+}
+
+async function getAllLocationsForClockPositionID(clockPositionID) {
+    let locationIDs = await locationDAO.getAllLocationIDsFromPositionID(clockPositionID);
+
+    const locations = [];
+    for (let entry of locationIDs) {
+        await locationDAO.getLocationFromID(entry.location_id).then(value => locations.push(value.name));
+    }
+    return locations;
+}
 
 async function updateUserLocation(userID, coords, isHeartbeat) {
     const locations = await locationDAO.getAllLocations();
@@ -22,8 +54,8 @@ async function updateUserLocation(userID, coords, isHeartbeat) {
     // Update Location Logs
     await loggingDAO.updateUserLocationLog(userID, coords.latitude, coords.longitude);
     if (followerIDList.length > 0) {
-        for (let idx = 0; idx < followerIDList.length; idx++) {
-            await loggingDAO.updateUserLocationLog(followerIDList[idx], coords.latitude, coords.longitude);
+        for (let followerID of followerIDList) {
+            await loggingDAO.updateUserLocationLog(followerID, coords.latitude, coords.longitude);
         }
     }
 
@@ -52,9 +84,9 @@ async function updateUserLocation(userID, coords, isHeartbeat) {
 }
 
 async function updateFollowersLocations(followers, locationID) {
-    for (let idx = 0; idx < followers.length; idx++) {
-        await fireLocationUpdate(followers[idx], locationID);
-        await wizardDAO.updateUserLocation(followers[idx], locationID);
+    for  (let followerID of followers) {
+        await fireLocationUpdate(followerID, locationID);
+        await wizardDAO.updateUserLocation(followerID, locationID);
     }
 }
 
@@ -72,13 +104,13 @@ async function fireLocationUpdate(userID, locationID, isHeartbeat) {
     });
 }
 
-function sendDiscordPing(userID, clockPosition, isHeartbeat) {
-    wizardDAO.getUserFromID(userID).then(async (result) => {
+async function sendDiscordPing(userID, clockPosition, isHeartbeat) {
+    await wizardDAO.getUserFromID(userID).then(async (result) => {
         if (result.isFollower === "false") {
             await dobby.notifyLocationChange(result.username, clockPosition.name, isHeartbeat);
         } else {
             let leadID = await followerDAO.getLeadIDFromFollowerID(result.id);
-            let lead = await wizardDAO.getUserFromID(leadID);
+            let lead = await wizardDAO.getUserFromID(leadID.lead_id);
             await dobby.notifyFollowerLocationChange(result.username, lead.username, clockPosition.name);
         }
     });
@@ -107,4 +139,10 @@ function deg2rad(deg) {
     return deg * (Math.PI/180)
 }
 
-module.exports = updateUserLocation;
+module.exports = {
+    addLocationInfo,
+    updateLocationInfo,
+    deleteLocationInfo,
+    getAllLocationsForClockPositionID,
+    updateUserLocation
+}
