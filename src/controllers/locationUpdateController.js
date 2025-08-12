@@ -57,30 +57,27 @@ async function updateFollowersLocations(followers, locationID) {
     }
 }
 
-async function fireLocationUpdate(userID, locationID, isHearbeat) {
+async function fireLocationUpdate(userID, locationID, isHeartbeat) {
     let clockPosition = await clockFaceDAO.getClockPositionFromLocationID(locationID);
     await clockFaceDAO.getClockPositionFromUserID(userID).then((result) => {
         if (settingsService.getSettingValue("notifyEveryPositionUpdate") === "true") {
-            wizardDAO.getUserFromID(userID).then(async (result) => {
-                if (result.isFollower === "false") {
-                    await dobby.notifyLocationChange(result.username, clockPosition.name, isHearbeat);
-                } else {
-                    let lead = await followerDAO.getLeadFromFollowerID(result.id);
-                    await dobby.notifyFollowerLocationChange(result.username, lead.username, clockPosition.name);
-                }
-
-            })
+            sendDiscordPing(userID, clockPosition, isHeartbeat);
         } else {
             if (result.face_position !== clockPosition.face_position) {
-                wizardDAO.getUserFromID(userID).then(async (result) => {
-                    if (result.isFollower === "false") {
-                        await dobby.notifyLocationChange(result.username, clockPosition.name, isHearbeat);
-                    } else {
-                        let lead = await followerDAO.getLeadFromFollowerID(result.id);
-                        await dobby.notifyFollowerLocationChange(result.username, lead.username, clockPosition.name);
-                    }
-                })
+                sendDiscordPing(userID, clockPosition, isHeartbeat);
             }
+        }
+    });
+}
+
+function sendDiscordPing(userID, clockPosition, isHeartbeat) {
+    wizardDAO.getUserFromID(userID).then(async (result) => {
+        if (result.isFollower === "false") {
+            await dobby.notifyLocationChange(result.username, clockPosition.name, isHeartbeat);
+        } else {
+            let leadID = await followerDAO.getLeadIDFromFollowerID(result.id);
+            let lead = await wizardDAO.getUserFromID(leadID);
+            await dobby.notifyFollowerLocationChange(result.username, lead.username, clockPosition.name);
         }
     });
 }

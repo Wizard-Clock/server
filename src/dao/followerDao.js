@@ -1,5 +1,4 @@
 const db = require("../controllers/dbController");
-const wizardDAO = require("./wizardDao");
 
 async function applyFollowLink(followerID, leadID) {
     db.all(`INSERT INTO follower_link (follower_id, lead_id) VALUES (?, ?) ON CONFLICT(follower_id) DO UPDATE SET lead_id=?`,[
@@ -10,12 +9,7 @@ async function applyFollowLink(followerID, leadID) {
 }
 
 async function removeFollowLink(followerID) {
-    await db.run(`DELETE FROM follower_link WHERE follower_id=?`, followerID, () => {});
-}
-
-async function getLeadFromFollowerID(followerID) {
-    let leadID = await getLeadIDFromFollowerID(followerID);
-    return wizardDAO.getUserFromID(leadID.lead_id);
+    await db.dbConnector.run(`DELETE FROM follower_link WHERE follower_id=?`, followerID, () => {});
 }
 
 async function getLeadIDFromFollowerID(followerID) {
@@ -43,7 +37,6 @@ async function getFollowerInfoFromLeadID(leadID) {
 module.exports = {
     applyFollowLink,
     removeFollowLink,
-    getLeadFromFollowerID,
     getLeadIDFromFollowerID,
     getFollowerInfoFromLeadID
 }

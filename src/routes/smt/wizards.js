@@ -22,8 +22,8 @@ router.get("/", authenticateToken, async function (req, res, next) {
         user.posistionLog = positionList;
 
         if (user.isFollower === "true") {
-            let leadUser = await followerDAO.getLeadFromFollowerID(user.id);
-            user.lead = leadUser;
+            let leadID = await followerDAO.getLeadIDFromFollowerID(user.id);
+            user.lead = await wizardDAO.getUserFromID(leadID.lead_id);
         }
     }
     const user = await wizardDAO.getUserFromID(req.userID);
