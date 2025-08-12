@@ -1,5 +1,4 @@
 const db = require("../controllers/dbController");
-const clockFaceDAO = require("./clockFaceDao");
 
 async function addLocation(location) {
     await db.dbConnector.run(`INSERT INTO locations (name, latitude, longitude, radius, description) VALUES (?, ?, ?, ?, ?)`, [
@@ -9,12 +8,6 @@ async function addLocation(location) {
         location.radius,
         location.description,
     ]);
-
-    if (location.clockPosition) {
-        let locationID;
-        await getLocationFromName(location.name).then(value => locationID = value.id);
-        return clockFaceDAO.updatePositionLocations(location.clockPosition, locationID);
-    }
 }
 
 async function updateLocation(location) {
@@ -26,17 +19,9 @@ async function updateLocation(location) {
         location.description,
         location.id
     ]);
-
-    if (location.clockPosition) {
-        return clockFaceDAO.updatePositionLocations(location.clockPosition, location.id);
-    } else {
-        return await removeLocationFromPosition(location.id);
-    }
 }
 
 async function deleteLocation(locationID) {
-    await removeLocationFromPosition(locationID);
-
     return await new Promise((resolve, reject) => {
         db.dbConnector.run(`DELETE FROM locations WHERE id=?`, locationID, (err, rows) => {
             if (err)
@@ -67,16 +52,6 @@ async function getAllLocations() {
                 resolve(rows);
         });
     });
-}
-
-async function getAllLocationsForClockPosition(clockPositionID) {
-    let locationIDs = await getAllLocationIDsFromPositionID(clockPositionID);
-
-    const locations = [];
-    for (let entry of locationIDs) {
-        await getLocationFromID(entry.location_id).then(value => locations.push(value.name));
-    }
-    return locations;
 }
 
 async function getAllLocationIDsFromPositionID(positionID) {
@@ -129,7 +104,6 @@ module.exports = {
     deleteLocation,
     removeLocationFromPosition,
     getAllLocations,
-    getAllLocationsForClockPosition,
     getAllLocationIDsFromPositionID,
     getLocationFromID,
     getLocationFromName,

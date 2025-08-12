@@ -5,7 +5,7 @@ const wizardDAO = require("../../dao/wizardDao");
 const followerDAO = require("../../dao/followerDao");
 const roleDAO = require("../../dao/roleDao");
 const dobby = require("../../controllers/discordController");
-const locationUpdateController = require("../../controllers/locationUpdateController");
+const locationController = require("../../controllers/locationController");
 const authenticateToken = require("../../controllers/authController");
 const passport = require("passport");
 
@@ -47,7 +47,7 @@ router.post('/credentialCheck', authenticateToken, async function (req, res, nex
 
 router.post('/updateUserLocation', authenticateToken, async function (req, res, next) {
     console.log("User location update received.");
-    await locationUpdateController(req.userID, req.body.location, req.body.heartbeat).then((result) => {
+    await locationController.updateUserLocation(req.userID, req.body.location, req.body.heartbeat).then((result) => {
         if (result) {
             return res.status(202).json({ message: 'User location updated.' });
         } else {

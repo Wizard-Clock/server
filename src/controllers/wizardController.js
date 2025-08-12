@@ -1,23 +1,24 @@
 const roleDAO = require("../dao/roleDao");
 const locationDAO = require("../dao/locationDAO");
+const loggingDAO = require("../dao/loggingDao");
 const followerDAO = require("../dao/followerDao");
 const wizardDAO = require("../dao/wizardDao");
 
 async function addUserInfo(username, password, role, isFollower, leadID) {
-    await wizardDAO.addUser(username, password, role, isFollower);
-
-    let newUser = await wizardDAO.getUserFromName(username);
-    await roleDAO.addUserToRole(newUser.id, role);
-
+    //TODO If follower, then assign to lead location
     const defaultLocation = await locationDAO.getDefaultLocation();
-    await wizardDAO.setUserLocation(newUser.id, defaultLocation.id);
-
-    if (isFollower) {
-        await followerDAO.applyFollowLink(newUser.id, leadID);
-    }
+    await wizardDAO.addUser(username, password, role, isFollower).then(async () => {
+        let newUser = await wizardDAO.getUserFromName(username)
+        await roleDAO.addUserToRole(newUser.id, role);
+        await wizardDAO.setUserLocation(newUser.id, defaultLocation.id);
+        if (isFollower) {
+            await followerDAO.applyFollowLink(newUser.id, leadID);
+        }
+    });
 }
 
 async function updateUserInfo(user) {
+    //TODO If updated to follower, then assign to lead location, unassign no change
     const oldUser = await wizardDAO.getUserFromID(user.id);
 
     if (oldUser.username !== user.username) {
@@ -38,9 +39,33 @@ async function updateUserInfo(user) {
 }
 
 async function deleteUserInfo(userID){
+    await wizardDAO.deleteUserLocation(userID);
+    await loggingDAO.clearUserLocationLog(userID);
     await roleDAO.removeUserFromRole(userID);
-    await followerDAO.removeFollowLink(userID);
+    await wizardDAO.getUserFromID(userID).then(async user => {
+        if (user.isFollower === "true") {
+            await followerDAO.removeFollowLink(userID);
+        } else {
+            await removeLeadFromFollowers(userID)
+        }
+    });
     return await wizardDAO.deleteUser(userID);
+}
+
+async function removeLeadFromFollowers(userID) {
+    let followerIDList = [];
+    await followerDAO.getFollowerInfoFromLeadID(userID).then(results => {
+        for (let followInfo of results) {
+            followerIDList.push(followInfo.follower_id);
+        }
+    });
+
+    if (followerIDList.length > 0) {
+        for (let followerID of followerIDList) {
+            await followerDAO.removeFollowLink(followerID);
+            await wizardDAO.updateUserFollowerStatus(followerID, false.toString());
+        }
+    }
 }
 
 module.exports = {

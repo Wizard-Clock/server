@@ -1,8 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const wizardDAO = require("../../dao/wizardDao");
-const locationDAO = require("../../dao/locationDAO");
 const clockFaceDAO = require("../../dao/clockFaceDao");
+const locationController =  require("../../controllers/locationController");
 const clockFaceController = require("../../controllers/clockFaceController");
 const roleDAO = require("../../dao/roleDao");
 const settingsService = require("../../controllers/serverSettingController").default.getInstance();
@@ -22,7 +22,7 @@ router.get('/', authenticateToken, async function (req, res, next) {
 
     const clockPositionsWithLocation = [];
     for (let cPosition of clockPositions) {
-        let locationsPerPosition = await locationDAO.getAllLocationsForClockPosition(cPosition.id);
+        let locationsPerPosition = await locationController.getAllLocationsForClockPositionID(cPosition.id);
         let locationString = "";
         for (let location of locationsPerPosition) {
             locationString += location + ", ";

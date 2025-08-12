@@ -99,6 +99,17 @@ async function setUserLocation(userID, locationID) {
     })
 }
 
+async function deleteUserLocation(userID) {
+    return await new Promise((resolve, reject) => {
+        db.dbConnector.run(`DELETE FROM user_location WHERE user_id=?`, userID, (err, rows) => {
+            if (err)
+                reject(err);
+            else
+                resolve(rows);
+        });
+    })
+}
+
 async function updateUserLocation(userID, locationID) {
     return setUserLocation(userID, locationID);
 }
@@ -109,6 +120,7 @@ module.exports = {
     updateUserPassword,
     updateUserFollowerStatus,
     deleteUser,
+    deleteUserLocation,
     getAllUsers,
     getUserFromID,
     getUserFromName,

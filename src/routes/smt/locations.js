@@ -4,6 +4,7 @@ const wizardDAO = require("../../dao/wizardDao");
 const locationDAO = require("../../dao/locationDAO");
 const clockFaceDAO = require("../../dao/clockFaceDao");
 const roleDAO = require("../../dao/roleDao");
+const locationController =  require("../../controllers/locationController");
 const authenticateToken = require("../../controllers/authController");
 const settingsService = require("../../controllers/serverSettingController").default.getInstance();
 const {formidable} = require("formidable");
@@ -49,7 +50,7 @@ router.post('/addLocation', authenticateToken, async function (req, res, next) {
             radius: location.radius[0],
             description: location.description ? location.description[0] : "",
         }
-        await locationDAO.addLocation(locationObj);
+        await locationController.addLocationInfo(locationObj);
         res.send({success: true});
     });
 })
@@ -66,13 +67,13 @@ router.post('/editLocation', authenticateToken, async function (req, res, next) 
             radius: location.radius ? location.radius[0] : 0,
             description: location.description ? location.description[0] : "",
         }
-        await locationDAO.updateLocation(locationObj);
+        await locationController.updateLocationInfo(locationObj);
         res.send({success: true});
     });
 })
 
 router.post('/deleteLocation', authenticateToken, async function (req, res, next) {
-    await locationDAO.deleteLocation(req.body.id);
+    await locationController.deleteLocationInfo(req.body.id);
     res.send({success: true});
 })
 

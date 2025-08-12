@@ -1,6 +1,4 @@
 const db = require("../controllers/dbController");
-const wizardDAO = require("./wizardDao");
-const locationDAO = require("./locationDAO");
 
 async function updateClockPosition(clockPosition) {
     return await new Promise((resolve, reject) => {
@@ -51,7 +49,6 @@ async function getClockPositionLocationFromLocationID(locationID) {
 
 async function getClockPositionFromLocationID(locationID) {
     let position = await getClockPositionLocationFromLocationID(locationID);
-
     if (position) {
         return await new Promise((resolve, reject) => {
             db.dbConnector.all('SELECT * FROM clock_face WHERE id=?', position.position_id, (err, rows) => {

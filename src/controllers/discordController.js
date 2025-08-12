@@ -113,6 +113,7 @@ async function sendWebhook(params) {
                 console.log("Discord Webhooks Enabled.");
             } else {
                 console.log("Invalid Discord Webhook URL or Parameters. Discord Webhooks Disabled.");
+                isValidWebhook = false;
             }
         }
         attemptStartup = false;
