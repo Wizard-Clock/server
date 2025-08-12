@@ -15,7 +15,7 @@ const db = require('./dbController');
  * user is authenticated; otherwise, not.
  */
 passport.use(new LocalStrategy(function verify(username, password, callback) {
-    db.get('SELECT * FROM users WHERE username = ?', [ username ], function(err, user) {
+    db.dbConnector.get('SELECT * FROM users WHERE username = ?', [ username ], function(err, user) {
         if (err) { return callback(err); }
         if (!user) { return callback(null, false, { message: 'Incorrect username or password.' }); }
 
@@ -61,7 +61,7 @@ passport.use(new JWTStrategy({
         secretOrKey   : process.env.JWT_SECRET
     },
     function (jwtPayload, callback) {
-        db.get('SELECT * FROM users WHERE username = ?', [ jwtPayload ], function(err, user) {
+        db.dbConnector.get('SELECT * FROM users WHERE username = ?', [ jwtPayload ], function(err, user) {
             if (err) { return callback(err); }
             if (!user) { return callback(null, false, { message: 'Incorrect token.' }); }
 

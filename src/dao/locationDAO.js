@@ -2,7 +2,7 @@ const db = require("../controllers/dbController");
 const clockFaceDAO = require("./clockFaceDao");
 
 async function addLocation(location) {
-    await db.run(`INSERT INTO locations (name, latitude, longitude, radius, description) VALUES (?, ?, ?, ?, ?)`, [
+    await db.dbConnector.run(`INSERT INTO locations (name, latitude, longitude, radius, description) VALUES (?, ?, ?, ?, ?)`, [
         location.name,
         location.latitude,
         location.longitude,
@@ -18,7 +18,7 @@ async function addLocation(location) {
 }
 
 async function updateLocation(location) {
-    await db.run(`UPDATE locations SET name=?, latitude=?, longitude=?, radius=?, description=? WHERE id=?`, [
+    await db.dbConnector.run(`UPDATE locations SET name=?, latitude=?, longitude=?, radius=?, description=? WHERE id=?`, [
         location.name,
         location.latitude,
         location.longitude,
@@ -38,7 +38,7 @@ async function deleteLocation(locationID) {
     await removeLocationFromPosition(locationID);
 
     return await new Promise((resolve, reject) => {
-        db.run(`DELETE FROM locations WHERE id=?`, locationID, (err, rows) => {
+        db.dbConnector.run(`DELETE FROM locations WHERE id=?`, locationID, (err, rows) => {
             if (err)
                 reject(err);
             else
@@ -49,7 +49,7 @@ async function deleteLocation(locationID) {
 
 async function removeLocationFromPosition(locationID) {
     return await new Promise((resolve, reject) => {
-        db.run(`DELETE FROM position_locations WHERE location_id=?`, locationID, (err, rows) => {
+        db.dbConnector.run(`DELETE FROM position_locations WHERE location_id=?`, locationID, (err, rows) => {
             if (err)
                 reject(err);
             else
@@ -60,7 +60,7 @@ async function removeLocationFromPosition(locationID) {
 
 async function getAllLocations() {
     return await new Promise((resolve, reject) => {
-        db.all('SELECT * FROM locations', (err, rows) => {
+        db.dbConnector.all('SELECT * FROM locations', (err, rows) => {
             if (err)
                 reject(err);
             else
@@ -81,7 +81,7 @@ async function getAllLocationsForClockPosition(clockPositionID) {
 
 async function getAllLocationIDsFromPositionID(positionID) {
     return await new Promise((resolve, reject) => {
-        db.all('SELECT * FROM position_locations WHERE position_id=?', positionID, (err, rows) => {
+        db.dbConnector.all('SELECT * FROM position_locations WHERE position_id=?', positionID, (err, rows) => {
             if (err)
                 reject(err);
             else
@@ -92,7 +92,7 @@ async function getAllLocationIDsFromPositionID(positionID) {
 
 async function getLocationFromID(locationID) {
     return await new Promise((resolve, reject) => {
-        db.all('SELECT * FROM locations WHERE id=?', locationID, (err, rows) => {
+        db.dbConnector.all('SELECT * FROM locations WHERE id=?', locationID, (err, rows) => {
             if (err)
                 reject(err);
             else
@@ -103,7 +103,7 @@ async function getLocationFromID(locationID) {
 
 async function getLocationFromName(locationName) {
     return await new Promise((resolve, reject) => {
-        db.all('SELECT * FROM locations WHERE name=?', locationName, (err, rows) => {
+        db.dbConnector.all('SELECT * FROM locations WHERE name=?', locationName, (err, rows) => {
             if (err)
                 reject(err);
             else
@@ -114,7 +114,7 @@ async function getLocationFromName(locationName) {
 
 async function getDefaultLocation() {
     return await new Promise((resolve, reject) => {
-        db.all('SELECT * FROM locations WHERE isDefault=1', (err, rows) => {
+        db.dbConnector.all('SELECT * FROM locations WHERE isDefault=1', (err, rows) => {
             if (err)
                 reject(err);
             else
