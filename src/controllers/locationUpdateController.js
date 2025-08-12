@@ -4,7 +4,7 @@ const loggingDAO = require("../dao/loggingDao");
 const wizardDAO = require("../dao/wizardDao");
 const clockFaceDAO = require("../dao/clockFaceDao");
 const dobby = require("./discordController");
-const settingsService = require("../../controllers/serverSettingController").default.getInstance();
+const settingsService = require("../controllers/serverSettingController").default.getInstance();
 
 
 async function updateUserLocation(userID, coords, isHeartbeat) {
