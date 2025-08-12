@@ -77,7 +77,7 @@ router.post('/manualUserLocationUpdate', authenticateToken, async function (req,
         });
     }
 
-    let reportingUser = await db.getUserFromID(userID);
+    let reportingUser = await wizardDAO.getUserFromID(userID);
     if (reportingUser.reportingMethod !== reportingMethod) {
         await dobby.notifyReportingMethodChange(reportingUser.username, reportingMethod, false);
         for (let followerID of  followers) {
