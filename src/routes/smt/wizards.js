@@ -3,6 +3,7 @@ const router = express.Router();
 const wizardDAO = require("../../dao/wizardDao");
 const loggingDAO = require("../../dao/loggingDao");
 const followerDAO = require("../../dao/followerDao");
+const wizardController =  require("../../controllers/wizardController");
 const roleDAO = require("../../dao/roleDao");
 const {formidable} = require('formidable');
 const authenticateToken = require("../../controllers/authController");
@@ -47,18 +48,18 @@ router.post('/addUser', authenticateToken, async function (req, res, next) {
     await form.parse(req, async (err, user) => {
         let isFollower = user.isFollower ? true : false;
         let leadID = isFollower ? (user.leadID ? user.leadID[0] : "") : "";
-        await wizardDAO.addUser(user.username[0], user.password[0], user.role[0], isFollower, leadID);
+        await wizardController.addUserInfo(user.username[0], user.password[0], user.role[0], isFollower, leadID);
         res.send({success: true});
     });
 })
 
 router.post('/deleteUser', authenticateToken, async function (req, res, next) {
-    await wizardDAO.deleteUser(req.body.id);
+    await wizardController.deleteUserInfo(req.body.id);
     res.send({success: true});
 })
 
 router.post('/updateUser', authenticateToken, async function (req, res, next) {
-    await wizardDAO.updateUser(req.body);
+    await wizardController.updateUserInfo(req.body);
     res.send({success: true});
 })
 

@@ -3,6 +3,7 @@ const followerDAO = require("../dao/followerDao");
 const loggingDAO = require("../dao/loggingDao");
 const wizardDAO = require("../dao/wizardDao");
 const clockFaceDAO = require("../dao/clockFaceDao");
+const clockFaceController =  require("./clockFaceController");
 const dobby = require("./discordController");
 const settingsService = require("../controllers/serverSettingController").default.getInstance();
 
@@ -59,7 +60,8 @@ async function updateFollowersLocations(followers, locationID) {
 
 async function fireLocationUpdate(userID, locationID, isHeartbeat) {
     let clockPosition = await clockFaceDAO.getClockPositionFromLocationID(locationID);
-    await clockFaceDAO.getClockPositionFromUserID(userID).then((result) => {
+    let defaultLocationID = await locationDAO.getDefaultLocation();
+    await clockFaceController.getClockPositionFromUserID(userID, defaultLocationID).then((result) => {
         if (settingsService.getSettingValue("notifyEveryPositionUpdate") === "true") {
             sendDiscordPing(userID, clockPosition, isHeartbeat);
         } else {

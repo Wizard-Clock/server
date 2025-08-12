@@ -3,6 +3,7 @@ const router = express.Router();
 const wizardDAO = require("../../dao/wizardDao");
 const locationDAO = require("../../dao/locationDAO");
 const clockFaceDAO = require("../../dao/clockFaceDao");
+const clockFaceController = require("../../controllers/clockFaceController");
 const roleDAO = require("../../dao/roleDao");
 const settingsService = require("../../controllers/serverSettingController").default.getInstance();
 const authenticateToken = require("../../controllers/authController");
@@ -17,7 +18,7 @@ router.get('/', authenticateToken, async function (req, res, next) {
     const clockPositions = await clockFaceDAO.getAllClockPositions();
 
     // Get all User Locations on Clock
-    const usersClockPosition= await wizardDAO.getAllUsersClockFacePositions();
+    const usersClockPosition= await clockFaceController.getAllUsersClockFacePositions();
 
     const clockPositionsWithLocation = [];
     for (let cPosition of clockPositions) {
@@ -50,7 +51,7 @@ router.get('/standalone', authenticateToken, async function (req, res, next) {
     const clockPositions = await clockFaceDAO.getAllClockPositions();
 
     // Get all User Locations on Clock
-    const usersClockPosition= await wizardDAO.getAllUsersClockFacePositions();
+    const usersClockPosition= await clockFaceController.getAllUsersClockFacePositions();
 
     res.render('standaloneClock', {
         title: 'Clock',
@@ -60,7 +61,7 @@ router.get('/standalone', authenticateToken, async function (req, res, next) {
 
 router.get('/updateToClock', authenticateToken, async function (req, res, next) {
     let clockPositions = await clockFaceDAO.getAllClockPositions();
-    let usersClockPositions = await wizardDAO.getAllUsersClockFacePositions();
+    let usersClockPositions = await clockFaceController.getAllUsersClockFacePositions();
     res.json({clockPositions, usersClockPositions});
 })
 

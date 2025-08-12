@@ -49,28 +49,6 @@ async function getClockPositionLocationFromLocationID(locationID) {
     });
 }
 
-async function getClockPositionFromUserID(user_id) {
-    let location = await wizardDAO.getUserLocationFromUserID(user_id);
-    let positionLocation = await getClockPositionLocationFromLocationID(location.location_id);
-
-    if (!positionLocation) {
-        let locationID = await locationDAO.getDefaultLocation();
-        return getClockPositionFromLocationID(locationID);
-    } else {
-        return getClockPositionFromID(positionLocation.position_id);
-    }
-}
-
-async function getClockPositionFromUserLocation(userLocation) {
-    let positionLocation = await getClockPositionLocationFromLocationID(userLocation.location_id);
-    if (!positionLocation) {
-        let locationID = await locationDAO.getDefaultLocation();
-        return getClockPositionFromLocationID(locationID);
-    } else {
-        return getClockPositionFromID(positionLocation.position_id);
-    }
-}
-
 async function getClockPositionFromLocationID(locationID) {
     let position = await getClockPositionLocationFromLocationID(locationID);
 
@@ -106,9 +84,8 @@ async function updatePositionLocations(position, locationID) {
 module.exports = {
     updateClockPosition,
     updatePositionLocations,
+    getClockPositionLocationFromLocationID,
     getAllClockPositions,
     getClockPositionFromID,
-    getClockPositionFromUserID,
-    getClockPositionFromLocationID,
-    getClockPositionFromUserLocation
+    getClockPositionFromLocationID
 }

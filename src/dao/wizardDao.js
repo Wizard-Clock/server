@@ -1,11 +1,7 @@
 const db = require("../controllers/dbController");
-const roleDAO = require("./roleDao");
-const followerDAO = require("./followerDao");
-const clockFaceDAO = require("./clockFaceDao");
-const locationDAO = require("./locationDAO");
 const crypto = require("crypto");
 
-async function addUser(username, password, role, isFollower, leadID) {
+async function addUser(username, password, role, isFollower) {
     let salt = crypto.randomBytes(16);
     await db.run(`INSERT INTO users (username, hashed_password, salt, isFollower) VALUES (?, ?, ?, ?)`, [
         username,
@@ -13,49 +9,27 @@ async function addUser(username, password, role, isFollower, leadID) {
         salt,
         isFollower.toString()
     ]);
-
-    let userID;
-    await getUserFromName(username).then(value => userID = value.id);
-    await roleDAO.addUserToRole(userID, role);
-
-    const defaultLocation = await locationDAO.getDefaultLocation();
-    await setUserLocation(userID, defaultLocation.id);
-
-    if (isFollower) {
-        await followerDAO.applyFollowLink(userID, leadID);
-    }
 }
 
-async function updateUser(user) {
-    const oldUser = await getUserFromID(user.id);
+async function updateUserUsername(userID, newUsername) {
+    await db.dbConnector.run(`UPDATE users SET username=? WHERE id=?`, [newUsername, userID], (err, rows) => {})
+}
 
-    if (oldUser.username !== user.username) {
-        await db.run(`UPDATE users SET username=? WHERE id=?`, [user.username, user.id], (err, rows) => {})
-    }
+async function updateUserPassword(userID, newPassword) {
+    let salt = crypto.randomBytes(16);
+    await db.dbConnector.run(`UPDATE users SET hashed_password=?, salt=? WHERE id=?`, [
+        crypto.pbkdf2Sync(newPassword, salt, 310000, 32, 'sha256'),
+        salt,
+        userID
+    ], (err, rows) => {})
+}
 
-    if (user.password !== "") {
-        let salt = crypto.randomBytes(16);
-        await db.run(`UPDATE users SET hashed_password=?, salt=? WHERE id=?`, [
-            crypto.pbkdf2Sync(user.password, salt, 310000, 32, 'sha256'),
-            salt,
-            user.id
-        ], (err, rows) => {})
-    }
-
-    if (user.isFollower === "true") {
-        await followerDAO.applyFollowLink(user.id, user.leadID);
-    } else {
-        await followerDAO.removeFollowLink(user.id);
-    }
-    await db.run(`UPDATE users SET isFollower=? WHERE id=?`,
-        [user.isFollower, user.id], () => {});
-
-    await roleDAO.updateUserRole(user.name, user.role);
+async function updateUserFollowerStatus(userID, followVal) {
+    await db.dbConnector.run(`UPDATE users SET isFollower=? WHERE id=?`,
+        [followVal, userID], () => {});
 }
 
 async function deleteUser(userID) {
-    await roleDAO.removeUserFromRole(userID);
-    await followerDAO.removeFollowLink(userID);
     return await new Promise((resolve, reject) => {
         db.run(`DELETE FROM users WHERE id=?`, userID, (err, rows) => {
             if (err)
@@ -129,26 +103,16 @@ async function updateUserLocation(userID, locationID) {
     return setUserLocation(userID, locationID);
 }
 
-async function getAllUsersClockFacePositions() {
-    const users = await getAllUsers();
-    let usersClockPosition = [];
-    for (let user of users) {
-        let userLocation = await getUserLocationFromUserID(user.id);
-        let position = await clockFaceDAO.getClockPositionFromUserLocation(userLocation);
-        let wizard= {name: user.username, position: position};
-        usersClockPosition.push(wizard);
-    }
-    return usersClockPosition;
-}
-
 module.exports = {
     addUser,
-    updateUser,
+    updateUserUsername,
+    updateUserPassword,
+    updateUserFollowerStatus,
     deleteUser,
     getAllUsers,
     getUserFromID,
     getUserFromName,
     getUserLocationFromUserID,
     updateUserLocation,
-    getAllUsersClockFacePositions
+    setUserLocation
 }
