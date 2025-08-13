@@ -114,5 +114,9 @@ INSERT OR IGNORE INTO clock_face (id,face_position, name) VALUES
 INSERT OR IGNORE INTO locations (id, name, latitude, longitude, radius, description, isDefault) VALUES
     (1,'Default', '0', '0', 0, 'Default location', 1);
 **
-INSERT OR IGNORE INTO position_locations (location_id, position_id)  VALUES
+INSERT OR IGNORE INTO position_locations (location_id, position_id) VALUES
     (1,13);
+**
+INSERT OR IGNORE INTO server_settings (setting_name, value) VALUES
+    ('dbVersion','1'),
+    ('adminInitialized','false');

@@ -6,7 +6,7 @@ const appRoot = require('app-root-path');
 const migrationsDir = path.normalize(appRoot + '/migrations/');
 let dbConnector;
 
-createDB();
+createDB().then(() => dbConnector.run(`DELETE FROM user_location_log`));
 
 async function createDB() {
     const dbDir = path.normalize(appRoot + '/db/');
@@ -18,7 +18,8 @@ async function createDB() {
     dbConnector = new sqlite.Database(dbName, (err) => {
         if (err) {
             return console.error(err.message);
-        }  console.log('Connected to the SQLite database.');
+        }
+        console.log('[db] Connected to the SQLite database.');
     });
     await initializeDB();
 }
@@ -31,9 +32,11 @@ async function initializeDB() {
         return +a - +b;
     });
 
-    dbConnector.serialize(() => {
+    await dbConnector.serialize(() => {
+        console.log('[db] Running migrations...');
         dbConnector.run("BEGIN TRANSACTION");
         files.forEach((file) => {
+            console.log('[db] Migration: ', file);
             const sqlArray = fs.readFileSync(migrationsDir + file)
                 .toString()
                 .split("**");
@@ -43,19 +46,13 @@ async function initializeDB() {
                 });
             })
         });
-
-        let salt = crypto.randomBytes(16);
-        dbConnector.run(`INSERT OR IGNORE INTO users (id,username, hashed_password, salt, isFollower)VALUES (?, ?, ?, ?, ?)`, [
-            1,
-            'admin',
-            crypto.pbkdf2Sync('admin', salt, 310000, 32, 'sha256'),
-            salt,
-            'false'
-        ]);
-        dbConnector.run(`INSERT OR IGNORE INTO user_roles (user_id, role_id)VALUES (1, 1)`);
-        dbConnector.run(`INSERT OR IGNORE INTO user_location (user_id, location_id)VALUES (1, 1)`);
-        dbConnector.run(`DELETE FROM user_location_log`);
         dbConnector.run("COMMIT");
+    });
+
+    await dbConnector.all(`SELECT * FROM server_settings WHERE setting_name='adminInitialized'`, (err, rows) => {
+        if (rows && rows[0].value === 'false') {
+            initializeAdminUser();
+        }
     });
 
     setInterval(async () => {
@@ -63,7 +60,25 @@ async function initializeDB() {
     }, 86400000);
 }
 
+async function initializeAdminUser() {
+    console.log('[db] Initialize default admin user.');
+    await dbConnector.serialize(() => {
+        dbConnector.run("BEGIN TRANSACTION");
+        let salt = crypto.randomBytes(16);
+        dbConnector.run(`INSERT OR IGNORE INTO users (id, username, hashed_password, salt, isFollower) VALUES (?, ?, ?, ?, ?)`, [
+            1,
+            'admin',
+            crypto.pbkdf2Sync('admin', salt, 310000, 32, 'sha256'),
+            salt,
+            'false'
+        ]);
+        dbConnector.run(`INSERT OR IGNORE INTO user_roles (user_id, role_id) VALUES (1, 1)`);
+        dbConnector.run(`INSERT OR IGNORE INTO user_location (user_id, location_id) VALUES (1, 1)`);
+        dbConnector.run(`UPDATE server_settings SET value='true' WHERE setting_name='adminInitialized'`);
+        dbConnector.run("COMMIT");
+    });
+}
+
 module.exports = {
-    dbConnector,
-    createDB
+    dbConnector
 };
