@@ -44,15 +44,13 @@ block content
                                         button(type="button" class="btn btn-primary"  onclick='previewLocation(' + location.latitude + ',' + location.longitude + ')')
                                             i(class="bi bi-eye-fill")
                                 else
-                                    td()
-                                    td()
-                                    td()
+                                    td()= 'N/A'
+                                    td()= 'N/A'
+                                    td()= 'N/A'
                                     td()= location.description
-                                    td()
-                                        button(type="button" class="btn btn-light" data-bs-toggle="modal" data-bs-target="#editLocationModal" data-bs-location= location)
-                                            i(class="bi bi-pencil-square")
-                                    td()
-                                    td()
+                                    td()= 'N/A'
+                                    td()= 'N/A'
+                                    td()= 'N/A'
 
                 button(type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addLocationModal") Add Location&nbsp;
                     i(class="bi bi-geo-alt")
