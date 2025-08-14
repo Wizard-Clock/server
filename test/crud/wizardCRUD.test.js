@@ -147,23 +147,31 @@ describe('User CRUD Tests', function () {
         it('delete child user.', async function () {
             let childUser = await wizardController.deleteUserInfo(TEST_CHILD_UPDATE.id);
             expect(childUser).to.equal(undefined);
-
         });
 
         it('verify child user delete.', async function () {
             let allUsers = await wizardDAO.getAllUsers();
-
+            for (let wizard of allUsers) {
+                TEST_CHILD_UPDATE.id.should.not.equal(wizard.id);
+            }
+            await wizardDAO.getUserLocationFromUserID(TEST_CHILD_UPDATE.id).then(async result => {
+                expect(result).to.equal(undefined);
+            });
         });
 
         it('delete admin user.', async function () {
             let normUser = await wizardController.deleteUserInfo(TEST_USER_UPDATED.id);
             expect(normUser).to.equal(undefined);
-
         });
 
         it('verify admin user delete.', async function () {
             let allUsers = await wizardDAO.getAllUsers();
-
+            for (let wizard of allUsers) {
+                TEST_USER_UPDATED.id.should.not.equal(wizard.id);
+            }
+            await wizardDAO.getUserLocationFromUserID(TEST_USER_UPDATED.id).then(async result => {
+                expect(result).to.equal(undefined);
+            });
         });
     });
 });

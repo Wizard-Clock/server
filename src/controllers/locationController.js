@@ -12,22 +12,25 @@ async function addLocationInfo(location) {
     if (location.clockPosition) {
         let locationID;
         await locationDAO.getLocationFromName(location.name).then(value => locationID = value.id);
-        return clockFaceDAO.updatePositionLocations(location.clockPosition, locationID);
+        await clockFaceDAO.updatePositionLocations(location.clockPosition, locationID);
+        return true;
     }
 }
 
 async function updateLocationInfo(location) {
     await locationDAO.updateLocation(location);
     if (location.clockPosition) {
-        return clockFaceDAO.updatePositionLocations(location.clockPosition, location.id);
+        await clockFaceDAO.updatePositionLocations(location.clockPosition, location.id);
     } else {
-        return await locationDAO.removeLocationFromPosition(location.id);
+        await locationDAO.removeLocationFromPosition(location.id);
     }
+    return true;
 }
 
-async  function deleteLocationInfo(locationID) {
+async function deleteLocationInfo(locationID) {
     await locationDAO.removeLocationFromPosition(locationID);
     await locationDAO.deleteLocation(locationID);
+    return true;
 }
 
 async function getAllLocationsForClockPositionID(clockPositionID) {
