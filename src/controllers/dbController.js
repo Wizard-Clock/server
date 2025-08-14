@@ -49,9 +49,9 @@ async function initializeDB() {
         dbConnector.run("COMMIT");
     });
 
-    await dbConnector.all(`SELECT * FROM server_settings WHERE setting_name='adminInitialized'`, (err, rows) => {
+    await dbConnector.all(`SELECT * FROM server_settings WHERE setting_name='adminInitialized'`, async (err, rows) => {
         if (rows && rows[0].value === 'false') {
-            initializeAdminUser();
+            await initializeAdminUser();
         }
     });
 

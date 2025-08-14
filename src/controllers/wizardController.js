@@ -14,6 +14,7 @@ async function addUserInfo(username, password, role, isFollower, leadID) {
             await updateUserToFollower(newUser.id, leadID);
         }
     });
+    return true;
 }
 
 async function updateUserInfo(user) {
@@ -34,6 +35,7 @@ async function updateUserInfo(user) {
     await wizardDAO.updateUserFollowerStatus(user.id, user.isFollower)
 
     await roleDAO.updateUserRole(user.id, user.role);
+    return true;
 }
 
 async function deleteUserInfo(userID){
