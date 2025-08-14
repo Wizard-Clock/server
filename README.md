@@ -8,10 +8,12 @@
 
 # Wizarding Clock Server
 ### Tech Stack
-- DB: sqllite 3
 - Runtime: Node.js
     - Auth Service: Passport.js
-- Backend Routing: Express.js
+    - Routing: Express.js
+- DB: sqllite 3
+- Testing:
+    - Mocha w/ Chai
 ### For more info see wiki [here](https://github.com/Wizard-Clock/server/wiki)!
 
 ## Docker Instructions
