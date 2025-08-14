@@ -119,4 +119,7 @@ INSERT OR IGNORE INTO position_locations (location_id, position_id) VALUES
 **
 INSERT OR IGNORE INTO server_settings (setting_name, value) VALUES
     ('dbVersion','1'),
+    ('discordWebhook','https://discord.com/api/webhooks/'),
+    ('enableDiscord','false'),
+    ('notifyEveryPositionUpdate','false'),
     ('adminInitialized','false');
