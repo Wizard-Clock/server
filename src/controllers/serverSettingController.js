@@ -1,5 +1,7 @@
 import ssDAO from "../dao/serverSettingDao.js";
 
+const SERVER_VERSION = '0.1.0';
+
 let instance;
 
 export default class ServerSettingsService {
@@ -14,7 +16,7 @@ export default class ServerSettingsService {
 
     constructor() {
         this._loadApplicationSettings().then(() => {
-            this.set('serverVersion', '0.1.0');
+            this.set('serverVersion', SERVER_VERSION);
             console.log("[settingService] Server Settings Successfully Loaded.");
         });
     }
