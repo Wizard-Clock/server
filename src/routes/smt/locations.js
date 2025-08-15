@@ -5,6 +5,7 @@ const locationDAO = require("../../dao/locationDAO");
 const clockFaceDAO = require("../../dao/clockFaceDao");
 const roleDAO = require("../../dao/roleDao");
 const locationController =  require("../../controllers/locationController");
+const clockFaceController =  require("../../controllers/clockFaceController");
 const authenticateToken = require("../../controllers/authController");
 const settingsService = require("../../controllers/serverSettingController").default.getInstance();
 const {formidable} = require("formidable");
@@ -23,7 +24,7 @@ router.get('/', authenticateToken, async function (req, res, next) {
     const user = await wizardDAO.getUserFromID(req.userID);
     let locations = await locationDAO.getAllLocations();
     for (let location of locations) {
-        const clockPosition = await clockFaceDAO.getClockPositionFromLocationID(location.id);
+        const clockPosition = await clockFaceController.getClockPositionFromLocationID(location.id);
         if (clockPosition) {
             location.clockPosition = clockPosition.face_position;
             location.clockPositionName = clockPosition.name;

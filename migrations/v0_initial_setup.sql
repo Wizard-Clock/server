@@ -53,12 +53,12 @@ CREATE TABLE IF NOT EXISTS "user_location_log" (
    FOREIGN KEY ('user_id') REFERENCES users('id')
 );
 **
-CREATE TABLE IF NOT EXISTS "user_location" (
+CREATE TABLE IF NOT EXISTS "user_position" (
     'user_id' INTEGER NOT NULL UNIQUE,
-    'location_id' INTEGER NOT NULL,
-    PRIMARY KEY ('user_id', 'location_id'),
+    'position_id' INTEGER NOT NULL,
+    PRIMARY KEY ('user_id', 'position_id'),
     FOREIGN KEY ('user_id') REFERENCES users('id'),
-    FOREIGN KEY ('location_id') REFERENCES locations('id')
+    FOREIGN KEY ('position_id') REFERENCES clock_face('id')
 );
 **
 CREATE TABLE IF NOT EXISTS "position_locations" (

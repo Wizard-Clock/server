@@ -2,14 +2,22 @@ const wizardDAO = require("../dao/wizardDao");
 const clockFaceDAO = require("../dao/clockFaceDao");
 const locationDAO = require("../dao/locationDAO");
 
-async function getClockPositionFromUserID(user_id, defaultLocationID) {
-    let location = await wizardDAO.getUserLocationFromUserID(user_id);
-    let positionLocation = await clockFaceDAO.getClockPositionLocationFromLocationID(location.location_id);
+async function getClockPositionFromUserID(user_id) {
+    let positionInfo = await wizardDAO.getUserClockPositionInfoFromUserID(user_id);
 
-    if (!positionLocation) {
-        return clockFaceDAO.getClockPositionFromLocationID(defaultLocationID);
+    if (!positionInfo) {
+        return getDefaultClockPosition();
     } else {
-        return clockFaceDAO.getClockPositionFromID(positionLocation.position_id);
+        return clockFaceDAO.getClockPositionFromID(positionInfo.position_id);
+    }
+}
+
+async function getClockPositionFromLocationID(locationID) {
+    let clockPositionInfo = await clockFaceDAO.getClockPositionInfoFromLocationID(locationID);
+    if (!clockPositionInfo) {
+        return null;
+    } else {
+        return clockFaceDAO.getClockPositionFromID(clockPositionInfo.position_id);
     }
 }
 
@@ -17,25 +25,21 @@ async function getAllUsersClockFacePositions() {
     const users = await wizardDAO.getAllUsers();
     let usersClockPosition = [];
     for (let user of users) {
-        let userLocation = await wizardDAO.getUserLocationFromUserID(user.id);
-        let position = await getClockPositionFromUserLocation(userLocation);
-        let wizard= {name: user.username, position: position};
+        let clockPosition = await getClockPositionFromUserID(user.id);
+        let wizard= {name: user.username, position: clockPosition};
         usersClockPosition.push(wizard);
     }
     return usersClockPosition;
 }
 
-async function getClockPositionFromUserLocation(userLocation) {
-    let defaultLocation = await locationDAO.getDefaultLocation();
-    let positionLocation = await clockFaceDAO.getClockPositionLocationFromLocationID(userLocation.location_id);
-    if (!positionLocation) {
-        return clockFaceDAO.getClockPositionFromLocationID(defaultLocation.id);
-    } else {
-        return clockFaceDAO.getClockPositionFromID(positionLocation.position_id);
-    }
+async function getDefaultClockPosition() {
+    const defaultLocation = await locationDAO.getDefaultLocation();
+    return getClockPositionFromLocationID(defaultLocation.id);
 }
 
 module.exports = {
     getAllUsersClockFacePositions,
-    getClockPositionFromUserID
+    getClockPositionFromUserID,
+    getClockPositionFromLocationID,
+    getDefaultClockPosition
 };

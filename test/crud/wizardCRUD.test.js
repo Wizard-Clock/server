@@ -1,4 +1,5 @@
 const wizardController = require('../../src/controllers/wizardController');
+const clockFaceController = require('../../src/controllers/clockFaceController');
 const locationDAO = require("../../src/dao/locationDAO");
 const followerDAO = require("../../src/dao/followerDao");
 const wizardDAO = require("../../src/dao/wizardDao");
@@ -56,9 +57,9 @@ describe('User CRUD Tests', function () {
             let leadInfo = await followerDAO.getLeadIDFromFollowerID(createdUser.id);
             expect(leadInfo).to.equal(undefined);
 
-            let locInfo = await wizardDAO.getUserLocationFromUserID(createdUser.id);
-            let defaultLocation = await locationDAO.getDefaultLocation();
-            locInfo.location_id.should.equal(defaultLocation.id);
+            let userClockPosition = await clockFaceController.getClockPositionFromUserID(createdUser.id);
+            let defaultClockPosition = await clockFaceController.getDefaultClockPosition();
+            userClockPosition.id.should.equal(defaultClockPosition.id);
         });
 
         it('create and initialize child user', async function () {
@@ -80,9 +81,9 @@ describe('User CRUD Tests', function () {
             let leadInfo = await followerDAO.getLeadIDFromFollowerID(createdChild.id);
             leadInfo.lead_id.should.equal(leadUser.id);
 
-            let locInfo = await wizardDAO.getUserLocationFromUserID(createdChild.id);
-            let defaultLocation = await locationDAO.getDefaultLocation();
-            locInfo.location_id.should.equal(defaultLocation.id);
+            let userClockPosition = await clockFaceController.getClockPositionFromUserID(createdChild.id);
+            let defaultClockPosition = await clockFaceController.getDefaultClockPosition();
+            userClockPosition.id.should.equal(defaultClockPosition.id);
         });
     });
 
@@ -110,9 +111,9 @@ describe('User CRUD Tests', function () {
             let leadInfo = await followerDAO.getLeadIDFromFollowerID(childUserUpdated.id);
             expect(leadInfo).to.equal(undefined);
 
-            let locInfo = await wizardDAO.getUserLocationFromUserID(childUserUpdated.id);
-            let defaultLocation = await locationDAO.getDefaultLocation();
-            locInfo.location_id.should.equal(defaultLocation.id);
+            let userClockPosition = await clockFaceController.getClockPositionFromUserID(childUserUpdated.id);
+            let defaultClockPosition = await clockFaceController.getDefaultClockPosition();
+            userClockPosition.id.should.equal(defaultClockPosition.id);
         });
 
         it('update user.', async function () {
@@ -137,9 +138,9 @@ describe('User CRUD Tests', function () {
             let leadInfo = await followerDAO.getLeadIDFromFollowerID(normUserUpdated.id);
             expect(leadInfo).to.equal(undefined);
 
-            let locInfo = await wizardDAO.getUserLocationFromUserID(normUserUpdated.id);
-            let defaultLocation = await locationDAO.getDefaultLocation();
-            locInfo.location_id.should.equal(defaultLocation.id);
+            let userClockPosition = await clockFaceController.getClockPositionFromUserID(normUserUpdated.id);
+            let defaultClockPosition = await clockFaceController.getDefaultClockPosition();
+            userClockPosition.id.should.equal(defaultClockPosition.id);
         });
     });
 
@@ -154,7 +155,7 @@ describe('User CRUD Tests', function () {
             for (let wizard of allUsers) {
                 TEST_CHILD_UPDATE.id.should.not.equal(wizard.id);
             }
-            await wizardDAO.getUserLocationFromUserID(TEST_CHILD_UPDATE.id).then(async result => {
+            await wizardDAO.getUserClockPositionInfoFromUserID(TEST_CHILD_UPDATE.id).then(async result => {
                 expect(result).to.equal(undefined);
             });
         });
@@ -169,7 +170,7 @@ describe('User CRUD Tests', function () {
             for (let wizard of allUsers) {
                 TEST_USER_UPDATED.id.should.not.equal(wizard.id);
             }
-            await wizardDAO.getUserLocationFromUserID(TEST_USER_UPDATED.id).then(async result => {
+            await wizardDAO.getUserClockPositionInfoFromUserID(TEST_USER_UPDATED.id).then(async result => {
                 expect(result).to.equal(undefined);
             });
         });

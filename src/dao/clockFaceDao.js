@@ -36,31 +36,19 @@ async function getClockPositionFromID(id) {
     });
 }
 
-async function getClockPositionLocationFromLocationID(locationID) {
+async function getClockPositionInfoFromLocationID(locationID) {
     return await new Promise((resolve, reject) => {
         db.dbConnector.all('SELECT * FROM position_locations WHERE location_id=?', locationID, (err, rows) => {
             if (err)
                 reject(err);
             else
-                resolve(rows[0]);
+                if (rows && rows.length > 0) {
+                    resolve(rows[0]);
+                } else {
+                    resolve(null);
+                }
         });
     });
-}
-
-async function getClockPositionFromLocationID(locationID) {
-    let position = await getClockPositionLocationFromLocationID(locationID);
-    if (position) {
-        return await new Promise((resolve, reject) => {
-            db.dbConnector.all('SELECT * FROM clock_face WHERE id=?', position.position_id, (err, rows) => {
-                if (err)
-                    reject(err);
-                else
-                    resolve(rows[0]);
-            });
-        });
-    } else {
-        return null;
-    }
 }
 
 async function updatePositionLocations(position, locationID) {
@@ -81,8 +69,7 @@ async function updatePositionLocations(position, locationID) {
 module.exports = {
     updateClockPosition,
     updatePositionLocations,
-    getClockPositionLocationFromLocationID,
     getAllClockPositions,
     getClockPositionFromID,
-    getClockPositionFromLocationID
+    getClockPositionInfoFromLocationID
 }

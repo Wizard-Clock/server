@@ -73,7 +73,7 @@ async function initializeAdminUser() {
             'false'
         ]);
         dbConnector.run(`INSERT OR IGNORE INTO user_roles (user_id, role_id) VALUES (1, 1)`);
-        dbConnector.run(`INSERT OR IGNORE INTO user_location (user_id, location_id) VALUES (1, 1)`);
+        dbConnector.run(`INSERT OR IGNORE INTO user_position (user_id, position_id) VALUES (1, 13)`);
         dbConnector.run(`UPDATE server_settings SET value='true' WHERE setting_name='adminInitialized'`);
         dbConnector.run("COMMIT");
     });

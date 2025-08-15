@@ -1,4 +1,5 @@
 const locationController = require("../../src/controllers/locationController");
+const clockFaceController = require("../../src/controllers/clockFaceController");
 const locationDAO = require("../../src/dao/locationDAO");
 const clockFaceDAO = require("../../src/dao/clockFaceDao");
 const {should, expect} = require('chai');
@@ -32,7 +33,7 @@ describe('Location CRUD Tests', function () {
 
         it('verify create.', async function () {
             let createdLocation = await locationDAO.getLocationFromName(TEST_LOCATION.name);
-            let clockFacePosition = await clockFaceDAO.getClockPositionFromLocationID(createdLocation.id);
+            let clockFacePosition = await clockFaceController.getClockPositionFromLocationID(createdLocation.id);
             createdLocation.name.should.equal(TEST_LOCATION.name);
             clockFacePosition.face_position.should.equal(TEST_LOCATION.clockPosition);
             createdLocation.latitude.should.equal(TEST_LOCATION.latitude);
@@ -53,7 +54,7 @@ describe('Location CRUD Tests', function () {
 
         it('verify update.', async function () {
             let updatedLocation = await locationDAO.getLocationFromName(TEST_LOCATION_UPDATE.name);
-            let clockFacePosition = await clockFaceDAO.getClockPositionFromLocationID(updatedLocation.id);
+            let clockFacePosition = await clockFaceController.getClockPositionFromLocationID(updatedLocation.id);
 
             updatedLocation.name.should.equal(TEST_LOCATION_UPDATE.name);
             updatedLocation.name.should.not.equal(TEST_LOCATION.name);
@@ -87,7 +88,7 @@ describe('Location CRUD Tests', function () {
             for (let loc of locationList) {
                 TEST_LOCATION_UPDATE.id.should.not.equal(loc.id);
             }
-            await clockFaceDAO.getClockPositionFromLocationID(TEST_LOCATION_UPDATE.id).then(async result => {
+            await clockFaceController.getClockPositionFromLocationID(TEST_LOCATION_UPDATE.id).then(async result => {
                 expect(result).to.equal(null);
             })
         });

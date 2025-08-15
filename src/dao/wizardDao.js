@@ -73,9 +73,9 @@ async function getUserFromName(name) {
     });
 }
 
-async function getUserLocationFromUserID(userID) {
+async function getUserClockPositionInfoFromUserID(userID) {
     return await new Promise((resolve, reject) => {
-        db.dbConnector.all('SELECT * FROM user_location WHERE user_id=?', userID, (err, rows) => {
+        db.dbConnector.all('SELECT * FROM user_position WHERE user_id=?', userID, (err, rows) => {
             if (err)
                 reject(err);
             else
@@ -84,12 +84,12 @@ async function getUserLocationFromUserID(userID) {
     });
 }
 
-async function setUserLocation(userID, locationID) {
+async function setUserClockPosition(userID, clockPositionID) {
     return await new Promise((resolve, reject) => {
-        db.dbConnector.all(`INSERT INTO user_location (user_id, location_id) VALUES (?, ?) ON CONFLICT(user_id) DO UPDATE SET location_id=?`, [
+        db.dbConnector.all(`INSERT INTO user_position (user_id, position_id) VALUES (?, ?) ON CONFLICT(user_id) DO UPDATE SET position_id=?`, [
             userID,
-            locationID,
-            locationID
+            clockPositionID,
+            clockPositionID
         ], (err, rows) => {
             if (err)
                 reject(err);
@@ -99,9 +99,9 @@ async function setUserLocation(userID, locationID) {
     })
 }
 
-async function deleteUserLocation(userID) {
+async function deleteUserClockPosition(userID) {
     return await new Promise((resolve, reject) => {
-        db.dbConnector.run(`DELETE FROM user_location WHERE user_id=?`, userID, (err, rows) => {
+        db.dbConnector.run(`DELETE FROM user_position WHERE user_id=?`, userID, (err, rows) => {
             if (err)
                 reject(err);
             else
@@ -110,8 +110,8 @@ async function deleteUserLocation(userID) {
     })
 }
 
-async function updateUserLocation(userID, locationID) {
-    return setUserLocation(userID, locationID);
+async function updateUserClockPosition(userID, clockPositionID) {
+    return setUserClockPosition(userID, clockPositionID);
 }
 
 module.exports = {
@@ -120,11 +120,11 @@ module.exports = {
     updateUserPassword,
     updateUserFollowerStatus,
     deleteUser,
-    deleteUserLocation,
+    deleteUserClockPosition,
     getAllUsers,
     getUserFromID,
     getUserFromName,
-    getUserLocationFromUserID,
-    updateUserLocation,
-    setUserLocation
+    getUserClockPositionInfoFromUserID,
+    updateUserClockPosition,
+    setUserClockPosition,
 }
