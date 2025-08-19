@@ -56,10 +56,13 @@ async function handleUserLocationUpdate(userID, coords, isHeartbeat) {
     });
 
     // Update Location Logs
-    await loggingDAO.updateUserLocationLog(userID, coords.latitude, coords.longitude);
-    if (followerIDList.length > 0) {
-        for (let followerID of followerIDList) {
-            await loggingDAO.updateUserLocationLog(followerID, coords.latitude, coords.longitude);
+    const releaseType = settingsService.getSettingValue("releaseType");
+    if (releaseType === "development") {
+        await loggingDAO.updateUserLocationLog(userID, coords.latitude, coords.longitude);
+        if (followerIDList.length > 0) {
+            for (let followerID of followerIDList) {
+                await loggingDAO.updateUserLocationLog(followerID, coords.latitude, coords.longitude);
+            }
         }
     }
 
@@ -212,6 +215,7 @@ async function removeLeadFromFollowers(userID) {
 module.exports = {
     addUserInfo,
     updateUserInfo,
+    updateUserReportingMethod,
     deleteUserInfo,
     handleUserLocationUpdate,
     handleUserPositionUpdate

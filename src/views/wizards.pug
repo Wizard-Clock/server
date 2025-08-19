@@ -47,25 +47,27 @@ block content
                     thead()
                         tr()
                             th(scope="col") Username
-                            th(scope="col") View Path
-                            th(scope="col") Clear Path Log
+                            if releaseType === "development"
+                                th(scope="col") View Path
+                                th(scope="col") Clear Path Log
                             th(scope="col") Assign Location
                     tbody()
                         each wizard in wizards
                             tr()
                                 td()= wizard.username
-                                td()
-                                    if wizard.posistionLog.length > 0
-                                        button(type="button" class="btn btn-outline-dark" data-bs-toggle="modal" data-bs-target="#viewPathModal" data-bs-wizard-log= wizard.posistionLog)
-                                            i(class="bi bi-map")
-                                    else
-                                        p() No Logged Locations
-                                td()
-                                    if wizard.posistionLog.length > 0
-                                        button(type="button" class="btn btn-outline-danger" onclick=`clearUserLog(${wizard.id})`)
-                                            i(class="bi bi-trash3-fill")
-                                    else
-                                        p() Log is Empty
+                                if releaseType === "development"
+                                    td()
+                                        if wizard.posistionLog.length > 0
+                                            button(type="button" class="btn btn-outline-dark" data-bs-toggle="modal" data-bs-target="#viewPathModal" data-bs-wizard-log= wizard.posistionLog)
+                                                i(class="bi bi-map")
+                                        else
+                                            p() No Logged Locations
+                                    td()
+                                        if wizard.posistionLog.length > 0
+                                            button(type="button" class="btn btn-outline-danger" onclick=`clearUserLog(${wizard.id})`)
+                                                i(class="bi bi-trash3-fill")
+                                        else
+                                            p() Log is Empty
                                 if wizard.isFollower === "true"
                                     td()= "N/A for Followers"
                                 else

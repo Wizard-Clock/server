@@ -1,6 +1,8 @@
 import ssDAO from "../dao/serverSettingDao.js";
 
 const SERVER_VERSION = '0.1.0';
+// Valid Release Types: development, release
+const RELEASE_TYPE = 'development';
 
 let instance;
 
@@ -17,6 +19,7 @@ export default class ServerSettingsService {
     constructor() {
         this._loadApplicationSettings().then(() => {
             this.set('serverVersion', SERVER_VERSION);
+            this.set('releaseType', RELEASE_TYPE);
             console.log("[settingService] Server Settings Successfully Loaded.");
         });
     }

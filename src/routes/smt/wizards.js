@@ -15,13 +15,17 @@ router.get("/", authenticateToken, async function (req, res, next) {
     if (userRole.role !== "admin") {
         return res.redirect("/clock");
     }
+    const releaseType = settingsService.getSettingValue("releaseType");
+
     let users = await wizardDAO.getAllUsers();
     for (let user of users) {
         await roleDAO.getRoleFromUserID(user.id).then(role => {user.role = role.role});
 
-        let positionList = []
-        await loggingDAO.getUserLocationLog(user.id).then(locations => {positionList = locations});
-        user.posistionLog = positionList;
+        if (releaseType === "development") {
+            let positionList = []
+            await loggingDAO.getUserLocationLog(user.id).then(locations => {positionList = locations});
+            user.posistionLog = positionList;
+        }
 
         if (user.isFollower === "true") {
             let leadID = await followerDAO.getLeadIDFromFollowerID(user.id);
@@ -44,7 +48,8 @@ router.get("/", authenticateToken, async function (req, res, next) {
         wizards: users,
         roles: await roleDAO.getAllRoles(),
         locations: clockPositions,
-        serverVersion: settingsService.getSettingValue("serverVersion")
+        serverVersion: settingsService.getSettingValue("serverVersion"),
+        releaseType: releaseType
     });
 });
 
