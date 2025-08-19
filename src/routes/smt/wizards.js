@@ -36,6 +36,8 @@ router.get("/", authenticateToken, async function (req, res, next) {
             let pos = await wizardDAO.getUserClockPositionInfoFromUserID(user.id);
             user.positionID = pos.position_id;
         }
+        user.hashed_password = "";
+        user.salt = "";
     }
 
     let clockPositions = await clockFaceDAO.getAllClockPositions();
