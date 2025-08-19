@@ -2,10 +2,7 @@ const express = require('express');
 const jwt = require('jsonwebtoken');
 const router = express.Router();
 const wizardDAO = require("../../dao/wizardDao");
-const followerDAO = require("../../dao/followerDao");
 const roleDAO = require("../../dao/roleDao");
-const dobby = require("../../controllers/discordController");
-const locationController = require("../../controllers/locationController");
 const wizardController = require("../../controllers/wizardController");
 const authenticateToken = require("../../controllers/authController");
 const passport = require("passport");
@@ -57,38 +54,9 @@ router.post('/updateUserLocation', authenticateToken, async function (req, res, 
     });
 });
 
-router.post('/manualUserLocationUpdate', authenticateToken, async function (req, res, next) {
-    const userID = req.userID;
-    const reportingMethod = req.body.reportingMethod;
-    const followers = [];
-
-    await wizardDAO.updateUserReportingMethod(userID, reportingMethod);
-    await followerDAO.getFollowerInfoFromLeadID(userID).then(async results => {
-        for (let followInfo of results) {
-            followers.push(followInfo.follower_id);
-            await wizardDAO.updateUserReportingMethod(followInfo.follower_id, reportingMethod);
-        }
-    });
-
-    if (reportingMethod === "manual") {
-        await locationUpdateController(req.userID, req.body.location, false).then((result) => {
-            if (!result) {
-                return res.status(500);
-            }
-        });
-    }
-
-    let reportingUser = await wizardDAO.getUserFromID(userID);
-    if (reportingUser.reportingMethod !== reportingMethod) {
-        await dobby.notifyReportingMethodChange(reportingUser.username, reportingMethod, false);
-        for (let followerID of  followers) {
-            await wizardDAO.getUserFromID(followerID).then(async results => {
-                await dobby.notifyReportingMethodChange(results.username, reportingMethod, true);
-            })
-        }
-    }
-    
+router.post('/updateUserReporting', authenticateToken, async function (req, res, next) {
+    await wizardController.updateUserReportingMethod(req.userID, req.body.reportingMethod);
     res.send({success: true});
-})
+});
 
 module.exports = router;

@@ -1,16 +1,16 @@
 const roleDAO = require("../dao/roleDao");
-const loggingDAO = require("../dao/loggingDao");
-const followerDAO = require("../dao/followerDao");
 const wizardDAO = require("../dao/wizardDao");
-const clockFaceController = require("../controllers/clockFaceController");
+const loggingDAO = require("../dao/loggingDao");
 const locationDAO = require("../dao/locationDAO");
+const followerDAO = require("../dao/followerDao");
 const clockFaceDAO = require("../dao/clockFaceDao");
+const clockFaceController = require("../controllers/clockFaceController");
 const dobby = require("./discordController");
 const settingsService = require("../controllers/serverSettingController").default.getInstance();
 
-async function addUserInfo(username, password, role, isFollower, leadID) {
+async function addUserInfo(username, password, role, reportingMethod, isFollower, leadID) {
     const defaultPosition = await clockFaceController.getDefaultClockPosition();
-    await wizardDAO.addUser(username, password, role, isFollower).then(async () => {
+    await wizardDAO.addUser(username, password, role, reportingMethod, isFollower).then(async () => {
         let newUser = await wizardDAO.getUserFromName(username)
         await roleDAO.addUserToRole(newUser.id, role);
         await wizardDAO.setUserClockPosition(newUser.id, defaultPosition.id);
@@ -30,7 +30,9 @@ async function updateUserInfo(user) {
     if (user.password !== "") {
         await wizardDAO.updateUserPassword(user.id, user.password);
     }
-
+    if (oldUser.reportingMethod !== user.reportingMethod) {
+        await updateUserReportingMethod(user.id, user.reportingMethod);
+    }
     if (user.isFollower === "true") {
         await updateUserToFollower(user.id, user.leadID);
     } else {
@@ -82,6 +84,27 @@ async function handleUserLocationUpdate(userID, coords, isHeartbeat) {
     });
     if (followerIDList.length > 0) {
         await updateFollowersClockPosition(followerIDList, defaultClockPosition.id);
+    }
+    return true;
+}
+
+async function handleUserPositionUpdate(userID, positionID) {
+    const followerIDList = [];
+
+    // Check for Followers
+    await followerDAO.getFollowerInfoFromLeadID(userID).then(results => {
+        for (let followInfo of results) {
+            followerIDList.push(followInfo.follower_id);
+        }
+    });
+
+    let clockPosition = await clockFaceDAO.getClockPositionFromID(positionID);
+    await fireLocationUpdate(userID, clockPosition, false);
+    await wizardDAO.updateUserClockPosition(userID, clockPosition.id).catch(() =>{
+        return false;
+    });
+    if (followerIDList.length > 0) {
+        await updateFollowersClockPosition(followerIDList, clockPosition.id);
     }
     return true;
 }
@@ -164,6 +187,12 @@ async function updateUserToFollower(followerID, leadID) {
     })
 }
 
+async function updateUserReportingMethod(userID, reportingMethod) {
+    await wizardDAO.updateUserReportingMethod(userID, reportingMethod);
+    let user = await wizardDAO.getUserFromID(userID);
+    await dobby.notifyReportingMethodChange(user.username, reportingMethod);
+}
+
 async function removeLeadFromFollowers(userID) {
     let followerIDList = [];
     await followerDAO.getFollowerInfoFromLeadID(userID).then(results => {
@@ -184,5 +213,6 @@ module.exports = {
     addUserInfo,
     updateUserInfo,
     deleteUserInfo,
-    handleUserLocationUpdate
+    handleUserLocationUpdate,
+    handleUserPositionUpdate
 };

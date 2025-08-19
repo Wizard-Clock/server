@@ -11,14 +11,16 @@ const TEST_USER = {
     username: 'Sirius',
     password: 'padf00t',
     role: 'user',
-    isFollower: false
+    isFollower: false,
+    reportingMethod: 'auto',
 }
 
 const TEST_USER_UPDATED = {
     username: 'Lupin',
     password: 'mooney',
     role: 'admin',
-    isFollower: 'false'
+    isFollower: 'false',
+    reportingMethod: 'manual',
 }
 
 const TEST_CHILD = {
@@ -26,7 +28,8 @@ const TEST_CHILD = {
     password: 'always',
     role: 'child',
     isFollower: true,
-    lead: TEST_USER.username
+    lead: TEST_USER.username,
+    reportingMethod: 'follow'
 }
 
 let TEST_CHILD_UPDATE = {
@@ -34,15 +37,18 @@ let TEST_CHILD_UPDATE = {
     password: 'never',
     role: 'user',
     isFollower: 'false',
-    lead: null
+    lead: null,
+    reportingMethod: 'manual',
 }
 
 
 describe('User CRUD Tests', function () {
     describe('Create', function () {
         it('create and initialize user', async function () {
-            await wizardController.addUserInfo(TEST_USER.username, TEST_USER.password, TEST_USER.role, TEST_USER.isFollower, '').then(async result => {
-                result.should.equal(true);
+            await wizardController.addUserInfo(
+                TEST_USER.username, TEST_USER.password, TEST_USER.role,
+                TEST_USER.reportingMethod, TEST_USER.isFollower, '').then(async result => {
+                    result.should.equal(true);
             });
         });
 
@@ -53,6 +59,8 @@ describe('User CRUD Tests', function () {
 
             let role = await roleDAO.getRoleFromUserID(createdUser.id);
             role.role.should.equal(TEST_USER.role);
+
+            createdUser.reportingMethod.should.equal(TEST_USER.reportingMethod);
 
             let leadInfo = await followerDAO.getLeadIDFromFollowerID(createdUser.id);
             expect(leadInfo).to.equal(undefined);
@@ -65,7 +73,7 @@ describe('User CRUD Tests', function () {
         it('create and initialize child user', async function () {
             let leadUser = await wizardDAO.getUserFromName(TEST_USER.username);
             await wizardController.addUserInfo(TEST_CHILD.username, TEST_CHILD.password,
-                TEST_CHILD.role, TEST_CHILD.isFollower, leadUser.id).then(async result => {
+                TEST_CHILD.role, TEST_CHILD.reportingMethod, TEST_CHILD.isFollower, leadUser.id).then(async result => {
                 result.should.equal(true);
             });
         });
@@ -75,6 +83,8 @@ describe('User CRUD Tests', function () {
             let createdChild = await wizardDAO.getUserFromName(TEST_CHILD.username);
             createdChild.username.should.equal(TEST_CHILD.username);
             createdChild.isFollower.should.equal(TEST_CHILD.isFollower.toString());
+
+            createdChild.reportingMethod.should.equal(TEST_CHILD.reportingMethod);
 
             let role = await roleDAO.getRoleFromUserID(createdChild.id);
             role.role.should.equal(TEST_CHILD.role);
@@ -101,6 +111,9 @@ describe('User CRUD Tests', function () {
 
             childUserUpdated.username.should.equal(TEST_CHILD_UPDATE.username);
             childUserUpdated.username.should.not.equal(TEST_CHILD.username);
+
+            childUserUpdated.reportingMethod.should.equal(TEST_CHILD_UPDATE.reportingMethod);
+            childUserUpdated.reportingMethod.should.not.equal(TEST_CHILD.reportingMethod);
 
             let updatedRole = await roleDAO.getRoleFromUserID(childUserUpdated.id);
             updatedRole.role.should.equal(TEST_CHILD_UPDATE.role);
@@ -129,6 +142,9 @@ describe('User CRUD Tests', function () {
 
             normUserUpdated.username.should.equal(TEST_USER_UPDATED.username);
             normUserUpdated.username.should.not.equal(TEST_USER.username);
+
+            normUserUpdated.reportingMethod.should.equal(TEST_USER_UPDATED.reportingMethod);
+            normUserUpdated.reportingMethod.should.not.equal(TEST_USER.reportingMethod);
 
             let updatedRole = await roleDAO.getRoleFromUserID(normUserUpdated.id);
             updatedRole.role.should.equal(TEST_USER_UPDATED.role);

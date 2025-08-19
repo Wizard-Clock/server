@@ -65,12 +65,13 @@ async function initializeAdminUser() {
     await dbConnector.serialize(() => {
         dbConnector.run("BEGIN TRANSACTION");
         let salt = crypto.randomBytes(16);
-        dbConnector.run(`INSERT OR IGNORE INTO users (id, username, hashed_password, salt, isFollower) VALUES (?, ?, ?, ?, ?)`, [
+        dbConnector.run(`INSERT OR IGNORE INTO users (id, username, hashed_password, salt, isFollower, reportingMethod) VALUES (?, ?, ?, ?, ?, ?)`, [
             1,
             'admin',
             crypto.pbkdf2Sync('admin', salt, 310000, 32, 'sha256'),
             salt,
-            'false'
+            'false',
+            'auto'
         ]);
         dbConnector.run(`INSERT OR IGNORE INTO user_roles (user_id, role_id) VALUES (1, 1)`);
         dbConnector.run(`INSERT OR IGNORE INTO user_position (user_id, position_id) VALUES (1, 13)`);

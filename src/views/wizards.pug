@@ -11,18 +11,18 @@ block content
                             th(scope="col") ID
                             th(scope="col") Username
                             th(scope="col") Role
+                            th(scope="col") Reporting Method
                             th(scope="col") Follower
                             th(scope="col") Wizard Following
                             th(scope="col") Edit
                             th(scope="col") Delete
-                            th(scope="col") View Path
-                            th(scope="col") Clear Path Log
                     tbody()
                         each wizard in wizards
                             tr()
                                 th(scope="row" id="wizardID")= wizard.id
                                 td()= wizard.username
                                 td()= wizard.role
+                                td()= wizard.reportingMethod
                                 td()= wizard.isFollower
                                 if wizard.isFollower === "true"
                                     td()= wizard.lead.username
@@ -37,6 +37,23 @@ block content
                                     td()
                                         button(type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal" data-bs-wizard-id= wizard.id data-bs-wizard-name= wizard.username)
                                             i(class="bi bi-trash3-fill")
+
+                button(type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addUserModal" onclick=`setUpAddForm()`) Add Wizard&nbsp;
+                    i(class="bi bi-person-plus-fill")
+
+            div(class="pt-4")
+                h3(class="pb-2 mb-4 border-bottom") Wizard Location Info
+                table(class="table table-striped table-hover")
+                    thead()
+                        tr()
+                            th(scope="col") Username
+                            th(scope="col") View Path
+                            th(scope="col") Clear Path Log
+                            th(scope="col") Assign Location
+                    tbody()
+                        each wizard in wizards
+                            tr()
+                                td()= wizard.username
                                 td()
                                     if wizard.posistionLog.length > 0
                                         button(type="button" class="btn btn-outline-dark" data-bs-toggle="modal" data-bs-target="#viewPathModal" data-bs-wizard-log= wizard.posistionLog)
@@ -49,9 +66,21 @@ block content
                                             i(class="bi bi-trash3-fill")
                                     else
                                         p() Log is Empty
+                                if wizard.isFollower === "true"
+                                    td()= "N/A for Followers"
+                                else
+                                    if wizard.reportingMethod === "auto"
+                                        td()= "Auto Enabled"
+                                    else
+                                        td()
+                                            form(id="manualPositionUpdateForm")
+                                                section()
+                                                    select(class="form-select" id=`manualPosition${wizard.id}Select` onchange=`updateManualPosition(${wizard.id})`)
+                                                        option(selected disabled value="") Update Location...
+                                                        each loc in locations
+                                                            option(value= loc.id)= loc.name
 
-                button(type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addUserModal" onclick=`setUpAddForm()`) Add Wizard&nbsp;
-                    i(class="bi bi-person-plus-fill")
+
 
             div(class="modal fade" id="viewPathModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="viewPathModalLabel" aria-hidden="true")
                 div(class="modal-dialog modal-dialog-centered modal-lg")
@@ -109,11 +138,18 @@ block content
                                     section()
                                         label(for="passwordEditConfirm" class="form-label") Confirm Password
                                         input(type="password" class="form-control" id="passwordEditConfirm")
-                                div(class="col-md-6")
+                                div(class="col-md-3")
                                     section()
                                         input(class="form-check-input followerEditCB followCheck" type="checkbox" value="" name="isFollower" id="followerEditCheck")
                                         label(for="followerEditCheck" class="form-label") &nbsp;Is Follower?
-                                div(class="col-md-6" id="leadInputEditDiv")
+                                div(class="col-md-5" id="reportingMethodEditDiv")
+                                    section()
+                                        label(for="reportingMethodEdit" class="form-label") Reporting Method
+                                        select(id="reportingMethodEdit" class="form-select rp-select" name="reportingMethod")
+                                            option(selected disabled value="") Choose...
+                                                option(value="auto")= "Auto (with App)"
+                                                option(value="manual")= "Manual"
+                                div(class="col-md-4" id="leadInputEditDiv")
                                     section()
                                         label(for="selectEditLead" class="form-label") Lead Wizard
                                         select(id="selectEditLead" class="form-select lead-select" name="leadID")
@@ -151,11 +187,18 @@ block content
                                     section()
                                         label(for="passwordAddFinal" class="form-label") Confirm Password
                                         input(type="password" class="form-control" id="passwordAddFinal" required)
-                                div(class="col-md-6")
+                                div(class="col-md-3")
                                     section()
                                         input(class="form-check-input followerAddCB" type="checkbox" value="" name="isFollower" id="followerAddCheck")
                                         label(for="followerAddCheck" class="form-label") &nbsp;Is Follower?
-                                div(class="col-md-6" id="leadInputAddDiv")
+                                div(class="col-md-5" id="reportingMethodAddDiv")
+                                    section()
+                                        label(for="reportingMethodInput" class="form-label") Reporting Method
+                                        select(id="reportingMethodInput" class="form-select" name="reportingMethod")
+                                            option(selected disabled value="") Choose...
+                                                option(value="auto")= "Auto (with App)"
+                                                option(value="manual")= "Manual"
+                                div(class="col-md-4" id="leadInputAddDiv")
                                     section()
                                         label(for="selectLead" class="form-label") Lead Wizard
                                         select(id="selectLead" class="form-select" name="leadID")
@@ -173,8 +216,8 @@ block content
                     maxZoom: 19,
                     attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
                 }).addTo(userMap);
-                let userLine;
 
+                let userLine;
                 let viewPathModal = document.getElementById('viewPathModal');
                 if (viewPathModal) {
                     viewPathModal.addEventListener('show.bs.modal', event => {
@@ -213,6 +256,32 @@ block content
                         });
                         await response.json();
                         window.location.reload();
+                    }
+                }
+
+                let wizardList = JSON.parse(`!{JSON.stringify(wizards)}`);
+                for(let wiz of wizardList) {
+                    if (wiz.reportingMethod === "manual") {
+                        let positionSelect = document.getElementById('manualPosition' + wiz.id + 'Select');
+                        if (positionSelect) {
+                            positionSelect.value = wiz.positionID;
+                        }
+                    }
+                }
+
+                async function updateManualPosition(userID) {
+                    let positionSelect = document.getElementById('manualPosition' + userID + 'Select');
+                    if (positionSelect) {
+                        await fetch('/wizards/manualPositionUpdate', {
+                            method: 'POST',
+                            headers: {
+                                "Content-Type": "application/json",
+                            },
+                            body: JSON.stringify({
+                                userID: userID,
+                                positionID: positionSelect.value
+                            })
+                        });
                     }
                 }
 
@@ -263,12 +332,15 @@ block content
                         editModal.querySelector('.user-id').value = wiz.id;
                         editModal.querySelector('.username').value = wiz.username;
                         editModal.querySelector('.role-select').value = wiz.role;
+                        editModal.querySelector('.rp-select').value = wiz.reportingMethod;
                         editModal.querySelector('.followCheck').checked = (wiz.isFollower === "true");
                         if (wiz.isFollower === "true") {
                             $("#leadInputEditDiv").show();
+                            $("#reportingMethodEditDiv").hide();
                             editModal.querySelector('.lead-select').value = wiz.lead.id;
                         } else {
                             $("#leadInputEditDiv").hide();
+                            $("#reportingMethodEditDiv").show();
                         }
                     });
                 }
@@ -284,13 +356,22 @@ block content
                                 return;
                             }
                         }
-                        let isFollower = document.getElementById('followerEditCheck').checked;
-                        let leadID = document.getElementById('selectEditLead').value;
                         let wizardID = document.getElementById('userid').value;
-                        if (leadID === wizardID) {
-                            alert("Wizard cannot follow themselves.");
+                        let isFollower = document.getElementById('followerEditCheck').checked;
+                        let leadID;
+                        if (isFollower) {
+                            leadID = document.getElementById('selectEditLead').value;
+                            if (leadID === wizardID) {
+                                alert("Wizard cannot follow themselves.");
+                                return;
+                            }
+                        }
+                        let reportingMethod = isFollower ? "follow" : document.getElementById('reportingMethodEdit').value;
+                        if (reportingMethod === '') {
+                            alert("Must select reporting method.");
                             return;
                         }
+
                         let response = await fetch('/wizards/updateUser', {
                             method: 'POST',
                             headers: {
@@ -300,6 +381,7 @@ block content
                                 id: wizardID,
                                 username: document.getElementById('usernameEdit').value,
                                 role: document.getElementById('roleEdit').value,
+                                reportingMethod: reportingMethod,
                                 password: pass,
                                 isFollower: isFollower.toString(),
                                 leadID: leadID
@@ -317,6 +399,7 @@ block content
 
                 function setUpAddForm() {
                     $("#leadInputAddDiv").hide();
+                    $("#reportingMethodAddDiv").show();
                     document.getElementById('followerAddCheck').checked = false;
                 }
 
@@ -326,12 +409,15 @@ block content
                     let firstPass = document.getElementById('passwordAddPlain').value;
                     let secPass = document.getElementById('passwordAddFinal').value;
                     let isFollower = document.getElementById('followerAddCheck').checked;
+                    let reportingMethod = document.getElementById('reportingMethodInput').value;
                     let leadID = document.getElementById('selectLead').value;
 
                     if (firstPass !== secPass) {
                         alert("Passwords much match.");
                     } else if (isFollower && !leadID) {
                         alert("Must assign the wizard a Lead Wizard.");
+                    } else if (!isFollower && !reportingMethod) {
+                        alert("Must assign a reporting method");
                     } else {
                         let response = await fetch('/wizards/addUser', {
                             method: 'POST',
@@ -350,15 +436,19 @@ block content
                 $(".followerEditCB").change(function () {
                     if (this.checked) {
                         $("#leadInputEditDiv").show();
+                        $("#reportingMethodEditDiv").hide();
                     } else {
                         $("#leadInputEditDiv").hide();
+                        $("#reportingMethodEditDiv").show();
                     }
                 });
 
                 $(".followerAddCB").change(function () {
                     if (this.checked) {
                         $("#leadInputAddDiv").show();
+                        $("#reportingMethodAddDiv").hide();
                     } else {
                         $("#leadInputAddDiv").hide();
+                        $("#reportingMethodAddDiv").show();
                     }
                 });

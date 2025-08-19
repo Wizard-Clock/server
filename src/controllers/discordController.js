@@ -65,7 +65,7 @@ async function notifyLocationChange(username, clockPositionName, isHearbeat) {
         ],
         content: new Date().toUTCString()
     }
-    sendWebhook(params);
+    await sendWebhook(params);
 }
 
 async function notifyFollowerLocationChange(username, leadUsername, clockPositionName) {
@@ -96,7 +96,33 @@ async function notifyFollowerLocationChange(username, leadUsername, clockPositio
         ],
         content: new Date().toUTCString()
     }
-    sendWebhook(params);
+    await sendWebhook(params);
+}
+
+async function notifyReportingMethodChange(username, reportingMethod) {
+    let params = {
+        username: webhookUsername,
+        avatar_url: webhookAvatar,
+        embeds: [
+            {
+                "title": "Reporting Method Update!",
+                "fields": [
+                    {
+                        "name": "Wizard",
+                        "value": "Master " + username,
+                        "inline": true
+                    },
+                    {
+                        "name": "Reporting Method",
+                        "value": reportingMethod,
+                        "inline": true
+                    }
+                ]
+            }
+        ],
+        content: new Date().toUTCString()
+    }
+    await sendWebhook(params);
 }
 
 async function sendWebhook(params) {
@@ -127,5 +153,6 @@ module.exports = {
     notifyServerStartup,
     enableDiscordPlugin,
     notifyLocationChange,
-    notifyFollowerLocationChange
+    notifyFollowerLocationChange,
+    notifyReportingMethodChange
 };

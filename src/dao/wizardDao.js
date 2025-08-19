@@ -1,12 +1,13 @@
 const db = require("../controllers/dbController");
 const crypto = require("crypto");
 
-async function addUser(username, password, role, isFollower) {
+async function addUser(username, password, role, reportingMethod, isFollower) {
     let salt = crypto.randomBytes(16);
-    await db.dbConnector.run(`INSERT INTO users (username, hashed_password, salt, isFollower) VALUES (?, ?, ?, ?)`, [
+    await db.dbConnector.run(`INSERT INTO users (username, hashed_password, salt, reportingMethod, isFollower) VALUES (?, ?, ?, ?, ?)`, [
         username,
         crypto.pbkdf2Sync(password, salt, 310000, 32, 'sha256'),
         salt,
+        reportingMethod,
         isFollower.toString()
     ]);
 }
@@ -17,11 +18,26 @@ async function updateUserUsername(userID, newUsername) {
 
 async function updateUserPassword(userID, newPassword) {
     let salt = crypto.randomBytes(16);
-    await db.dbConnector.run(`UPDATE users SET hashed_password=?, salt=? WHERE id=?`, [
-        crypto.pbkdf2Sync(newPassword, salt, 310000, 32, 'sha256'),
-        salt,
-        userID
-    ], (err, rows) => {})
+    return await new Promise((resolve, reject) => {
+        db.dbConnector.run(`UPDATE users SET hashed_password=?, salt=? WHERE id=?`, [
+            crypto.pbkdf2Sync(newPassword, salt, 310000, 32, 'sha256'), salt, userID], (err, rows) => {
+            if (err)
+                reject(err);
+            else
+                resolve(rows);
+        })
+    });
+}
+
+async function updateUserReportingMethod(userID, newReportingMethod) {
+    return await new Promise((resolve, reject) => {
+        db.dbConnector.run(`UPDATE users SET reportingMethod=? WHERE id=?`, [newReportingMethod, userID], (err, rows) => {
+            if (err)
+                reject(err);
+            else
+                resolve(rows);
+        })
+    });
 }
 
 async function updateUserFollowerStatus(userID, followVal) {
@@ -118,6 +134,7 @@ module.exports = {
     addUser,
     updateUserUsername,
     updateUserPassword,
+    updateUserReportingMethod,
     updateUserFollowerStatus,
     deleteUser,
     deleteUserClockPosition,

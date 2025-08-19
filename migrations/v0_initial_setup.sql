@@ -5,7 +5,8 @@ CREATE TABLE IF NOT EXISTS "users" (
     'username' TEXT NOT NULL UNIQUE,
     'hashed_password' BLOB NOT NULL,
     'salt' BLOB NOT NULL,
-    'isFollower' TEXT NOT NULL
+    'isFollower' TEXT NOT NULL,
+    'reportingMethod' TEXT NOT NULL
 );
 **
 CREATE TABLE IF NOT EXISTS "roles" (
