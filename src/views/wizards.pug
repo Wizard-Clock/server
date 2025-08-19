@@ -127,8 +127,8 @@ block content
                                         input(type="text" class="form-control username" name="username" id="usernameEdit")
                                 div(class="col-md-4")
                                     section()
-                                        label(for="roleEdit" class="form-label") Role
-                                        select(id="roleEdit" class="form-select role-select" name="role")
+                                        label(for="roleEditInput" class="form-label") Role
+                                        select(id="roleEditInput" class="form-select role-select" name="role" onchange=`validateRoleChange("Edit")`)
                                             option(selected disabled value="") Choose...
                                             for role in roles
                                                 option(value= role.role)=role.role
@@ -177,7 +177,7 @@ block content
                                 div(class="col-md-6")
                                     section()
                                         label(for="roleAddInput" class="form-label") Role
-                                        select(id="roleAddInput" class="form-select" name="role" required)
+                                        select(id="roleAddInput" class="form-select" name="role" required onchange=`validateRoleChange("Add")`)
                                             option(selected disabled value="") Choose...
                                             for role in roles
                                                 option()=role.role
@@ -195,8 +195,8 @@ block content
                                         label(for="followerAddCheck" class="form-label") &nbsp;Is Follower?
                                 div(class="col-md-5" id="reportingMethodAddDiv")
                                     section()
-                                        label(for="reportingMethodInput" class="form-label") Reporting Method
-                                        select(id="reportingMethodInput" class="form-select" name="reportingMethod")
+                                        label(for="reportingMethodAdd" class="form-label") Reporting Method
+                                        select(id="reportingMethodAdd" class="form-select" name="reportingMethod")
                                             option(selected disabled value="") Choose...
                                                 option(value="auto")= "Auto (with App)"
                                                 option(value="manual")= "Manual"
@@ -324,6 +324,32 @@ block content
                     }
                 }
 
+                async function validateRoleChange(formType) {
+                    let role = document.getElementById('role' + formType + 'Input').value;
+                    if (role) {
+                        let reportingOptions = document.getElementById('reportingMethod' + formType);
+                        let autoOptionIdx;
+                        for (let idx = 0; idx < reportingOptions.length; idx++) {
+                            if (reportingOptions.options[idx].value === 'auto') {
+                                autoOptionIdx = idx;
+                            }
+                        }
+
+                        if (role === "child") {
+                            if (autoOptionIdx) {
+                                reportingOptions.remove(autoOptionIdx);
+                            }
+                        } else {
+                            if (!autoOptionIdx) {
+                                let opt = document.createElement('option');
+                                opt.value = 'auto';
+                                opt.innerHTML = "Auto (with App)";
+                                reportingOptions.appendChild(opt);
+                            }
+                        }
+                    }
+                }
+
                 let editModal = document.getElementById('editModal');
                 if (editModal) {
                     editModal.addEventListener('show.bs.modal', event => {
@@ -382,7 +408,7 @@ block content
                             body: JSON.stringify({
                                 id: wizardID,
                                 username: document.getElementById('usernameEdit').value,
-                                role: document.getElementById('roleEdit').value,
+                                role: document.getElementById('roleEditInput').value,
                                 reportingMethod: reportingMethod,
                                 password: pass,
                                 isFollower: isFollower.toString(),
@@ -411,7 +437,7 @@ block content
                     let firstPass = document.getElementById('passwordAddPlain').value;
                     let secPass = document.getElementById('passwordAddFinal').value;
                     let isFollower = document.getElementById('followerAddCheck').checked;
-                    let reportingMethod = document.getElementById('reportingMethodInput').value;
+                    let reportingMethod = document.getElementById('reportingMethodAdd').value;
                     let leadID = document.getElementById('selectLead').value;
 
                     if (firstPass !== secPass) {
