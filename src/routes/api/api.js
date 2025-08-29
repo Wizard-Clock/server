@@ -6,6 +6,7 @@ const roleDAO = require("../../dao/roleDao");
 const wizardController = require("../../controllers/wizardController");
 const authenticateToken = require("../../controllers/authController");
 const passport = require("passport");
+const clockFaceDAO = require("../../dao/clockFaceDao");
 
 router.all('/health', async function (req, res, next) {
     return res.status(200).json({ message: 'API up and running.' });
@@ -43,8 +44,26 @@ router.post('/credentialCheck', authenticateToken, async function (req, res, nex
     }
 })
 
+router.get('/getManualLocations', authenticateToken, async function (req, res, next) {
+    let locations = JSON.stringify(await clockFaceDAO.getAllClockPositions());
+    return res.send(JSON.stringify(locations));
+});
+
+router.post('/updateUserLocationManual', authenticateToken, async function (req, res, next) {
+    console.log("Manual user location update received.");
+    await wizardController.updateUserReportingMethod(req.userID, 'manual');
+    await wizardController.handleUserPositionUpdate(req.userID, req.body.positionID).then((result) => {
+        if (result) {
+            return res.status(202).json({ message: 'User location updated.' });
+        } else {
+            return res.status(500);
+        }
+    });
+});
+
 router.post('/updateUserLocation', authenticateToken, async function (req, res, next) {
     console.log("User location update received.");
+    await wizardController.updateUserReportingMethod(req.userID, 'auto');
     await wizardController.handleUserLocationUpdate(req.userID, req.body.location, req.body.heartbeat).then((result) => {
         if (result) {
             return res.status(202).json({ message: 'User location updated.' });
