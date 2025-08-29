@@ -79,10 +79,15 @@ passport.use(new JWTStrategy({
 // Middleware to verify JWT
 function authenticateToken(req, res, next) {
     if (req.baseUrl === "/api" || req.baseUrl === "/api/watchFace") {
-        const token = req.headers['authorization'].slice(6).trim();
-        // If there is no token, return an error
-        if(token == null) {
-            return res.status(400).json({ message: 'Invalid Credentials.' });
+        let token;
+        if (req.headers['authorization']) {
+            token = req.headers['authorization'].slice(6).trim();
+            // If there is no token, return an error
+            if(token == null) {
+                return res.status(400).json({ message: 'Invalid Credentials.' });
+            }
+        } else {
+            return res.status(400).json({ message: 'No credentials provided.' });
         }
 
         jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
