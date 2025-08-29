@@ -14,14 +14,15 @@ router.get('/', authenticateToken, async function (req, res, next) {
     res.render('pocketWatch', {
         title: 'Pocket Watch',
         clockPositions: clockPositions,
-        usersClockPosition:usersClockPosition,
-        headerAuth:req.headers['authorization'].slice(6).trim()});
-})
+        usersClockPosition: usersClockPosition,
+        headerAuth: req.headers['authorization'].slice(6).trim()
+    });
+});
 
 router.get('/faceRefresh', authenticateToken, async function (req, res, next) {
     let clockPositions = await clockFaceDAO.getAllClockPositions();
     let usersClockPositions = await clockFaceController.getAllUsersClockFacePositions();
     res.json({clockPositions, usersClockPositions});
-})
+});
 
 module.exports = router;

@@ -93,7 +93,7 @@ html
             let response = await fetch('/api/watchFace/faceRefresh', {
                 method: 'GET',
                 headers: {
-                    "Authorization": "Bearer " + JSON.parse(`!{JSON.stringify(headerAuth)}`),
+                    "Authorization": "Bearer " + JSON.parse('!{JSON.stringify(headerAuth)}')
                 }
             });
             let updatedData = await response.json();
