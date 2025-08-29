@@ -1,6 +1,6 @@
 import ssDAO from "../dao/serverSettingDao.js";
 
-const SERVER_VERSION = '0.1.0';
+const SERVER_VERSION = '0.2.0';
 // Valid Release Types: development, release
 const RELEASE_TYPE = 'development';
 
