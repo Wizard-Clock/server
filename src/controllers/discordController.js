@@ -126,7 +126,7 @@ async function notifyReportingMethodChange(username, reportingMethod) {
 }
 
 async function sendWebhook(params) {
-    if (!settingsService.getSettingValue("enableDiscord") || !isValidWebhook) {return}
+    if (settingsService.getSettingValue("enableDiscord") === "false" || !isValidWebhook) {return}
     fetch(settingsService.getSettingValue("discordWebhook"), {
         method: "POST",
         headers: {

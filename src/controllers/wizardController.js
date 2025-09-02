@@ -191,9 +191,11 @@ async function updateUserToFollower(followerID, leadID) {
 }
 
 async function updateUserReportingMethod(userID, reportingMethod) {
-    await wizardDAO.updateUserReportingMethod(userID, reportingMethod);
     let user = await wizardDAO.getUserFromID(userID);
-    await dobby.notifyReportingMethodChange(user.username, reportingMethod);
+    if (user.reportingMethod !== reportingMethod) {
+        await wizardDAO.updateUserReportingMethod(userID, reportingMethod);
+        await dobby.notifyReportingMethodChange(user.username, reportingMethod);
+    }
 }
 
 async function removeLeadFromFollowers(userID) {
